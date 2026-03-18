@@ -5,36 +5,131 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>SB Dönüt Raporu</title>
 <style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: Arial, sans-serif; background: #0a0f1e; color: #e2e8f0; padding: 24px; }
-.wrap { max-width: 700px; margin: 0 auto; }
-h1 { font-size: 22px; color: #93c5fd; margin-bottom: 4px; }
-.sub { font-size: 11px; color: #334155; margin-bottom: 20px; }
-.box { background: #111827; border: 1px solid #1e3a5f; border-radius: 10px; padding: 16px; margin-bottom: 12px; }
-.box h3 { font-size: 11px; text-transform: uppercase; letter-spacing: .5px; color: #475569; margin-bottom: 10px; }
-label.lbl { display: block; font-size: 11px; color: #475569; text-transform: uppercase; letter-spacing: .3px; margin-bottom: 4px; }
-input[type=password], input[type=text], select { display: block; width: 100%; background: #0d1524; border: 1px solid #1e3a5f; border-radius: 7px; padding: 9px 12px; color: #e2e8f0; font-size: 13px; font-family: Arial, sans-serif; outline: none; appearance: none; -webkit-appearance: none; }
-input[type=password] { font-family: monospace; }
-input[type=password]:focus, input[type=text]:focus, select:focus { border-color: #1d4ed8; }
-select option { background: #0d1524; }
-.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
-.fld { display: flex; flex-direction: column; gap: 4px; }
-input[type=file] { display: block; width: 100%; background: #0d1524; border: 2px dashed #1e3a5f; border-radius: 8px; padding: 14px 12px; color: #64748b; font-size: 13px; font-family: Arial, sans-serif; cursor: pointer; outline: none; }
-input[type=file]:hover { border-color: #1d4ed8; color: #93c5fd; }
-input[type=file]::file-selector-button { background: #1d4ed8; color: white; border: none; padding: 7px 16px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 700; margin-right: 12px; font-family: Arial, sans-serif; }
-#statusBox { padding: 12px 14px; border-radius: 8px; font-size: 13px; line-height: 1.7; background: #0d1524; border: 1px solid #1e3a5f; min-height: 44px; margin-top: 10px; white-space: pre-wrap; }
-#progBar { height: 4px; background: #1e3a5f; border-radius: 2px; overflow: hidden; margin-top: 8px; }
-#progFill { height: 100%; background: #1d4ed8; transition: width .4s ease; width: 0; }
-#runBtn { display: block; width: 100%; padding: 16px; background: #1d4ed8; color: white; border: none; border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer; font-family: Arial, sans-serif; margin-top: 4px; }
-#runBtn:hover:not(:disabled) { background: #1a44c0; }
-#runBtn:disabled { opacity: .45; cursor: not-allowed; }
-#resultBox { display: none; padding: 14px 16px; border-radius: 8px; background: #0d1f0d; border: 1px solid #166534; margin-top: 10px; }
-.r-name { font-size: 16px; font-weight: 700; color: #f1f5f9; }
-.r-meta { font-size: 11px; color: #334155; margin-top: 3px; }
-.r-score { font-size: 38px; font-weight: 700; color: #86efac; }
-.dims { display: grid; grid-template-columns: repeat(5,1fr); gap: 6px; margin-top: 10px; }
-.dim { text-align: center; background: #111827; border-radius: 8px; padding: 10px 4px; }
-.keySt { font-size: 11px; margin-top: 4px; }
+/* ── EKRAN STILI ─────────────────────────────────────────── */
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:Arial,sans-serif;background:#0a0f1e;color:#e2e8f0;padding:24px;}
+.wrap{max-width:720px;margin:0 auto;}
+h1{font-size:22px;color:#93c5fd;margin-bottom:4px;}
+.sub{font-size:11px;color:#334155;margin-bottom:20px;}
+.box{background:#111827;border:1px solid #1e3a5f;border-radius:10px;padding:16px;margin-bottom:12px;}
+.box h3{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:#475569;margin-bottom:10px;}
+label.lbl{display:block;font-size:11px;color:#475569;text-transform:uppercase;letter-spacing:.3px;margin-bottom:4px;}
+input[type=password],input[type=text],select{display:block;width:100%;background:#0d1524;border:1px solid #1e3a5f;border-radius:7px;padding:9px 12px;color:#e2e8f0;font-size:13px;font-family:Arial,sans-serif;outline:none;appearance:none;-webkit-appearance:none;}
+input[type=password]{font-family:monospace;}
+input[type=password]:focus,input[type=text]:focus,select:focus{border-color:#1d4ed8;}
+select option{background:#0d1524;}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;}
+.fld{display:flex;flex-direction:column;gap:4px;}
+input[type=file]{display:block;width:100%;background:#0d1524;border:2px dashed #1e3a5f;border-radius:8px;padding:14px 12px;color:#64748b;font-size:13px;font-family:Arial,sans-serif;cursor:pointer;outline:none;}
+input[type=file]:hover{border-color:#1d4ed8;color:#93c5fd;}
+input[type=file]::file-selector-button{background:#1d4ed8;color:white;border:none;padding:7px 16px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:700;margin-right:12px;font-family:Arial,sans-serif;}
+#statusBox{padding:12px 14px;border-radius:8px;font-size:13px;line-height:1.7;background:#0d1524;border:1px solid #1e3a5f;min-height:44px;margin-top:10px;white-space:pre-wrap;}
+#progBar{height:4px;background:#1e3a5f;border-radius:2px;overflow:hidden;margin-top:8px;}
+#progFill{height:100%;background:#1d4ed8;transition:width .4s ease;width:0;}
+.btn{display:block;width:100%;padding:14px;color:white;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:Arial,sans-serif;margin-top:8px;}
+#runBtn{background:#1d4ed8;}
+#runBtn:hover:not(:disabled){background:#1a44c0;}
+#runBtn:disabled{opacity:.45;cursor:not-allowed;}
+#dlBtn{background:#166534;display:none;}
+#dlBtn:hover{background:#14532d;}
+#resultBox{display:none;padding:14px 16px;border-radius:8px;background:#0d1f0d;border:1px solid #166534;margin-top:10px;}
+.r-name{font-size:16px;font-weight:700;color:#f1f5f9;}
+.r-meta{font-size:11px;color:#334155;margin-top:3px;}
+.r-score{font-size:38px;font-weight:700;color:#86efac;}
+.dims{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:10px;}
+.dim{text-align:center;background:#111827;border-radius:8px;padding:10px 4px;}
+.keySt{font-size:11px;margin-top:4px;}
+
+/* ── PDF / YAZICI STILI ──────────────────────────────────── */
+#pdfContent{display:none;}
+
+@media print{
+  body{background:white!important;padding:0!important;margin:0!important;color:#000!important;}
+  .wrap{display:none!important;}
+  #pdfContent{
+    display:block!important;
+    font-family:Arial,sans-serif;
+    font-size:9pt;
+    color:#1a1a1a;
+    padding:0;
+    margin:0;
+  }
+  @page{size:A4;margin:12mm 12mm 14mm 12mm;}
+
+  /* Cover */
+  .pdf-cover{background:#0A1E44!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;padding:14mm 12mm 8mm;margin-bottom:0;}
+  .pdf-cover-title{font-size:22pt;font-weight:700;color:#fff!important;margin-bottom:3mm;}
+  .pdf-cover-sub{font-size:10pt;color:#93C5FD!important;margin-bottom:1mm;}
+  .pdf-cover-sub2{font-size:9pt;color:#6B8FC4!important;}
+  .pdf-name-bar{background:#1D4ED8!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;padding:5mm 12mm;}
+  .pdf-name-bar .name{font-size:14pt;font-weight:700;color:#fff!important;}
+  .pdf-name-bar .meta{font-size:9pt;color:#DBEAFE!important;}
+  .pdf-ders-bar{background:#0F2744!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;padding:3mm 12mm;border-top:0.5pt solid #1D4ED8;}
+  .pdf-ders-bar span{font-size:8.5pt;color:#93C5FD!important;}
+  .pdf-ders-bar strong{color:#fff!important;}
+
+  /* Meta table */
+  .pdf-meta{width:100%;border-collapse:collapse;margin:4mm 0;}
+  .pdf-meta td{padding:2mm 3mm;font-size:8pt;border:0.5pt solid #fff;}
+  .pdf-meta .lbl{background:#0A1E44!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;color:#fff!important;font-weight:700;width:32%;}
+  .pdf-meta .val{background:#F1F5F9!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;color:#334155!important;}
+  .pdf-meta .ok{background:#DCFCE7!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  .pdf-meta .warn{background:#FEF3C7!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+
+  /* Summary */
+  .pdf-summary{border-left:4pt solid #1D4ED8;border-top:1.5pt solid #1D4ED8;background:#F1F5F9!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;padding:3mm 4mm;margin:3mm 0;font-size:8.5pt;line-height:1.5;}
+  .pdf-summary h4{font-size:9pt;font-weight:700;color:#0A1E44!important;margin-bottom:2mm;}
+
+  /* Score table */
+  .pdf-section-title{font-size:11pt;font-weight:700;color:#0A1E44!important;margin:4mm 0 2mm;}
+  .pdf-scores{width:100%;border-collapse:collapse;margin-bottom:0;}
+  .pdf-scores th{background:#0A1E44!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;color:#fff!important;font-size:8pt;padding:2mm 3mm;text-align:left;}
+  .pdf-scores td{font-size:8.5pt;padding:2mm 3mm;border-bottom:0.5pt solid #E2E8F0;}
+  .pdf-scores tr.total td{background:#0A1E44!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;color:#fff!important;font-weight:700;}
+  .pdf-scores td.sc{font-weight:700;}
+
+  /* Grade bar */
+  .pdf-grade-bar{display:flex;margin:0 0 4mm;border:0.5pt solid #1E293B;}
+  .pdf-grade-cell{flex:1;padding:2.5mm 1mm;text-align:center;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  .pdf-grade-cell .gn{font-size:7.5pt;font-weight:700;color:#fff!important;}
+  .pdf-grade-cell .gr{font-size:7pt;color:#93C5FD!important;margin-top:0.5mm;}
+  .pdf-grade-cell .ga{font-size:7.5pt;font-weight:700;color:#FCD34D!important;margin-top:0.5mm;}
+
+  /* Dim cards */
+  .pdf-dim{border:1pt solid #E2E8F0;margin:3mm 0;break-inside:avoid;page-break-inside:avoid;}
+  .pdf-dim-hdr{padding:2.5mm 3mm;-webkit-print-color-adjust:exact;print-color-adjust:exact;display:flex;justify-content:space-between;align-items:center;}
+  .pdf-dim-hdr .dtitle{font-size:9pt;font-weight:700;color:#fff!important;}
+  .pdf-dim-hdr .dscore{font-size:11pt;font-weight:700;color:#FCD34D!important;}
+  .pdf-dim-status{font-size:8pt;font-weight:700;padding:1.5mm 3mm;background:#F8FAFC!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;border-bottom:0.5pt solid #E2E8F0;}
+  .pdf-dim-cols{display:grid;grid-template-columns:1fr 1fr;}
+  .pdf-dim-good{background:#DCFCE7!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;padding:2mm 3mm;border-right:0.5pt solid #E2E8F0;}
+  .pdf-dim-weak{background:#FEF3C7!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;padding:2mm 3mm;}
+  .pdf-dim-good h5,.pdf-dim-weak h5{font-size:8pt;font-weight:700;margin-bottom:1.5mm;}
+  .pdf-dim-good h5{color:#166534!important;}
+  .pdf-dim-weak h5{color:#92400E!important;}
+  .pdf-dim-good ul,.pdf-dim-weak ul{padding-left:3.5mm;font-size:7.5pt;}
+  .pdf-dim-good ul li,.pdf-dim-weak ul li{margin-bottom:1mm;line-height:1.35;color:#334155!important;}
+  .pdf-dim-rec{background:#DBEAFE!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;padding:2mm 3mm;font-size:8pt;border-top:0.5pt solid #93C5FD;border-left:2pt solid #1D4ED8;}
+  .pdf-dim-rec strong{color:#1D4ED8!important;}
+
+  /* Steps */
+  .pdf-steps{margin:3mm 0;}
+  .pdf-step{margin-bottom:2mm;break-inside:avoid;page-break-inside:avoid;padding:2.5mm 3.5mm;}
+  .pdf-step .snum{font-size:14pt;font-weight:700;display:inline;margin-right:2mm;}
+  .pdf-step .stitle{font-size:9pt;font-weight:700;color:#0A1E44!important;display:inline;}
+  .pdf-step .sdesc{font-size:8pt;color:#334155!important;margin-top:1.5mm;line-height:1.4;}
+  .step0{background:#FEE2E2!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;border-left:3pt solid #991B1B;}
+  .step1{background:#FEF3C7!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;border-left:3pt solid #92400E;}
+  .step2{background:#DBEAFE!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;border-left:3pt solid #1D4ED8;}
+  .step0 .snum{color:#991B1B!important;}
+  .step1 .snum{color:#92400E!important;}
+  .step2 .snum{color:#1D4ED8!important;}
+
+  /* Footer */
+  .pdf-footer{border-top:1pt solid #93C5FD;margin-top:4mm;padding-top:2mm;text-align:center;font-size:7.5pt;color:#64748B!important;font-style:italic;}
+
+  .page-break{page-break-before:always;}
+}
 </style>
 </head>
 <body>
@@ -61,11 +156,12 @@ input[type=file]::file-selector-button { background: #1d4ed8; color: white; bord
 <div class="box">
   <h3>Öğrenci Form PDF'i</h3>
   <input type="file" id="fileInp" accept=".pdf,application/pdf">
-  <div id="statusBox">Dosya seçilmedi. PDF seçtikten sonra butona basın.</div>
+  <div id="statusBox">Dosya seçilmedi. PDF seçip Değerlendir butonuna basın.</div>
   <div id="progBar"><div id="progFill"></div></div>
 </div>
 
-<button id="runBtn">Değerlendir &amp; Word İndir</button>
+<button class="btn" id="runBtn">🤖 &nbsp;Değerlendir</button>
+<button class="btn" id="dlBtn" onclick="printPDF()">📄 &nbsp;PDF Olarak İndir</button>
 
 <div id="resultBox">
   <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap">
@@ -74,376 +170,23 @@ input[type=file]::file-selector-button { background: #1d4ed8; color: white; bord
   </div>
   <div class="dims" id="rDims"></div>
 </div>
-
 </div>
 
+<!-- PDF içeriği — sadece yazdırırken görünür -->
+<div id="pdfContent"></div>
+
 <script>
-// ═══════════════════════════════════════════════════════════════
-// MINIMAL ZIP BUILDER — pure JS, no library needed
-// ═══════════════════════════════════════════════════════════════
-var ZIP = (function(){
-  function u8(s){ // string → Uint8Array (UTF-8)
-    return new TextEncoder().encode(s);
-  }
-  function crc32(buf){
-    var t=new Int32Array(256),c;
-    for(var n=0;n<256;n++){c=n;for(var k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c;}
-    var crc=-1;
-    for(var i=0;i<buf.length;i++)crc=t[(crc^buf[i])&0xFF]^(crc>>>8);
-    return(crc^-1)>>>0;
-  }
-  function le2(n){return[n&0xFF,(n>>8)&0xFF];}
-  function le4(n){return[n&0xFF,(n>>8)&0xFF,(n>>16)&0xFF,(n>>24)&0xFF];}
-  function concat(arrays){
-    var len=0;arrays.forEach(function(a){len+=a.length;});
-    var r=new Uint8Array(len),off=0;
-    arrays.forEach(function(a){r.set(a,off);off+=a.length;});
-    return r;
-  }
-
-  return {
-    build: function(files){ // files: [{name:string, data:Uint8Array}]
-      var locals=[], centrals=[], offset=0;
-      files.forEach(function(f){
-        var name=u8(f.name), data=f.data instanceof Uint8Array?f.data:u8(f.data);
-        var crc=crc32(data), csz=data.length, usz=data.length;
-        var local=concat([
-          new Uint8Array([0x50,0x4B,0x03,0x04]), // sig
-          new Uint8Array([20,0]),                  // version
-          new Uint8Array([0,0]),                   // flags
-          new Uint8Array([0,0]),                   // method (store)
-          new Uint8Array([0,0,0,0]),               // mod time+date
-          new Uint8Array(le4(crc)),
-          new Uint8Array(le4(csz)),
-          new Uint8Array(le4(usz)),
-          new Uint8Array(le2(name.length)),
-          new Uint8Array([0,0]),                   // extra len
-          name, data
-        ]);
-        var central=concat([
-          new Uint8Array([0x50,0x4B,0x01,0x02]),  // sig
-          new Uint8Array([20,0,20,0]),              // ver made, ver needed
-          new Uint8Array([0,0]),                   // flags
-          new Uint8Array([0,0]),                   // method
-          new Uint8Array([0,0,0,0]),               // mod time+date
-          new Uint8Array(le4(crc)),
-          new Uint8Array(le4(csz)),
-          new Uint8Array(le4(usz)),
-          new Uint8Array(le2(name.length)),
-          new Uint8Array([0,0,0,0,0,0,0,0,0,0,0,0]), // extra, comment, disk, attr
-          new Uint8Array(le4(0)),                  // ext attr
-          new Uint8Array(le4(offset)),             // local header offset
-          name
-        ]);
-        locals.push(local);
-        centrals.push(central);
-        offset+=local.length;
-      });
-      var cdStart=offset, cdSize=0;
-      centrals.forEach(function(c){cdSize+=c.length;});
-      var eocd=concat([
-        new Uint8Array([0x50,0x4B,0x05,0x06,0,0,0,0]), // sig, disk nums
-        new Uint8Array(le2(files.length)),  // entries this disk
-        new Uint8Array(le2(files.length)),  // total entries
-        new Uint8Array(le4(cdSize)),
-        new Uint8Array(le4(cdStart)),
-        new Uint8Array([0,0])               // comment len
-      ]);
-      return concat(locals.concat(centrals).concat([eocd]));
-    }
-  };
-})();
-
-// ═══════════════════════════════════════════════════════════════
-// DOCX BUILDER — generates OpenXML, no external library
-// ═══════════════════════════════════════════════════════════════
-var DOCX = (function(){
-  // Color helpers
-  var NAVY='0A1E44', BLUE='1D4ED8', MBLUE='93C5FD', SL='334155', LT='F1F5F9',
-      WH='FFFFFF', GN='166534', GNBG='DCFCE7', AM='92400E', AMBG='FEF3C7',
-      RD='991B1B', RDBG='FEE2E2', GR='64748B', PU='5B21B6', PUBG='EDE9FE',
-      TEAL='0F766E';
-
-  var GRADES=[{l:'BASLANGIÇ',mn:0,mx:15,f:GR},{l:'TEMEL',mn:16,mx:25,f:BLUE},{l:'GELISMEKTE',mn:26,mx:35,f:'1E4D8C'},{l:'IYI',mn:36,mx:43,f:GN},{l:'PEKIYI',mn:44,mx:50,f:'14532D'}];
-  function getGrade(t){return GRADES.find(function(g){return t>=g.mn&&t<=g.mx;})||GRADES[0];}
-  function tot(sc){return Object.values(sc||{}).reduce(function(a,b){return a+b;},0);}
-  function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
-
-  // XML building blocks
-  function rPr(opts){
-    opts=opts||{};
-    return '<w:rPr>'+(opts.bold?'<w:b/>':'')+(opts.italic?'<w:i/>':'')+(opts.sz?'<w:sz w:val="'+opts.sz+'"/><w:szCs w:val="'+opts.sz+'"/>':'')+(opts.color?'<w:color w:val="'+opts.color+'"/>':'')+(opts.font?'<w:rFonts w:ascii="'+opts.font+'" w:hAnsi="'+opts.font+'"/>':'')+'</w:rPr>';
-  }
-  function run(text, opts){return '<w:r>'+rPr(opts)+'<w:t xml:space="preserve">'+esc(text)+'</w:t></w:r>';}
-  function para(runs, opts){
-    opts=opts||{};
-    var ppr='<w:pPr>';
-    if(opts.align)ppr+='<w:jc w:val="'+opts.align+'"/>';
-    if(opts.before||opts.after)ppr+='<w:spacing'+(opts.before?' w:before="'+opts.before+'"':'')+(opts.after?' w:after="'+opts.after+'"':'')+(opts.line?' w:line="'+opts.line+'" w:lineRule="auto"':'')+'/>';
-    if(opts.shading)ppr+='<w:shd w:val="clear" w:fill="'+opts.shading+'"/>';
-    if(opts.numId)ppr+='<w:numPr><w:ilvl w:val="0"/><w:numId w:val="'+opts.numId+'"/></w:numPr>';
-    if(opts.indent)ppr+='<w:ind w:left="'+opts.indent+'"/>';
-    if(opts.border)ppr+=opts.border;
-    ppr+='</w:pPr>';
-    if(typeof runs==='string') return '<w:p>'+ppr+run(runs,opts.runOpts||{})+'</w:p>';
-    return '<w:p>'+ppr+(runs||[]).join('')+'</w:p>';
-  }
-  function cell(content,opts){
-    opts=opts||{};
-    var tcp='<w:tcPr>';
-    if(opts.w)tcp+='<w:tcW w:w="'+opts.w+'" w:type="dxa"/>';
-    if(opts.span)tcp+='<w:gridSpan w:val="'+opts.span+'"/>';
-    if(opts.fill)tcp+='<w:shd w:val="clear" w:fill="'+opts.fill+'"/>';
-    if(opts.borders){
-      tcp+='<w:tcBorders>';
-      var sides=['top','bottom','left','right'];
-      sides.forEach(function(s){
-        var b=opts.borders[s];
-        if(b===false){tcp+='<w:'+s+' w:val="none" w:sz="0" w:space="0" w:color="auto"/>';}
-        else if(b){tcp+='<w:'+s+' w:val="single" w:sz="'+(b.sz||4)+'" w:space="0" w:color="'+(b.color||'000000')+'"/>';}
-      });
-      tcp+='</w:tcBorders>';
-    }
-    if(opts.margin!==undefined){tcp+='<w:tcMar><w:top w:w="'+(opts.margin)+'" w:type="dxa"/><w:bottom w:w="'+(opts.margin)+'" w:type="dxa"/><w:left w:w="'+(opts.margin*2)+'" w:type="dxa"/><w:right w:w="'+(opts.margin*2)+'" w:type="dxa"/></w:tcMar>';}
-    if(opts.vAlign)tcp+='<w:vAlign w:val="'+opts.vAlign+'"/>';
-    tcp+='</w:tcPr>';
-    return '<w:tc>'+tcp+content+'</w:tc>';
-  }
-  function row(cells){return '<w:tr>'+cells.join('')+'</w:tr>';}
-  function table(rows,opts){
-    opts=opts||{};
-    var tpr='<w:tblPr><w:tblW w:w="'+(opts.w||9880)+'" w:type="dxa"/>';
-    if(opts.borders){
-      tpr+='<w:tblBorders>';
-      ['top','bottom','left','right','insideH','insideV'].forEach(function(s){
-        var b=opts.borders[s];
-        if(b===false)tpr+='<w:'+s+' w:val="none" w:sz="0" w:space="0" w:color="auto"/>';
-        else if(b)tpr+='<w:'+s+' w:val="single" w:sz="'+(b.sz||4)+'" w:space="0" w:color="'+(b.color||'000000')+'"/>';
-      });
-      tpr+='</w:tblBorders>';
-    }
-    tpr+='</w:tblPr>';
-    var tgr='<w:tblGrid>';
-    if(opts.cols)opts.cols.forEach(function(c){tgr+='<w:gridCol w:w="'+c+'"/>';});
-    tgr+='</w:tblGrid>';
-    return '<w:tbl>'+tpr+tgr+rows.join('')+'</w:tbl>';
-  }
-  function gap(){return '<w:p><w:pPr><w:spacing w:after="80"/></w:pPr></w:p>';}
-  function pageBreak(){return '<w:p><w:r><w:br w:type="page"/></w:r></w:p>';}
-
-  // Noborder shorthand
-  var NB={top:false,bottom:false,left:false,right:false};
-  function WB(c,s){return{top:{color:c,sz:s||4},bottom:{color:c,sz:s||4},left:{color:c,sz:s||4},right:{color:c,sz:s||4}};}
-
-  // Build document XML from report data
-  function buildDocXml(r){
-    var sc=r.scores||{b1:5,b2:5,b3:5,b4:5,b5:5};
-    var t=tot(sc), gr=getGrade(t);
-    var katki=String(r.yzKatki||'—');
-    var katkiBg=(katki==='%26-50'||katki==='%1-25')?GNBG:(katki==='%76-100'?AMBG:LT);
-
-    var DIMW=[
-      {id:'b1',label:'YZ Araç Kullanimi',   hc:AM},
-      {id:'b2',label:'Materyal & Dogrulama', hc:BLUE},
-      {id:'b3',label:'Pedagojik Tasarim',    hc:AM},
-      {id:'b4',label:'Kazanim & Icerik',     hc:GN},
-      {id:'b5',label:'Prompt Kalitesi',      hc:PU}
-    ];
-    var DHC=[AM,BLUE,AM,GN,PU];
-    var STC=[{c:RD,bg:RDBG},{c:AM,bg:AMBG},{c:BLUE,bg:'DBEAFE'}];
-
-    // Helper: meta table row
-    function mRow(lbl,val,bg){
-      return row([
-        cell(para(lbl,{runOpts:{bold:true,color:WH,sz:20},after:0,before:0}),{w:2600,fill:NAVY,margin:60,borders:{top:{color:WH,sz:2},bottom:{color:WH,sz:2},left:{color:WH,sz:2},right:{color:WH,sz:2}}}),
-        cell(para(String(val||'—'),{after:0,before:0,runOpts:{sz:20}}),{w:7280,fill:bg||LT,margin:60,borders:{top:{color:WH,sz:2},bottom:{color:WH,sz:2},left:{color:WH,sz:2},right:{color:WH,sz:2}}})
-      ]);
-    }
-
-    // Cover
-    var cover=table([
-      row([cell(
-        para('HAFTALIK GERI DONUT RAPORU',{runOpts:{bold:true,color:WH,sz:52,font:'Arial'},after:40,before:0})+
-        para('H'+r.hafta+' · '+esc(r.tema||'')+' · Bireysel Degerlendirme',{runOpts:{color:MBLUE,sz:24},after:20,before:0})+
-        para('Bilisim Teknolojileri · Sosyal Bilgiler Ogretmenligi',{runOpts:{color:'6B8FC4',sz:19},after:60,before:0}),
-        {fill:NAVY,margin:100,borders:{top:NB,bottom:NB,left:{color:BLUE,sz:20},right:NB}}
-      )]),
-      row([cell(
-        para([run(esc(r.studentName||'—'),{bold:true,color:WH,sz:30}),run('  ·  '+esc(r.sinif||'')+'  ·  '+esc(r.tarih||''),{color:'DBEAFE',sz:22})],{before:0,after:0}),
-        {fill:BLUE,margin:80,borders:{top:NB,bottom:NB,left:NB,right:NB}}
-      )]),
-      row([cell(
-        para([run('Ders Ogretim Uyesi:  ',{bold:true,color:MBLUE,sz:20}),run('Doc. Dr. Erhan Yaylak',{bold:true,color:WH,sz:20}),run('  |  Bilisim Teknolojileri · SB Ogretmenligi',{color:'6B8FC4',sz:18})],{before:0,after:0}),
-        {fill:'0F2744',margin:70,borders:{top:{color:BLUE,sz:2},bottom:NB,left:NB,right:NB}}
-      )])
-    ],{w:9880,cols:[9880],borders:{top:NB,bottom:NB,left:NB,right:NB,insideH:NB,insideV:NB}});
-
-    // Meta table
-    var metaRows=[
-      mRow('Ogretmen Adayi',r.studentName),
-      mRow('Ders',r.ders||'SB'),
-      mRow('Sinif',r.sinif),
-      mRow('Hafta/Tema','H'+r.hafta+' — '+esc(r.tema||'')),
-      mRow('Unite',r.unite),
-      mRow('Konu',r.konu),
-      mRow('Kazanim',r.kazanim,GNBG),
-      mRow('Dijital Arac',r.dijitalArac),
-      mRow('YZ Araci',r.yzArac),
-      mRow('Icerik Turu',r.icerikTuru),
-      mRow('YZ Katki',katki,katkiBg)
-    ];
-    if(r.urunLink)metaRows.push(mRow('Urun Linki',r.urunLink,GNBG));
-    var metaTbl=table(metaRows,{w:9880,cols:[2600,7280],borders:{top:NB,bottom:NB,left:NB,right:NB,insideH:NB,insideV:NB}});
-
-    // Summary box
-    var sumBox=table([row([cell(
-      para('HAFTALIK DEGERLENDIRME OZETI',{runOpts:{bold:true,color:NAVY,sz:22},after:80,before:0})+
-      para(esc(r.genelOzet||'—'),{runOpts:{sz:20},after:0,before:0}),
-      {fill:LT,margin:80,borders:{top:{color:BLUE,sz:8},bottom:{color:BLUE,sz:4},left:{color:BLUE,sz:20},right:{color:'E2E8F0',sz:2}}}
-    )])],{w:9880,cols:[9880],borders:{top:NB,bottom:NB,left:NB,right:NB,insideH:NB,insideV:NB}});
-
-    // Score table
-    var GFC=['475569','334155','1D4ED8','166534','14532D'];
-    var scoreRows2=[
-      row([
-        cell(para('BOYUT',{runOpts:{bold:true,color:WH,sz:20},before:0,after:0}),{w:5200,fill:NAVY,margin:60,borders:{top:NB,bottom:NB,left:NB,right:{color:WH,sz:2}}}),
-        cell(para('PUAN',{runOpts:{bold:true,color:WH,sz:20},before:0,after:0}),{w:2800,fill:NAVY,margin:60,borders:{top:NB,bottom:NB,left:NB,right:{color:WH,sz:2}}}),
-        cell(para('%',{runOpts:{bold:true,color:WH,sz:20},before:0,after:0}),{w:1880,fill:NAVY,margin:60,borders:{top:NB,bottom:NB,left:NB,right:NB}})
-      ])
-    ];
-    [['B1 · YZ Araç Kullanimi',sc.b1,AM,AMBG],['B2 · Materyal & Dogrulama',sc.b2,BLUE,'DBEAFE'],['B3 · Pedagojik Tasarim',sc.b3,AM,AMBG],['B4 · Kazanim & Icerik',sc.b4,GN,GNBG],['B5 · Prompt Kalitesi',sc.b5,PU,PUBG]].forEach(function(a){
-      var lbl=a[0],sv=a[1],tc=a[2],bg=a[3],pct=Math.round(sv/10*100);
-      scoreRows2.push(row([
-        cell(para(lbl,{runOpts:{bold:true,sz:20},before:0,after:0}),{w:5200,margin:55,borders:{top:NB,bottom:{color:'E2E8F0',sz:2},left:NB,right:NB}}),
-        cell(para([run(sv+'/10',{bold:true,color:tc,sz:24}),run('  ('+pct+'%)',{color:GR,sz:20})],{before:0,after:0}),{w:2800,margin:55,borders:{top:NB,bottom:{color:'E2E8F0',sz:2},left:NB,right:NB}}),
-        cell(para(pct+'%',{runOpts:{bold:true,color:tc,sz:20},before:0,after:0}),{w:1880,fill:bg,margin:55,borders:{top:NB,bottom:{color:'E2E8F0',sz:2},left:NB,right:NB}})
-      ]));
-    });
-    scoreRows2.push(row([
-      cell(para([run('TOPLAM PUAN',{bold:true,color:WH,sz:22}),run('  |  Derece:  ',{color:MBLUE,sz:18}),run(gr.l,{bold:true,color:'FCD34D',sz:18})],{before:0,after:0}),{span:2,fill:NAVY,margin:70,borders:{top:{color:BLUE,sz:6},bottom:NB,left:NB,right:{color:WH,sz:2}}}),
-      cell(para(t+' / 50',{runOpts:{bold:true,color:WH,sz:26},before:0,after:0}),{fill:BLUE,margin:70,borders:{top:{color:BLUE,sz:6},bottom:NB,left:NB,right:NB}})
-    ]));
-    scoreRows2.push(row([
-      cell(para([run('▼ GENEL PERFORMANS DERECESI — aktif derece vurgulanmistir',{bold:true,color:MBLUE,sz:18})],{before:0,after:0}),
-        {span:3,fill:'1E293B',margin:55,borders:{top:{color:WH,sz:4},bottom:NB,left:NB,right:NB}})
-    ]));
-    var scoreTbl=table(scoreRows2,{w:9880,cols:[5200,2800,1880],borders:{top:{color:BLUE,sz:8},bottom:NB,left:{color:BLUE,sz:8},right:{color:BLUE,sz:8},insideH:{color:'E2E8F0',sz:2},insideV:NB}});
-
-    // Grade indicator
-    var gradeCells2=GRADES.map(function(g,i){
-      var act=g.l===gr.l;
-      return cell(
-        para(g.l,{runOpts:{bold:act,color:WH,sz:18},align:'center',after:16,before:0})+
-        para(g.mn+'-'+g.mx,{runOpts:{color:act?'DBEAFE':'93C5FD',sz:16},align:'center',after:16,before:0})+
-        para(act?'▲ '+t+'/50':'',{runOpts:{bold:true,color:'FCD34D',sz:15},align:'center',after:0,before:0}),
-        {w:1976,fill:act?BLUE:GFC[i],margin:60,borders:{top:NB,bottom:NB,left:{color:NAVY,sz:4},right:{color:NAVY,sz:4}}}
-      );
-    });
-    var gradeTbl=table([row(gradeCells2)],{w:9880,cols:[1976,1976,1976,1976,1976],borders:{top:NB,bottom:NB,left:NB,right:NB,insideH:NB,insideV:NB}});
-
-    // Dimension cards
-    var dimCardsXml='';
-    DIMW.forEach(function(d,i){
-      var s=sc['b'+(i+1)]||0,hc=d.hc;
-      var dim=(r.dims&&r.dims['b'+(i+1)])||{};
-      var good=Array.isArray(dim.good)?dim.good:[];
-      var weak=Array.isArray(dim.weak)?dim.weak:[];
-      var goodXml=good.map(function(g){return para('• '+esc(g),{runOpts:{sz:18},before:0,after:14});}).join('')||para('—',{runOpts:{sz:18,color:GR},before:0,after:0});
-      var weakXml=weak.map(function(w){return para('• '+esc(w),{runOpts:{sz:18},before:0,after:14});}).join('')||para('—',{runOpts:{sz:18,color:GR},before:0,after:0});
-      var hdrRow=row([cell(
-        para([run('BOYUT '+(i+1)+'  ',{bold:true,color:'DBEAFE',sz:24}),run(d.label,{bold:true,color:WH,sz:24}),run('     '+s+'/10',{bold:true,color:'FCD34D',sz:28})],{before:0,after:0}),
-        {span:2,fill:hc,margin:80,borders:{top:NB,bottom:NB,left:{color:NAVY,sz:12},right:NB}}
-      )]);
-      var statusRow=row([cell(
-        para(esc(dim.status||'—'),{runOpts:{bold:true,sz:18},before:0,after:0}),
-        {span:2,fill:LT,margin:60,borders:{top:NB,bottom:{color:'E2E8F0',sz:2},left:NB,right:NB}}
-      )]);
-      var colsRow=row([
-        cell(para('✓ GUCLU YONLER',{runOpts:{bold:true,color:GN,sz:20},after:40,before:0})+goodXml,{w:4940,fill:GNBG,margin:80,borders:{top:NB,bottom:NB,left:NB,right:{color:'E2E8F0',sz:6}}}),
-        cell(para('▲ GELISIM ALANLARI',{runOpts:{bold:true,color:AM,sz:20},after:40,before:0})+weakXml,{w:4940,fill:AMBG,margin:80,borders:{top:NB,bottom:NB,left:NB,right:NB}})
-      ]);
-      var recRow=row([cell(
-        para([run('➜  ONERI:  ',{bold:true,color:BLUE,sz:20}),run(esc(dim.rec||'—'),{color:NAVY,sz:20,italic:true})],{before:0,after:0}),
-        {span:2,fill:'DBEAFE',margin:70,borders:{top:{color:'93C5FD',sz:4},bottom:NB,left:{color:BLUE,sz:12},right:NB}}
-      )]);
-      dimCardsXml+=table([hdrRow,statusRow,colsRow,recRow],{w:9880,cols:[4940,4940],borders:{top:{color:hc,sz:8},bottom:{color:hc,sz:4},left:{color:hc,sz:8},right:{color:hc,sz:4},insideH:{color:'E2E8F0',sz:2},insideV:{color:'E2E8F0',sz:2}}})+gap();
-    });
-
-    // Steps
-    var stepsRows=[(r.steps||[]).length>0?'':row([cell(para('Gelisim adimi yok.',{runOpts:{color:GR,sz:18},before:0,after:0}),{fill:LT,margin:80,borders:WB('E2E8F0')})])];
-    stepsRows=[];
-    stepsRows.push(row([cell(para('ONCELIKLI 3 GELISIM ADIMI',{runOpts:{bold:true,color:WH,sz:26},before:0,after:0}),{fill:NAVY,margin:80,borders:WB(NAVY)})]));
-    (r.steps||[]).forEach(function(s,i){
-      var sc2=STC[Math.min(i,2)];
-      stepsRows.push(row([cell(
-        para([run('0'+(i+1)+'  ',{bold:true,color:sc2.c,sz:32}),run(esc(s.title||'—'),{bold:true,color:NAVY,sz:22})],{after:40,before:0})+
-        para(esc(s.desc||'—'),{runOpts:{sz:20},before:0,after:0}),
-        {fill:sc2.bg,margin:80,borders:{top:{color:'E2E8F0',sz:2},bottom:{color:'E2E8F0',sz:2},left:{color:sc2.c,sz:20},right:NB}}
-      )]));
-    });
-    var stepsTbl=table(stepsRows,{w:9880,cols:[9880],borders:{top:NB,bottom:NB,left:NB,right:NB,insideH:{color:'E2E8F0',sz:2},insideV:NB}});
-
-    // Footer line
-    var footerLine=para([run('Hazirlayan: Doc. Dr. Erhan Yaylak  |  Form Analiz Araci (Claude AI)  |  H'+r.hafta+'  |  2025-2026',{color:GR,sz:16,italic:true})],{align:'center',border:'<w:pBdr><w:top w:val="single" w:sz="4" w:space="1" w:color="'+MBLUE+'"/></w:pBdr>',before:160,after:0});
-
-    // Assemble document body
-    var body=cover+gap()+metaTbl+gap()+sumBox+gap()+scoreTbl+gradeTbl+gap()+pageBreak()+dimCardsXml+stepsTbl+gap()+footerLine;
-
-    return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n'+
-      '<w:document xmlns:wpc="http://schemas.microsoft.com/office/word/2010/wordprocessingCanvas" '+
-      'xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" '+
-      'xmlns:o="urn:schemas-microsoft-com:office:office" '+
-      'xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" '+
-      'xmlns:m="http://schemas.openxmlformats.org/officeDocument/2006/math" '+
-      'xmlns:v="urn:schemas-microsoft-com:vml" '+
-      'xmlns:wp14="http://schemas.microsoft.com/office/word/2010/wordprocessingDrawing" '+
-      'xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" '+
-      'xmlns:w10="urn:schemas-microsoft-com:office:word" '+
-      'xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" '+
-      'xmlns:w14="http://schemas.microsoft.com/office/word/2010/wordml" '+
-      'xmlns:wpg="http://schemas.microsoft.com/office/word/2010/wordprocessingGroup" '+
-      'xmlns:wpi="http://schemas.microsoft.com/office/word/2010/wordprocessingInk" '+
-      'xmlns:wne="http://schemas.microsoft.com/office/word/2006/wordml" '+
-      'xmlns:wps="http://schemas.microsoft.com/office/word/2010/wordprocessingShape" mc:Ignorable="w14 wp14">'+
-      '<w:body>'+body+
-      '<w:sectPr>'+
-      '<w:pgSz w:w="11906" w:h="16838"/>'+
-      '<w:pgMar w:top="576" w:right="1008" w:bottom="720" w:left="1008" w:header="360" w:footer="360" w:gutter="0"/>'+
-      '</w:sectPr>'+
-      '</w:body></w:document>';
-  }
-
-  var CONTENT_TYPES='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/><Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/><Override PartName="/word/settings.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.settings+xml"/></Types>';
-  var RELS='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>';
-  var WORD_RELS='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/settings" Target="settings.xml"/></Relationships>';
-  var STYLES='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:docDefaults><w:rPrDefault><w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial"/><w:sz w:val="20"/><w:szCs w:val="20"/><w:lang w:val="tr-TR"/></w:rPr></w:rPrDefault></w:docDefaults></w:styles>';
-  var SETTINGS='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<w:settings xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:defaultTabStop w:val="720"/></w:settings>';
-
-  return {
-    build: function(rep){
-      var docXml = buildDocXml(rep);
-      var files=[
-        {name:'[Content_Types].xml', data:CONTENT_TYPES},
-        {name:'_rels/.rels', data:RELS},
-        {name:'word/document.xml', data:docXml},
-        {name:'word/_rels/document.xml.rels', data:WORD_RELS},
-        {name:'word/styles.xml', data:STYLES},
-        {name:'word/settings.xml', data:SETTINGS}
-      ];
-      return ZIP.build(files);
-    }
-  };
-})();
-
-// ═══════════════════════════════════════════════════════════════
-// APP
-// ═══════════════════════════════════════════════════════════════
-var pdfB64=null;
-var GRADES=[{label:'BASLANGIÇ',min:0,max:15,fill:'#475569'},{label:'TEMEL',min:16,max:25,fill:'#1D4ED8'},{label:'GELISMEKTE',min:26,max:35,fill:'#1E4D8C'},{label:'IYI',min:36,max:43,fill:'#166534'},{label:'PEKIYI',min:44,max:50,fill:'#14532D'}];
+var pdfB64=null, currentRep=null;
+var GRADES=[{label:'BAŞLANGIÇ',min:0,max:15,fill:'#475569',bg:'475569'},{label:'TEMEL',min:16,max:25,fill:'#1D4ED8',bg:'1D4ED8'},{label:'GELİŞMEKTE',min:26,max:35,fill:'#1E4D8C',bg:'1E4D8C'},{label:'İYİ',min:36,max:43,fill:'#166534',bg:'166534'},{label:'PEKİYİ',min:44,max:50,fill:'#14532D',bg:'14532D'}];
 var DIMS=[{id:'b1',label:'YZ Araç',color:'#F59E0B'},{id:'b2',label:'Materyal',color:'#1D4ED8'},{id:'b3',label:'Pedagoji',color:'#F59E0B'},{id:'b4',label:'Kazanım',color:'#166534'},{id:'b5',label:'Prompt',color:'#5B21B6'}];
+var DIMW=[{id:'b1',label:'YZ Araç Kullanımı',hc:'F59E0B'},{id:'b2',label:'Materyal & Doğrulama',hc:'1D4ED8'},{id:'b3',label:'Pedagojik Tasarım',hc:'F59E0B'},{id:'b4',label:'Kazanım & İçerik',hc:'166534'},{id:'b5',label:'Prompt Kalitesi',hc:'5B21B6'}];
+var DHC=['#F59E0B','#1D4ED8','#F59E0B','#166534','#5B21B6'];
+var STC=[{c:'#991B1B',bg:'FEE2E2'},{c:'#92400E',bg:'FEF3C7'},{c:'#1D4ED8',bg:'DBEAFE'}];
+
 function getGrade(t){return GRADES.find(function(g){return t>=g.min&&t<=g.max;})||GRADES[0];}
 function totSc(sc){return Object.values(sc||{}).reduce(function(a,b){return a+b;},0);}
 function G(id){return document.getElementById(id);}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function setStatus(msg,color){var el=G('statusBox');el.textContent=msg;el.style.color=color||'#93c5fd';el.style.borderColor=color==='#86efac'?'#166534':color==='#fca5a5'?'#991b1b':'#1e3a5f';}
 function setP(pct){G('progFill').style.width=pct+'%';}
 
@@ -465,22 +208,21 @@ window.addEventListener('DOMContentLoaded',function(){
       if(!b64||b64.length<100){setStatus('İçerik boş.','#fca5a5');return;}
       pdfB64=b64;
       G('fileInp').value='';
-      setStatus('Hazır: '+file.name+' ('+(file.size/1024).toFixed(1)+' KB)\nDeğerlendir butonuna basın.','#86efac');
+      setStatus('Hazır: '+file.name+' ('+(file.size/1024).toFixed(1)+' KB) — Değerlendir butonuna basın.','#86efac');
     });
     reader.addEventListener('error',function(){setStatus('Okuma hatası.','#fca5a5');});
     reader.readAsDataURL(file);
   });
-
   G('runBtn').addEventListener('click',function(){runEval();});
 });
 
 async function runEval(){
   if(!pdfB64){setStatus('PDF seçilmedi!','#fca5a5');return;}
   var key=getKey();
-  if(!key){setStatus('API Key yok! Üstteki alana sk-ant-api03-... ile başlayan anahtarı girin.','#fca5a5');return;}
-  G('runBtn').disabled=true;G('resultBox').style.display='none';
-  var week=G('weekSel').value,tema=G('temaInp').value||week+'. Tema';
-  var prompt='Bu PDF '+week+'. hafta ogretmen adayi degerlendirme formudur.\nB1=YZ kullanim(0-10) B2=Dogrulama(0-10) B3=Pedagoji(0-10) B4=Kazanim(0-10) B5=Prompt(0-10)\nSADECE JSON dokundur:\n{"studentName":"AD SOYAD","sinif":"X. Sinif","ders":"Sosyal Bilgiler","tema":"'+tema+'","tarih":"tarih","unite":"unite","konu":"konu","kazanim":"SB.X.X.X - ifade","dijitalArac":"arac","yzArac":"YZ","icerikTuru":"tur","yzKatki":"%26-50","urunLink":"","scores":{"b1":6,"b2":7,"b3":5,"b4":8,"b5":3},"genelOzet":"3-4 cumle","dims":{"b1":{"status":"aciklama","good":["g1","g2","g3"],"weak":["w1","w2"],"rec":"oneri"},"b2":{"status":"","good":[],"weak":[],"rec":""},"b3":{"status":"","good":[],"weak":[],"rec":""},"b4":{"status":"","good":[],"weak":[],"rec":""},"b5":{"status":"","good":[],"weak":[],"rec":""}},"steps":[{"title":"adim 1","desc":"aciklama"},{"title":"adim 2","desc":"..."},{"title":"adim 3","desc":"..."}]}';
+  if(!key){setStatus('API Key yok! Üstteki alana sk-ant-api03-... anahtarı girin.','#fca5a5');return;}
+  G('runBtn').disabled=true;G('dlBtn').style.display='none';G('resultBox').style.display='none';
+  var week=G('weekSel').value, tema=G('temaInp').value||week+'. Tema';
+  var prompt='Bu PDF '+week+'. hafta ogretmen adayi degerlendirme formudur.\nB1=YZ kullanim(0-10) B2=Dogrulama(0-10) B3=Pedagoji(0-10) B4=Kazanim(0-10) B5=Prompt(0-10)\nSADECE JSON:\n{"studentName":"AD SOYAD","sinif":"X. Sinif","ders":"Sosyal Bilgiler","tema":"'+tema+'","tarih":"tarih","unite":"unite","konu":"konu","kazanim":"SB.X.X.X - ifade","dijitalArac":"arac","yzArac":"YZ","icerikTuru":"tur","yzKatki":"%26-50","urunLink":"","scores":{"b1":6,"b2":7,"b3":5,"b4":8,"b5":3},"genelOzet":"3-4 cumle","dims":{"b1":{"status":"aciklama","good":["g1","g2","g3"],"weak":["w1","w2"],"rec":"oneri"},"b2":{"status":"","good":[],"weak":[],"rec":""},"b3":{"status":"","good":[],"weak":[],"rec":""},"b4":{"status":"","good":[],"weak":[],"rec":""},"b5":{"status":"","good":[],"weak":[],"rec":""}},"steps":[{"title":"adim 1","desc":"aciklama"},{"title":"adim 2","desc":"..."},{"title":"adim 3","desc":"..."}]}';
   try{
     setStatus('Claude analiz ediyor...');setP(25);
     var resp=await fetch('https://api.anthropic.com/v1/messages',{
@@ -493,24 +235,151 @@ async function runEval(){
     var data=await resp.json();
     if(data.error)throw new Error(data.error.message||JSON.stringify(data.error));
     var raw=data.content[0].text.replace(/```json/g,'').replace(/```/g,'').trim();
-    var rep;try{rep=JSON.parse(raw);}catch(pe){var m=raw.match(/\{[\s\S]*\}/);if(m)rep=JSON.parse(m[0]);else throw new Error('JSON hatası: '+pe.message);}
+    var rep;
+    try{rep=JSON.parse(raw);}
+    catch(pe){var m=raw.match(/\{[\s\S]*\}/);if(m)rep=JSON.parse(m[0]);else throw new Error('JSON hatası: '+pe.message);}
     rep.hafta=parseInt(week);rep.tema=tema;
+    currentRep=rep;
     try{var db=JSON.parse(localStorage.getItem('sb_eval')||'{}');if(!db[rep.studentName])db[rep.studentName]={};db[rep.studentName][week]=rep;localStorage.setItem('sb_eval',JSON.stringify(db));}catch(e){}
-    setStatus('Word oluşturuluyor...');setP(85);
-    var zipData=DOCX.build(rep);
-    var blob=new Blob([zipData],{type:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'});
-    var fn='rapor_'+String(rep.studentName||'ogrenci').replace(/\s+/g,'_').toLowerCase().replace(/[^a-z0-9_]/g,'')+'_h'+rep.hafta+'.docx';
-    var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=fn;document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(function(){URL.revokeObjectURL(a.href);},15000);
+    setP(90);
+    buildPdfHtml(rep);
     setP(100);
     var t=totSc(rep.scores),gr=getGrade(t);
-    G('rName').textContent=rep.studentName||'?';G('rMeta').textContent=(rep.ders||'SB')+' · '+(rep.sinif||'')+' · H'+week+' · '+tema;G('rScore').textContent=t;G('rGrade').textContent=gr.label+' ('+t+'/50)';G('rGrade').style.color=gr.fill;
+    G('rName').textContent=rep.studentName||'?';
+    G('rMeta').textContent=(rep.ders||'SB')+' · '+(rep.sinif||'')+' · H'+week+' · '+tema;
+    G('rScore').textContent=t;
+    G('rGrade').textContent=gr.label+' ('+t+'/50)';
+    G('rGrade').style.color=gr.fill;
     G('rDims').innerHTML=DIMS.map(function(d){return '<div class="dim" style="border-top:3px solid '+d.color+'"><div style="font-size:8px;color:#475569;margin-bottom:5px">'+d.label+'</div><div style="font-size:20px;font-weight:700;color:'+d.color+'">'+(rep.scores[d.id]||0)+'</div><div style="font-size:9px;color:#334155">/10</div></div>';}).join('');
     G('resultBox').style.display='block';
-    setStatus('Tamamlandı! '+rep.studentName+' · '+t+'/50 · '+gr.label+'\nWord dosyası indirildi.','#86efac');
+    G('dlBtn').style.display='block';
+    setStatus('Tamamlandı! '+rep.studentName+' · '+t+'/50 · '+gr.label+'\n"PDF Olarak İndir" butonuna basın.','#86efac');
   }catch(err){setStatus('HATA:\n'+err.message,'#fca5a5');setP(0);}
   finally{G('runBtn').disabled=false;}
 }
+
+function buildPdfHtml(r){
+  var sc=r.scores||{b1:5,b2:5,b3:5,b4:5,b5:5};
+  var t=totSc(sc), gr=getGrade(t);
+  var katki=String(r.yzKatki||'—');
+  var katkiCls=(katki==='%26-50'||katki==='%1-25')?'ok':(katki==='%76-100'?'warn':'');
+
+  // Meta rows
+  var metaRows=[
+    ['Öğretmen Adayı',r.studentName,''],
+    ['Ders',r.ders||'SB',''],
+    ['Sınıf',r.sinif,''],
+    ['Hafta / Tema','H'+r.hafta+' — '+esc(r.tema||''),''],
+    ['Ünite',r.unite,''],
+    ['Konu',r.konu,''],
+    ['Kazanım',r.kazanim,'ok'],
+    ['Dijital Araç',r.dijitalArac,''],
+    ['YZ Aracı',r.yzArac,''],
+    ['İçerik Türü',r.icerikTuru,''],
+    ['YZ Katkı Oranı',katki,katkiCls]
+  ];
+  if(r.urunLink)metaRows.push(['Ürün Linki',r.urunLink,'ok']);
+  var metaHtml=metaRows.map(function(row){return '<tr><td class="lbl">'+esc(row[0])+'</td><td class="val '+(row[2]||'')+'">'+esc(row[1]||'—')+'</td></tr>';}).join('');
+
+  // Score rows
+  var sRows=[['B1 · YZ Araç Kullanımı',sc.b1,'#F59E0B'],['B2 · Materyal & Doğrulama',sc.b2,'#1D4ED8'],['B3 · Pedagojik Tasarım',sc.b3,'#F59E0B'],['B4 · Kazanım & İçerik',sc.b4,'#166534'],['B5 · Prompt Kalitesi',sc.b5,'#5B21B6']];
+  var scHtml=sRows.map(function(a){var pct=Math.round(a[1]/10*100);return '<tr><td>'+esc(a[0])+'</td><td class="sc" style="color:'+a[2]+'">'+a[1]+'/10</td><td>'+pct+'%</td></tr>';}).join('');
+  scHtml+='<tr class="total"><td colspan="2">TOPLAM — '+esc(gr.label)+'</td><td>'+t+' / 50</td></tr>';
+
+  // Grade bar
+  var gradeHtml=GRADES.map(function(g){
+    var act=g.label===gr.label;
+    var bg=act?'#1D4ED8':'#'+g.bg;
+    return '<div class="pdf-grade-cell" style="background:'+bg+'">'+
+      '<div class="gn">'+esc(g.label)+'</div>'+
+      '<div class="gr">'+g.min+'-'+g.max+'</div>'+
+      (act?'<div class="ga">▲ '+t+'/50</div>':'<div class="ga">&nbsp;</div>')+
+      '</div>';
+  }).join('');
+
+  // Dim cards
+  var dimHtml=DIMW.map(function(d,i){
+    var s=sc['b'+(i+1)]||0, dim=(r.dims&&r.dims['b'+(i+1)])||{};
+    var good=Array.isArray(dim.good)?dim.good:[];
+    var weak=Array.isArray(dim.weak)?dim.weak:[];
+    return '<div class="pdf-dim">'+
+      '<div class="pdf-dim-hdr" style="background:#'+d.hc+'">'+
+        '<span class="dtitle">BOYUT '+(i+1)+'  '+esc(d.label)+'</span>'+
+        '<span class="dscore">'+s+'/10</span>'+
+      '</div>'+
+      '<div class="pdf-dim-status">'+esc(dim.status||'—')+'</div>'+
+      '<div class="pdf-dim-cols">'+
+        '<div class="pdf-dim-good">'+
+          '<h5>✓ GÜÇLÜ YÖNLER</h5>'+
+          '<ul>'+(good.length?good.map(function(g){return '<li>'+esc(g)+'</li>';}).join(''):'<li>—</li>')+'</ul>'+
+        '</div>'+
+        '<div class="pdf-dim-weak">'+
+          '<h5>▲ GELİŞİM ALANLARI</h5>'+
+          '<ul>'+(weak.length?weak.map(function(w){return '<li>'+esc(w)+'</li>';}).join(''):'<li>—</li>')+'</ul>'+
+        '</div>'+
+      '</div>'+
+      (dim.rec?'<div class="pdf-dim-rec"><strong>➜ ÖNERİ:</strong> '+esc(dim.rec)+'</div>':'')+
+    '</div>';
+  }).join('');
+
+  // Steps
+  var stepHtml=(r.steps||[]).map(function(s,i){
+    return '<div class="pdf-step step'+i+'">'+
+      '<span class="snum">0'+(i+1)+'</span>'+
+      '<span class="stitle">'+esc(s.title||'—')+'</span>'+
+      '<div class="sdesc">'+esc(s.desc||'—')+'</div>'+
+    '</div>';
+  }).join('');
+
+  var html=
+    // SAYFA 1
+    '<div class="pdf-cover">'+
+      '<div class="pdf-cover-title">GERİ DÖNÜT RAPORU</div>'+
+      '<div class="pdf-cover-sub">Dijital Öğrenme Ürünü Hazırlama ve Yansıtma Formu Analizi</div>'+
+      '<div class="pdf-cover-sub2">Sosyal Bilgiler Öğretiminde Bilişim Teknolojileri Dersi</div>'+
+    '</div>'+
+    '<div class="pdf-name-bar">'+
+      '<span class="name">'+esc(r.studentName||'—')+'</span>'+
+      '<span class="meta">  ·  H'+r.hafta+'  ·  '+esc(r.tema||'')+'  ·  '+esc(r.tarih||'')+'</span>'+
+    '</div>'+
+    '<div class="pdf-ders-bar">'+
+      '<span>Ders Öğretim Üyesi: </span><strong>Doç. Dr. Erhan Yaylak</strong>'+
+      '<span>  |  Bilişim Teknolojileri Dersi · Sosyal Bilgiler Öğretmenliği</span>'+
+    '</div>'+
+
+    '<table class="pdf-meta">'+metaHtml+'</table>'+
+
+    '<div class="pdf-summary"><h4>GENEL DEĞERLENDİRME ÖZETİ</h4>'+esc(r.genelOzet||'—')+'</div>'+
+
+    '<div class="pdf-section-title">PUAN ÖZETİ  &amp;  DERECE</div>'+
+    '<table class="pdf-scores">'+
+      '<tr><th>BOYUT</th><th>PUAN</th><th>%</th></tr>'+
+      scHtml+
+    '</table>'+
+    '<div class="pdf-grade-bar">'+gradeHtml+'</div>'+
+
+    // SAYFA 2
+    '<div class="page-break"></div>'+
+    '<div class="pdf-section-title">BOYUT KARTLARI</div>'+
+    dimHtml+
+
+    '<div class="pdf-section-title">ÖNCELİKLİ 3 GELİŞİM ADIMI</div>'+
+    '<div class="pdf-steps">'+stepHtml+'</div>'+
+
+    '<div class="pdf-footer">Hazırlayan: Doç. Dr. Erhan Yaylak  |  Form Analiz Aracı (Claude AI)  |  H'+r.hafta+'  |  Bilişim Teknolojileri Dersi · SB Öğretmenliği · 2025-2026</div>';
+
+  G('pdfContent').innerHTML=html;
+}
+
+function printPDF(){
+  if(!currentRep){setStatus('Önce değerlendirme yapın.','#fca5a5');return;}
+  // Set document title for PDF filename
+  var name=String(currentRep.studentName||'rapor').replace(/\s+/g,'_');
+  var oldTitle=document.title;
+  document.title='rapor_'+name+'_h'+currentRep.hafta;
+  window.print();
+  document.title=oldTitle;
+}
 </script>
-</div>
 </body>
 </html>
