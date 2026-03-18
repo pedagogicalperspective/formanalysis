@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Sosyal Bilgiler Öğretmen Adayı Form Analiz Aracı — 7 Boyutlu AI Destekli Değerlendirme" />
+  <meta name="description" content="Sosyal Bilgiler Öğretmen Adayı Form Analiz Aracı -- 7 Boyutlu AI Destekli Değerlendirme" />
   <title>Form Analiz Aracı</title>
   <!-- React 18 -->
   <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
@@ -21,15 +21,15 @@
 <body>
   <div id="root"></div>
 
-  <script type="text/babel" data-presets="react">
+  <script>
     const { useState, useRef, useCallback } = React;
     // XLSX is available as global window.XLSX from CDN
 
 
-// ═══════════════════════════════════════════════════════════════
-// DEĞERLENDİRME BOYUTLARI — ÖLÇEK 1, ÖLÇEK 2 ve YANSITMA FORMU
+//---
+// DEĞERLENDİRME BOYUTLARI -- ÖLÇEK 1, ÖLÇEK 2 ve YANSITMA FORMU
 // İLE TAM UYUMLU YENİ YAPI
-// ═══════════════════════════════════════════════════════════════
+//---
 
 const DIMS = [
   {
@@ -138,9 +138,9 @@ const DIMS = [
   },
 ];
 
-// ═══════════════════════════════════════════════════════════════
+//---
 // RAPOR MODLARI
-// ═══════════════════════════════════════════════════════════════
+//---
 const REPORT_MODES = {
   weekly: {
     id: "weekly", label: "Haftalık Form Raporu",
@@ -165,92 +165,92 @@ const REPORT_MODES = {
   },
 };
 
-// ═══════════════════════════════════════════════════════════════
+//---
 // SİSTEM PROMPTLARI
-// ═══════════════════════════════════════════════════════════════
+//---
 const PROMPTS = {
 
 weekly: `Sen, sosyal bilgiler öğretmen adaylarının Bilişim Teknolojileri dersi kapsamında hazırladıkları haftalık "Dijital Öğrenme Ürünü Hazırlama ve Yansıtma Formu" ile iki ölçekten (Ölçek 1: YZ Etik Tutumları; Ölçek 2: YZ Öğrenme Becerileri) elde edilen verileri bütüncül biçimde analiz eden uzman bir eğitimci-araştırmacısın.
 
 HAFTALIK DEĞERLENDİRME BOYUTLARI:
 
-═══ BOYUT 1 — Yapay Zekâ Etik Farkındalığı ve Eleştirel Tutum (10 puan) ═══
-[Ölçek 1 — 18 madde: Gizlilik & veri güvenliği / Önyargı & adalet / Şeffaflık / Özerklik & manipülasyon / Öğrenme desteği]
+--- BOYUT 1 -- Yapay Zekâ Etik Farkındalığı ve Eleştirel Tutum (10 puan)---
+[Ölçek 1 -- 18 madde: Gizlilik & veri güvenliği / Önyargı & adalet / Şeffaflık / Özerklik & manipülasyon / Öğrenme desteği]
 
 Değerlendirme kriterleri:
-• Gizlilik & veri güvenliği: YZ araçlarına veri girerken bilinç düzeyi; Ölçek 1 M.1-4 örüntüsü (yüksek kaygı + proaktif önlem = güçlü)
-• Önyargı & algoritmik adalet: M.5-6 önyargı farkındalığı + Form S.14 önyargı/kapsayıcılık kontrolü tutarlılığı
-• Şeffaflık & açıklanabilirlik: M.14-18 şeffaflık talebi; "kara kutu" farkındalığı söylemi
-• Özerklik & manipülasyon: M.8,13 kontrol & manipülasyon kaygısı; kendi kararını AI'ye bırakmama farkındalığı
-• Öğrenme desteği & fırsat eşitliği: M.7,9,10,11,12 yapıcı AI kullanımı perspektifi
+- Gizlilik & veri güvenliği: YZ araçlarına veri girerken bilinç düzeyi; Ölçek 1 M.1-4 örüntüsü (yüksek kaygı + proaktif önlem = güçlü)
+- Önyargı & algoritmik adalet: M.5-6 önyargı farkındalığı + Form S.14 önyargı/kapsayıcılık kontrolü tutarlılığı
+- Şeffaflık & açıklanabilirlik: M.14-18 şeffaflık talebi; "kara kutu" farkındalığı söylemi
+- Özerklik & manipülasyon: M.8,13 kontrol & manipülasyon kaygısı; kendi kararını AI'ye bırakmama farkındalığı
+- Öğrenme desteği & fırsat eşitliği: M.7,9,10,11,12 yapıcı AI kullanımı perspektifi
 
 Puan rehberi: 1-2=Farkındalık yok; 3-4=Yüzeysel; 5-6=Farkında ama uygulamasız; 7-8=Farkında+kısmen uygulayan; 9-10=Derinlemesine farkında+tutarlı uygulama
 
-═══ BOYUT 2 — YZ Destekli Öğrenme ve Öz-Düzenleme Becerileri (10 puan) ═══
-[Ölçek 2 — 22 madde: Araç kullanımı / Geri bildirim yorumlama / Öz-düzenleme / Eleştirel düşünme / Katılım]
+--- BOYUT 2 -- YZ Destekli Öğrenme ve Öz-Düzenleme Becerileri (10 puan)---
+[Ölçek 2 -- 22 madde: Araç kullanımı / Geri bildirim yorumlama / Öz-düzenleme / Eleştirel düşünme / Katılım]
 
 Değerlendirme kriterleri:
-• Araç yetkinliği: M.1,4,5 farklı arayüzlere uyum + Form S.8,9 araç çeşitliliğiyle karşılaştırma
-• Geri bildirim entegrasyonu: M.6,7,8 AI çıktısını anlamlandırma & güçlü/zayıf yön tespiti
-• Öz-düzenleme & bağımlılık bilinci: M.9,10,11 hedef değerlendirme + Form S.19 sorumluluk farkındalığı; M.10 bağımlılık üzerine eleştirel düşünme kritik
-• Eleştirel düşünme & problem çözme: M.13,14 farklı bakış açıları & problem çözme için AI
-• Öğrenme kalıcılığı: M.15,16,17,18 katılım, kalıcılık, öğrenme tarzı uyumu
+- Araç yetkinliği: M.1,4,5 farklı arayüzlere uyum + Form S.8,9 araç çeşitliliğiyle karşılaştırma
+- Geri bildirim entegrasyonu: M.6,7,8 AI çıktısını anlamlandırma & güçlü/zayıf yön tespiti
+- Öz-düzenleme & bağımlılık bilinci: M.9,10,11 hedef değerlendirme + Form S.19 sorumluluk farkındalığı; M.10 bağımlılık üzerine eleştirel düşünme kritik
+- Eleştirel düşünme & problem çözme: M.13,14 farklı bakış açıları & problem çözme için AI
+- Öğrenme kalıcılığı: M.15,16,17,18 katılım, kalıcılık, öğrenme tarzı uyumu
 
-═══ BOYUT 3 — Dijital Materyal Geliştirme Süreci (10 puan) ═══
+--- BOYUT 3 -- Dijital Materyal Geliştirme Süreci (10 puan)---
 [Yansıtma Formu S.8-14, S.17-18]
 
 Değerlendirme kriterleri:
-• Araç seçimi kalitesi (S.8 dijital araç + S.9 YZ aracı): Amaca uygunluk, çeşitlilik, gerekçe
-• AI kullanım aşamaları (S.10): Tek aşama (yüzeysel) → Çok aşamalı entegrasyon (derinlemesine); planlama+içerik+değerlendirme = ideal
-• Doğrulama kalitesi (S.12): En az 2 kaynak şartı + kaynak türü çeşitliliği (ders kitabı, kurum sitesi, atlas vb.) + bölüm/sayfa/URL detayı
-• Gizlilik kontrolü (S.13): Sadece "kontrol etmedim" seçimi → ciddi zayıflık; anonimleştirme+telif kontrolü = güçlü
-• Önyargı/kapsayıcılık kontrolü (S.14): Kontrol etmeme → risk; düzeltme yaptığını belirtme → olgunluk işareti
-• AI oranı & özgünlük dengesi (S.17): %0 veya %76-100 uç değerler sorgulanmalı; %26-75 arası + prompt paylaşımı = iyi denge
+- Araç seçimi kalitesi (S.8 dijital araç + S.9 YZ aracı): Amaca uygunluk, çeşitlilik, gerekçe
+- AI kullanım aşamaları (S.10): Tek aşama (yüzeysel) → Çok aşamalı entegrasyon (derinlemesine); planlama+içerik+değerlendirme = ideal
+- Doğrulama kalitesi (S.12): En az 2 kaynak şartı + kaynak türü çeşitliliği (ders kitabı, kurum sitesi, atlas vb.) + bölüm/sayfa/URL detayı
+- Gizlilik kontrolü (S.13): Sadece "kontrol etmedim" seçimi → ciddi zayıflık; anonimleştirme+telif kontrolü = güçlü
+- Önyargı/kapsayıcılık kontrolü (S.14): Kontrol etmeme → risk; düzeltme yaptığını belirtme → olgunluk işareti
+- AI oranı & özgünlük dengesi (S.17): %0 veya %76-100 uç değerler sorgulanmalı; %26-75 arası + prompt paylaşımı = iyi denge
 
-═══ BOYUT 4 — Pedagojik Tasarım Kalitesi (10 puan) ═══
+--- BOYUT 4 -- Pedagojik Tasarım Kalitesi (10 puan)---
 [Yansıtma Formu S.3, S.11, S.15, S.16]
 
 Değerlendirme kriterleri:
-• Pedagojik gerekçe derinliği (S.11): Tek gerekçe (yüzeysel) → Çok boyutlu gerekçe (somutlaştırma+öğrenci merkezlilik+farklılaştırma+eleştirel düşünme = 4+ boyut)
-• Sınıf düzeyi uyumu (S.3): Seçilen sınıf seviyesine dil/kavram/soyutluk uygunluğu değerlendir
-• Öğrenciye beklenen kazanım (S.15): Genel ifadelerden spesifik beceri/çıktılara uzanan yelpaze; 21. yy becerileri, SB'ye özgü beceriler
-• Öğretmen adayı öz gelişimi (S.16): Farkındalık derinliği; öğretim tasarımı + dijital yeterlik + etik farkındalık üçlüsü
+- Pedagojik gerekçe derinliği (S.11): Tek gerekçe (yüzeysel) → Çok boyutlu gerekçe (somutlaştırma+öğrenci merkezlilik+farklılaştırma+eleştirel düşünme = 4+ boyut)
+- Sınıf düzeyi uyumu (S.3): Seçilen sınıf seviyesine dil/kavram/soyutluk uygunluğu değerlendir
+- Öğrenciye beklenen kazanım (S.15): Genel ifadelerden spesifik beceri/çıktılara uzanan yelpaze; 21. yy becerileri, SB'ye özgü beceriler
+- Öğretmen adayı öz gelişimi (S.16): Farkındalık derinliği; öğretim tasarımı + dijital yeterlik + etik farkındalık üçlüsü
 
-═══ BOYUT 5 — Sosyal Bilgiler Kazanım & İçerik Uyumu (10 puan) ═══
+--- BOYUT 5 -- Sosyal Bilgiler Kazanım & İçerik Uyumu (10 puan)---
 [Yansıtma Formu S.2, S.4, S.5, S.6, S.7]
 
 Değerlendirme kriterleri:
-• Kazanım ifadesinin kalitesi (S.6): "SB.X.X.X." kodlu & MEB ifadesine yakın = güçlü; belirsiz/genel ifade = zayıf
-• Ders-ünite-konu-kazanım zinciri (S.2,4,5,6): İç tutarlılık; konu, kazanımı gerçekten karşılıyor mu?
-• Hafta/tema uyumu (S.7): Ders planıyla örtüşme
-• Sosyal bilgiler becerileri: Empati, tarihsel düşünme, coğrafi sorgulama, vatandaşlık; içeriğe yansıması
-• Değerler & disiplinlerarası: İnsan hakları, çevre, adalet; yerel-küresel bağ
+- Kazanım ifadesinin kalitesi (S.6): "SB.X.X.X." kodlu & MEB ifadesine yakın = güçlü; belirsiz/genel ifade = zayıf
+- Ders-ünite-konu-kazanım zinciri (S.2,4,5,6): İç tutarlılık; konu, kazanımı gerçekten karşılıyor mu?
+- Hafta/tema uyumu (S.7): Ders planıyla örtüşme
+- Sosyal bilgiler becerileri: Empati, tarihsel düşünme, coğrafi sorgulama, vatandaşlık; içeriğe yansıması
+- Değerler & disiplinlerarası: İnsan hakları, çevre, adalet; yerel-küresel bağ
 
-═══ BOYUT 6 — Prompt Mühendisliği ve YZ İş Birliği Kalitesi (Nitel) ═══
+--- BOYUT 6 -- Prompt Mühendisliği ve YZ İş Birliği Kalitesi (Nitel)---
 [Yansıtma Formu S.18 + genel form verisi]
 
 Değerlendirme kriterleri: (puan verilmez; derinlemesine nitel analiz)
-• Paylaşılan prompt(lar)ın açıklığı, bağlamı ve kısıt ifadeleri
-• Kazanım & pedagojik hedefe bağlılık
-• Zincir düşünme, rol atama, format belirleme gibi ileri teknikler
-• AI'yi pasif araç mı yoksa düşünce ortağı mı olarak konumlandırma
+- Paylaşılan prompt(lar)ın açıklığı, bağlamı ve kısıt ifadeleri
+- Kazanım & pedagojik hedefe bağlılık
+- Zincir düşünme, rol atama, format belirleme gibi ileri teknikler
+- AI'yi pasif araç mı yoksa düşünce ortağı mı olarak konumlandırma
 
-═══ BOYUT 7 — Form Sorularının Yapısal ve Psikometrik Analizi (Nitel) ═══
+--- BOYUT 7 -- Form Sorularının Yapısal ve Psikometrik Analizi (Nitel)---
 [Her iki ölçek + yansıtma formu]
 
 Değerlendirme kriterleri: (puan verilmez; form geliştirmeye katkı)
-• Ölçek 1 alt boyutları (Gizlilik / Önyargı & Adalet / Şeffaflık / Özerklik / Öğrenme Desteği): Madde dağılım dengesi
-• Ölçek 2 alt boyutları (Araç Kullanımı / Geri Bildirim / Öz-Düzenleme / Eleştirel Düşünme / Katılım): Madde içerik geçerliliği
-• Yansıtma formu: S.10-14 doğrulama & etik soruları yeterince ölçüyor mu?
-• İki ölçek & form arasında örtüşen/tamamlayıcı boyutlar
-• Eksik boyutlar ve iyileştirme önerileri
+- Ölçek 1 alt boyutları (Gizlilik / Önyargı & Adalet / Şeffaflık / Özerklik / Öğrenme Desteği): Madde dağılım dengesi
+- Ölçek 2 alt boyutları (Araç Kullanımı / Geri Bildirim / Öz-Düzenleme / Eleştirel Düşünme / Katılım): Madde içerik geçerliliği
+- Yansıtma formu: S.10-14 doğrulama & etik soruları yeterince ölçüyor mu?
+- İki ölçek & form arasında örtüşen/tamamlayıcı boyutlar
+- Eksik boyutlar ve iyileştirme önerileri
 
-════════════ RAPOR FORMATI (Türkçe, akademik, yapıcı) ════════════
+--- RAPOR FORMATI (Türkçe, akademik, yapıcı)---
 
 ## GENEL DEGERLENDIRME OZETI
 (4-5 cümle: Ölçek 1+2 tutarlılığı, form doldurum kalitesi, en güçlü boyut, en kritik gelişim alanı)
 
-## BOYUT 1 — YZ Etik Farkindarligi (Olcek 1)
+## BOYUT 1 -- YZ Etik Farkindarligi (Olcek 1)
 **Puan: X/10**
 **Alt Boyut Profili:**
 - Gizlilik & Veri Guvenligi: [guclu/orta/zayif + gerekce]
@@ -262,7 +262,7 @@ Değerlendirme kriterleri: (puan verilmez; form geliştirmeye katkı)
 **Gelisim Alanlari:** ...
 **Oneri:** ...
 
-## BOYUT 2 — YZ Ogrenme Becerileri (Olcek 2)
+## BOYUT 2 -- YZ Ogrenme Becerileri (Olcek 2)
 **Puan: X/10**
 **Alt Boyut Profili:**
 - Arac Yetkinligi: ...
@@ -274,7 +274,7 @@ Değerlendirme kriterleri: (puan verilmez; form geliştirmeye katkı)
 **Gelisim Alanlari:** ...
 **Oneri:** ...
 
-## BOYUT 3 — Materyal Gelistirme Sureci (Yansitma Formu)
+## BOYUT 3 -- Materyal Gelistirme Sureci (Yansitma Formu)
 **Puan: X/10**
 **Surec Analizi:**
 - Arac Secimi: ...
@@ -287,26 +287,26 @@ Değerlendirme kriterleri: (puan verilmez; form geliştirmeye katkı)
 **Gelisim Alanlari:** ...
 **Oneri:** ...
 
-## BOYUT 4 — Pedagojik Tasarim (Yansitma Formu)
+## BOYUT 4 -- Pedagojik Tasarim (Yansitma Formu)
 **Puan: X/10**
 **Pedagojik Gerekcenin Boyutlari:** [kac boyut? hangileri?]
 **Guclu Yonler:** ...
 **Gelisim Alanlari:** ...
 **Oneri:** ...
 
-## BOYUT 5 — Kazanim & Icerik Uyumu (Yansitma Formu)
+## BOYUT 5 -- Kazanim & Icerik Uyumu (Yansitma Formu)
 **Puan: X/10**
 **Kazanim Zinciri Degerlendirmesi:** [ders→unite→konu→kazanim tutarliligi]
 **Guclu Yonler:** ...
 **Gelisim Alanlari:** ...
 **Oneri:** ...
 
-## BOYUT 6 — Prompt Muhendisligi (Nitel)
+## BOYUT 6 -- Prompt Muhendisligi (Nitel)
 **Prompt Kalite Duzeyi:** [Basit / Orta / Gelismis / Uzman]
 **Analiz:** ...
 **Gelistirme Onerileri:** ...
 
-## BOYUT 7 — Form Soruları Yapisal Analizi (Nitel)
+## BOYUT 7 -- Form Soruları Yapisal Analizi (Nitel)
 **Olcek 1 Degerlendirmesi:** ...
 **Olcek 2 Degerlendirmesi:** ...
 **Yansitma Formu Degerlendirmesi:** ...
@@ -326,53 +326,53 @@ individual: `Sen, sosyal bilgiler öğretmen adaylarının 10 haftalık süreçt
 
 BİREYSEL GELİŞİM BOYUTLARI (7 boyut):
 
-BOYUT 1 — YZ Etik Farkındalığı Gelişimi [Ölçek 1]
-• Gizlilik, önyargı, şeffaflık, özerklik alt boyutlarında haftalık değişim
-• Form S.13 (gizlilik) ve S.14 (önyargı) kontrollerinin 10 haftada gelişimi
-• Etik tutumların pratiğe yansımasındaki evrim
-• Trend: [Gerileme / Durağan / Yavaş İlerleme / Belirgin İlerleme / Dönüşüm]
+BOYUT 1 -- YZ Etik Farkındalığı Gelişimi [Ölçek 1]
+- Gizlilik, önyargı, şeffaflık, özerklik alt boyutlarında haftalık değişim
+- Form S.13 (gizlilik) ve S.14 (önyargı) kontrollerinin 10 haftada gelişimi
+- Etik tutumların pratiğe yansımasındaki evrim
+- Trend: [Gerileme / Durağan / Yavaş İlerleme / Belirgin İlerleme / Dönüşüm]
 
-BOYUT 2 — YZ Öğrenme Becerileri Gelişimi [Ölçek 2]
-• Araç çeşitliliği, geri bildirim yorumlama, öz-düzenleme becerilerindeki artış
-• Bağımlılık farkındalığının haftalara göre derinleşmesi
-• Eleştirel düşünme için AI kullanımının olgunlaşması
-• Trend değerlendirmesi
+BOYUT 2 -- YZ Öğrenme Becerileri Gelişimi [Ölçek 2]
+- Araç çeşitliliği, geri bildirim yorumlama, öz-düzenleme becerilerindeki artış
+- Bağımlılık farkındalığının haftalara göre derinleşmesi
+- Eleştirel düşünme için AI kullanımının olgunlaşması
+- Trend değerlendirmesi
 
-BOYUT 3 — Materyal Geliştirme Süreci Olgunlaşması [Form S.8-14, S.17-18]
-• Araç seçimindeki çeşitlenme (tek araç → çoklu ekosistem)
-• Doğrulama adımlarının nitelik artışı
-• Gizlilik & önyargı kontrolünün tutarlılığı
-• Prompt kalitesinin haftalara göre evrimi
-• AI oranı tercihlerindeki değişim (özgünlük bilincinin gelişimi)
-• Trend değerlendirmesi
+BOYUT 3 -- Materyal Geliştirme Süreci Olgunlaşması [Form S.8-14, S.17-18]
+- Araç seçimindeki çeşitlenme (tek araç → çoklu ekosistem)
+- Doğrulama adımlarının nitelik artışı
+- Gizlilik & önyargı kontrolünün tutarlılığı
+- Prompt kalitesinin haftalara göre evrimi
+- AI oranı tercihlerindeki değişim (özgünlük bilincinin gelişimi)
+- Trend değerlendirmesi
 
-BOYUT 4 — Pedagojik Tasarım Yeterliliğinin Gelişimi [Form S.11,15,16]
-• Pedagojik gerekçe derinliğinin artışı (tek boyutlu → çok boyutlu)
-• Öğrenciye yönelik çıktı beklentilerinin özgünleşmesi
-• Öz gelişim farkındalığının derinleşmesi
-• Trend değerlendirmesi
+BOYUT 4 -- Pedagojik Tasarım Yeterliliğinin Gelişimi [Form S.11,15,16]
+- Pedagojik gerekçe derinliğinin artışı (tek boyutlu → çok boyutlu)
+- Öğrenciye yönelik çıktı beklentilerinin özgünleşmesi
+- Öz gelişim farkındalığının derinleşmesi
+- Trend değerlendirmesi
 
-BOYUT 5 — Kazanım Uyumunun Gelişimi [Form S.2-7]
-• Kazanım ifadesi kalitesinin haftalara göre iyileşmesi
-• Ders-ünite-konu-kazanım zincirinin tutarlılığının artışı
-• SB beceri entegrasyonunun zenginleşmesi
-• Trend değerlendirmesi
+BOYUT 5 -- Kazanım Uyumunun Gelişimi [Form S.2-7]
+- Kazanım ifadesi kalitesinin haftalara göre iyileşmesi
+- Ders-ünite-konu-kazanım zincirinin tutarlılığının artışı
+- SB beceri entegrasyonunun zenginleşmesi
+- Trend değerlendirmesi
 
-BOYUT 6 — Prompt Mühendisliği Olgunlaşması [Form S.18]
-• Basit prompt'tan karmaşık yapılandırılmış prompt'a geçiş
-• Pedagojik hedefi prompt'a yansıtma becerisinin gelişimi
-• Trend değerlendirmesi
+BOYUT 6 -- Prompt Mühendisliği Olgunlaşması [Form S.18]
+- Basit prompt'tan karmaşık yapılandırılmış prompt'a geçiş
+- Pedagojik hedefi prompt'a yansıtma becerisinin gelişimi
+- Trend değerlendirmesi
 
-BOYUT 7 — Form Kalitesinin Gelişimi [Her iki form]
-• Formlara verilen yanıtların kalitesi ve derinliğinin 10 haftada artışı
-• Yansıtıcı düşüncenin (reflective practice) görünürlük gelişimi
+BOYUT 7 -- Form Kalitesinin Gelişimi [Her iki form]
+- Formlara verilen yanıtların kalitesi ve derinliğinin 10 haftada artışı
+- Yansıtıcı düşüncenin (reflective practice) görünürlük gelişimi
 
 RAPOR FORMATI:
 
-## BIREYSEL GELISIM RAPORU — OZET PROFIL
+## BIREYSEL GELISIM RAPORU -- OZET PROFIL
 (Öğretmen adayının 10 haftalık genel gelişim portföyü, 5-6 cümle; Ölçek 1+2 ile form tutarlılığı vurgulanmalı)
 
-## BOYUT 1 — YZ Etik Farkindarligi Gelisimi
+## BOYUT 1 -- YZ Etik Farkindarligi Gelisimi
 **Trend: [...]**
 **Alt Boyut Trendleri:**
 - Gizlilik: ... | Onyargi: ... | Seffaflik: ... | Ozerklik: ...
@@ -380,31 +380,31 @@ RAPOR FORMATI:
 **En Guclu Alt Boyut:** ...
 **Destek Gerektiren Alan:** ...
 
-## BOYUT 2 — YZ Ogrenme Becerileri Gelisimi
+## BOYUT 2 -- YZ Ogrenme Becerileri Gelisimi
 **Trend: [...]**
 **Alt Boyut Trendleri:** ...
 **Kritik Gelisim Anları:** ...
 
-## BOYUT 3 — Materyal Gelistirme Surecinin Olgunlasmasi
+## BOYUT 3 -- Materyal Gelistirme Surecinin Olgunlasmasi
 **Trend: [...]**
 **Arac Secimi Evrimi:** ...
 **Dogrulama Kalitesi Evrimi:** ...
 **Prompt Olgunlasmasi:** ...
 **AI Oran Tercihleri:** ...
 
-## BOYUT 4 — Pedagojik Tasarim Gelisimi
+## BOYUT 4 -- Pedagojik Tasarim Gelisimi
 **Trend: [...]**
 **Pedagojik Gerekcenin Derinlesmesi:** ...
 
-## BOYUT 5 — Kazanim Uyumunun Gelisimi
+## BOYUT 5 -- Kazanim Uyumunun Gelisimi
 **Trend: [...]**
 **Kazanim Zinciri Kalitesi:** ...
 
-## BOYUT 6 — Prompt Muhendisligi Gelisimi
+## BOYUT 6 -- Prompt Muhendisligi Gelisimi
 **Trend: [...]**
 **Olgunlasma Kanıtları:** ...
 
-## BOYUT 7 — Yansıtıcı Dusunce Gelisimi
+## BOYUT 7 -- Yansıtıcı Dusunce Gelisimi
 **Trend: [...]**
 **Gozlem:** ...
 
@@ -426,96 +426,96 @@ class: `Sen, sosyal bilgiler öğretmen adaylarından oluşan bir sınıfın 10 
 
 SINIF GELİŞİM BOYUTLARI (7 boyut):
 
-BOYUT 1 — YZ Etik Farkındalığı — Sınıf Profili [Ölçek 1]
-• Her alt boyut (gizlilik, önyargı, şeffaflık, özerklik) için sınıf ortalaması ve dağılım örüntüsü
-• Form S.13-14 ile Ölçek 1 tutarlılığı (söylem-pratik boşluğu)
-• 10 haftalık etik farkındalık trendi (sınıf geneli)
-• Etik boyutta öne çıkan ve geride kalan öğrenci profilleri (anonim)
+BOYUT 1 -- YZ Etik Farkındalığı -- Sınıf Profili [Ölçek 1]
+- Her alt boyut (gizlilik, önyargı, şeffaflık, özerklik) için sınıf ortalaması ve dağılım örüntüsü
+- Form S.13-14 ile Ölçek 1 tutarlılığı (söylem-pratik boşluğu)
+- 10 haftalık etik farkındalık trendi (sınıf geneli)
+- Etik boyutta öne çıkan ve geride kalan öğrenci profilleri (anonim)
 
-BOYUT 2 — YZ Öğrenme Becerileri — Sınıf Profili [Ölçek 2]
-• 5 alt boyut için sınıf profili (araç yetkinliği / geri bildirim / öz-düzenleme / eleştirel düşünme / katılım)
-• Bağımlılık farkındalığı (M.10) sınıf genelinde nasıl dağılıyor?
-• Ölçek 2 ile Form S.19 (sorumluluk farkındalığı) tutarlılığı
+BOYUT 2 -- YZ Öğrenme Becerileri -- Sınıf Profili [Ölçek 2]
+- 5 alt boyut için sınıf profili (araç yetkinliği / geri bildirim / öz-düzenleme / eleştirel düşünme / katılım)
+- Bağımlılık farkındalığı (M.10) sınıf genelinde nasıl dağılıyor?
+- Ölçek 2 ile Form S.19 (sorumluluk farkındalığı) tutarlılığı
 
-BOYUT 3 — Materyal Geliştirme Süreci — Sınıf Profili [Form S.8-14, S.17-18]
-• En çok kullanılan dijital araçlar ve AI araçları (sıklık analizi)
-• AI kullanım aşaması çeşitliliği sınıf genelinde nasıl?
-• Doğrulama kalitesi sınıf ortalaması; "kontrol etmedim" seçimi oranı (gizlilik & önyargı)
-• AI katkı oranı dağılımı (% bazlı sınıf profili)
-• Prompt paylaşım kalitesi genel değerlendirmesi
+BOYUT 3 -- Materyal Geliştirme Süreci -- Sınıf Profili [Form S.8-14, S.17-18]
+- En çok kullanılan dijital araçlar ve AI araçları (sıklık analizi)
+- AI kullanım aşaması çeşitliliği sınıf genelinde nasıl?
+- Doğrulama kalitesi sınıf ortalaması; "kontrol etmedim" seçimi oranı (gizlilik & önyargı)
+- AI katkı oranı dağılımı (% bazlı sınıf profili)
+- Prompt paylaşım kalitesi genel değerlendirmesi
 
-BOYUT 4 — Pedagojik Tasarım — Sınıf Profili [Form S.11, S.15, S.16]
-• Pedagojik gerekçe derinliği sınıf geneli (kaç boyut kullanan kaç öğrenci)
-• Öğrenci çıktı beklentilerinde en çok hangi beceriler öne çıkıyor?
-• Öz gelişim farkındalığı yelpazesi
+BOYUT 4 -- Pedagojik Tasarım -- Sınıf Profili [Form S.11, S.15, S.16]
+- Pedagojik gerekçe derinliği sınıf geneli (kaç boyut kullanan kaç öğrenci)
+- Öğrenci çıktı beklentilerinde en çok hangi beceriler öne çıkıyor?
+- Öz gelişim farkındalığı yelpazesi
 
-BOYUT 5 — Kazanım Uyumu — Sınıf Profili [Form S.2-7]
-• Kazanım ifadesi kalitesi sınıf genelinde nasıl?
-• En çok seçilen ders, sınıf düzeyi, öğrenme alanı ve içerik türü
-• Kazanım-içerik uyumu genel görünümü
+BOYUT 5 -- Kazanım Uyumu -- Sınıf Profili [Form S.2-7]
+- Kazanım ifadesi kalitesi sınıf genelinde nasıl?
+- En çok seçilen ders, sınıf düzeyi, öğrenme alanı ve içerik türü
+- Kazanım-içerik uyumu genel görünümü
 
-BOYUT 6 — Prompt Mühendisliği — Sınıf Profili [Form S.18]
-• Sınıf genelinde prompt olgunluk dağılımı
-• Örnek iyi prompt'ların genel özellikleri
-• Sınıfın ortak prompt zayıflıkları
+BOYUT 6 -- Prompt Mühendisliği -- Sınıf Profili [Form S.18]
+- Sınıf genelinde prompt olgunluk dağılımı
+- Örnek iyi prompt'ların genel özellikleri
+- Sınıfın ortak prompt zayıflıkları
 
-BOYUT 7 — 10 Haftalık Sınıf Gelişim Trendi
-• Her boyut için hafta bazlı sınıf trendi
-• En hızlı gelişim gösteren boyut & hafta
-• En durağan veya gerileyen boyut
-• Kritik dönüm noktaları
+BOYUT 7 -- 10 Haftalık Sınıf Gelişim Trendi
+- Her boyut için hafta bazlı sınıf trendi
+- En hızlı gelişim gösteren boyut & hafta
+- En durağan veya gerileyen boyut
+- Kritik dönüm noktaları
 
-BOYUT 8 — Karşılaştırmalı Öğrenci Profilleri (Anonim)
-• Tutarlı yüksek performans profili (hangi boyutlarda güçlü?)
-• Hızlı dönüşüm profili (hangi boyutlarda sıçrama?)
-• Ek desteğe ihtiyaç profili (hangi boyutlar öncelikli?)
+BOYUT 8 -- Karşılaştırmalı Öğrenci Profilleri (Anonim)
+- Tutarlı yüksek performans profili (hangi boyutlarda güçlü?)
+- Hızlı dönüşüm profili (hangi boyutlarda sıçrama?)
+- Ek desteğe ihtiyaç profili (hangi boyutlar öncelikli?)
 
 RAPOR FORMATI:
 
-## SINIF GELISIM RAPORU — YONETICI OZETI
+## SINIF GELISIM RAPORU -- YONETICI OZETI
 (Sınıfın 10 haftalık genel profili, en kritik 3 bulgu ve acil müdahale alanları, 6-7 cümle)
 
-## BOYUT 1 — YZ Etik Farkindarligi Sinif Profili
+## BOYUT 1 -- YZ Etik Farkindarligi Sinif Profili
 **Genel Duzey:** [Baslangic / Gelismekte / Yeterli / Ileri]
 **Alt Boyut Dagilimi:** (Gizlilik / Onyargi / Seffaflik / Ozerklik)
 **Soylem-Pratik Boslugu:** ...
 **10 Haftalik Trend:** ...
 **Mudahale Onerileri:** ...
 
-## BOYUT 2 — YZ Ogrenme Becerileri Sinif Profili
+## BOYUT 2 -- YZ Ogrenme Becerileri Sinif Profili
 **Genel Duzey:** ...
 **Alt Boyut Ozeti:** ...
 **Kritik Bulgu (Bagimlilik Boyutu):** ...
 **Mudahale Onerileri:** ...
 
-## BOYUT 3 — Materyal Gelistirme Surecinin Sinif Profili
+## BOYUT 3 -- Materyal Gelistirme Surecinin Sinif Profili
 **En Cok Kullanilan Araclar:** ...
 **AI Kullanim Asama Cesitliligi:** ...
 **Dogrulama & Etik Kontrol Profili:** ...
 **AI Oran Dagilimi:** ...
 **Mudahale Onerileri:** ...
 
-## BOYUT 4 — Pedagojik Tasarim Sinif Profili
+## BOYUT 4 -- Pedagojik Tasarim Sinif Profili
 **Gerekcenin Derinligi Dagilimi:** ...
 **One Cikan Beceriler:** ...
 **Mudahale Onerileri:** ...
 
-## BOYUT 5 — Kazanim Uyumu Sinif Profili
+## BOYUT 5 -- Kazanim Uyumu Sinif Profili
 **Kazanim Kalite Dagilimi:** ...
 **En Cok Tercih Edilen Icerikler:** ...
 **Mudahale Onerileri:** ...
 
-## BOYUT 6 — Prompt Muhendisligi Sinif Profili
+## BOYUT 6 -- Prompt Muhendisligi Sinif Profili
 **Olgunluk Dagilimi:** ...
 **Ortak Gucluk:** ...
 **Ornek Iyi Pratikler:** ...
 
-## BOYUT 7 — 10 Haftalik Sinif Trendi
+## BOYUT 7 -- 10 Haftalik Sinif Trendi
 **En Hizli Gelisim:** ...
 **En Duragan/Gerileyen:** ...
 **Kritik Donum Noktalari:** ...
 
-## BOYUT 8 — Karsilastirmali Ogrenci Profilleri
+## BOYUT 8 -- Karsilastirmali Ogrenci Profilleri
 **Yuksek Performans Profili:** ...
 **Hizli Donusum Profili:** ...
 **Ek Destek Profili:** ...
@@ -528,9 +528,9 @@ RAPOR FORMATI:
 - 5. ...`,
 };
 
-// ═══════════════════════════════════════════════════════════════
+//---
 // YARDIMCI FONKSİYONLAR
-// ═══════════════════════════════════════════════════════════════
+//---
 const formatMarkdown = (text) => {
   if (!text) return "";
   return text
@@ -635,16 +635,19 @@ li::marker{color:${ac}}
 <div>
   <div class="page-header"><span><span class="dot"></span>${m.label.toUpperCase()} · ${fileName}</span><span>${dateStr}</span></div>
   <div class="content">${html}</div>
-  <div class="pfooter"><span>SB Öğretmen Adayı Değerlendirme Projesi — ${m.label}</span><span>Claude AI · Form Analiz Aracı</span></div>
+  <div class="pfooter"><span>SB Öğretmen Adayı Değerlendirme Projesi -- ${m.label}</span><span>Claude AI · Form Analiz Aracı</span></div>
 </div>
 <scr"+"ipt>window.onload=function(){setTimeout(function(){window.print();},900);}</scr"+"ipt>
 </body></html>`);
   win.document.close();
 };
 
-// ═══════════════════════════════════════════════════════════════
+//---
 // ANA BİLEŞEN
-// ═══════════════════════════════════════════════════════════════
+//---
+  </script>
+
+  <script type="text/babel" data-presets="react">
 function FormAnalizAraci() {
   const [mode, setMode] = useState(null);
   const [file, setFile] = useState(null);
@@ -764,7 +767,7 @@ function FormAnalizAraci() {
           <div>
             <div style={{ fontSize:"8.5px", textTransform:"uppercase", letterSpacing:"3px", color:C.sky, fontFamily:"system-ui", fontWeight:700 }}>Bilişim Teknolojileri Dersi</div>
             <div style={{ fontSize:"16px", fontWeight:"bold", color:"#eef5ff" }}>Form Analiz Aracı</div>
-            <div style={{ fontSize:"10px", color:C.soft, fontFamily:"system-ui" }}>Ölçek 1 · Ölçek 2 · Yansıtma Formu — 7 Boyutlu Değerlendirme</div>
+            <div style={{ fontSize:"10px", color:C.soft, fontFamily:"system-ui" }}>Ölçek 1 · Ölçek 2 · Yansıtma Formu -- 7 Boyutlu Değerlendirme</div>
           </div>
         </div>
         {mode && <div style={{ padding:"5px 12px", background:`${mc}18`, border:`1px solid ${mc}40`, borderRadius:"7px", fontSize:"11px", fontFamily:"system-ui", color:C.sky }}>{REPORT_MODES[mode].icon} {REPORT_MODES[mode].label}</div>}
@@ -772,7 +775,7 @@ function FormAnalizAraci() {
 
       <div style={{ maxWidth:"960px", margin:"0 auto", padding:"22px 18px" }}>
 
-        {/* ══ MOD SEÇİMİ ══ */}
+        {}/* MOD SECIMI */
         {step === "mode" && (
           <div>
             <div style={{ textAlign:"center", marginBottom:"24px" }}>
@@ -796,7 +799,7 @@ function FormAnalizAraci() {
 
             {/* 7 Boyut özet tablosu */}
             <div style={{ background:C.panel, border:`1px solid ${C.bright}`, borderRadius:"14px", padding:"20px 22px" }}>
-              <div style={{ fontSize:"9px", textTransform:"uppercase", letterSpacing:"2px", color:C.sky, fontWeight:700, marginBottom:"14px", fontFamily:"system-ui" }}>7 Değerlendirme Boyutu — Ölçek 1, Ölçek 2 ve Yansıtma Formu Entegrasyonu</div>
+              <div style={{ fontSize:"9px", textTransform:"uppercase", letterSpacing:"2px", color:C.sky, fontWeight:700, marginBottom:"14px", fontFamily:"system-ui" }}>7 Değerlendirme Boyutu -- Ölçek 1, Ölçek 2 ve Yansıtma Formu Entegrasyonu</div>
               <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"8px" }}>
                 {DIMS.map((d) => (
                   <div key={d.id} style={{ padding:"10px 13px", background:"#050c18", borderRadius:"8px", border:`1px solid ${C.border}`, display:"flex", gap:"9px", alignItems:"flex-start" }}>
@@ -815,7 +818,7 @@ function FormAnalizAraci() {
           </div>
         )}
 
-        {/* ══ DOSYA YÜKLEME ══ */}
+        {}/* DOSYA YUKLEME */
         {(step === "upload" || step === "ready") && mode && (
           <div>
             <div style={{ background:C.panel, border:`1px solid ${mc}35`, borderRadius:"11px", padding:"13px 16px", marginBottom:"16px", display:"flex", alignItems:"center", justifyContent:"space-between" }}>
@@ -838,7 +841,7 @@ function FormAnalizAraci() {
                 <div>
                   <div style={{ fontSize:"36px", marginBottom:"7px" }}>{file.name.endsWith(".pdf")?"📄":"📊"}</div>
                   <div style={{ fontSize:"14px", color:"#86efac", fontWeight:"bold", marginBottom:"3px" }}>{file.name}</div>
-                  <div style={{ fontSize:"11px", color:"#4ade80", fontFamily:"system-ui" }}>✓ Yüklendi — {(file.size/1024).toFixed(1)} KB</div>
+                  <div style={{ fontSize:"11px", color:"#4ade80", fontFamily:"system-ui" }}>✓ Yüklendi -- {(file.size/1024).toFixed(1)} KB</div>
                   <button onClick={(e) => { e.stopPropagation(); backToUpload(); }} style={{ marginTop:"9px", padding:"3px 10px", background:"transparent", border:`1px solid ${C.border}`, borderRadius:"5px", color:C.soft, cursor:"pointer", fontFamily:"system-ui", fontSize:"11px" }}>Farklı dosya</button>
                 </div>
               ) : (
@@ -878,14 +881,14 @@ function FormAnalizAraci() {
                   onMouseOver={(e) => { e.currentTarget.style.transform="translateY(-2px)"; e.currentTarget.style.boxShadow=`0 9px 32px ${mc}60`; }}
                   onMouseOut={(e) => { e.currentTarget.style.transform="translateY(0)"; e.currentTarget.style.boxShadow=`0 5px 24px ${mc}40`; }}
                 >
-                  {REPORT_MODES[mode].icon} 7 Boyutlu Analiz Başlat — PDF Rapor Oluştur
+                  {REPORT_MODES[mode].icon} 7 Boyutlu Analiz Başlat -- PDF Rapor Oluştur
                 </button>
               </>
             )}
           </div>
         )}
 
-        {/* ══ LOADING ══ */}
+        {}/* LOADING */
         {step === "analyzing" && (
           <div style={{ textAlign:"center", padding:"58px 28px", background:C.panel, border:`1px solid ${C.bright}`, borderRadius:"16px" }}>
             <style>{`@keyframes spin{to{transform:rotate(360deg)}} @keyframes dp{0%,100%{opacity:.2}50%{opacity:1}}`}</style>
@@ -901,7 +904,7 @@ function FormAnalizAraci() {
 
         {error && <div style={{ background:"rgba(220,38,38,0.1)", border:"1px solid #dc2626", borderRadius:"9px", padding:"12px 15px", marginTop:"11px", color:"#fca5a5", fontFamily:"system-ui", fontSize:"12.5px" }}>⚠️ {error}</div>}
 
-        {/* ══ RAPOR ══ */}
+        {}/* RAPOR */
         {step === "done" && report && (
           <div>
             <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:"12px", background:C.panel, border:`1px solid ${mc}30`, borderRadius:"11px", padding:"11px 15px" }}>
