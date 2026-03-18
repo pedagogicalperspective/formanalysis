@@ -165,7 +165,8 @@ input[type=file]::file-selector-button:hover{background:#1a44c0;}
 
   <div id="w1-out" style="margin-top:10px;font-size:12px;color:#86EFAC;display:none;"></div>
   <br>
-  <button class="btn" id="w1-btn" onclick="runW1()" disabled>🤖 &nbsp;Değerlendir &amp; Word İndir</button>
+  <button class="btn" id="w1-btn" onclick="runW1()">🤖 &nbsp;Değerlendir &amp; Word İndir</button>
+  <!-- FIX: not disabled, check in runW1() -->🤖 &nbsp;Değerlendir &amp; Word İndir</button>
 </div>
 </div>
 
@@ -257,17 +258,26 @@ var WC = [];         // [{name,size,b64}, ...]
 
 /* ─── NATIVE INPUT HANDLERS ──────────────────────────────────────── */
 function onPick(mode, inp) {
+  // Capture file BEFORE resetting input
   var file = inp.files && inp.files[0];
-  inp.value = ''; // reset immediately
-  if (!file) return;
-  if (!isPDF(file)) { st(mode, '❌ PDF değil: ' + file.name, 'err'); return; }
-  readOne(file, function(result) {
-    W1 = result;
-    st('w1', '✅ ' + result.name + ' — ' + kb(result.size) + ' KB hazır', 'ok');
-    G('w1-btn').disabled = false;
-  }, function(e) {
-    st('w1', '❌ Okuma hatası: ' + e, 'err');
-  });
+  if (!file) { st(mode, '⚠ Dosya seçilmedi.', 'inf'); return; }
+  if (!isPDF(file)) { inp.value = ''; st(mode, '❌ PDF değil: ' + file.name, 'err'); return; }
+  st('w1', '⏳ Yükleniyor: ' + file.name + ' ...', 'inf');
+  var reader = new FileReader();
+  reader.onload = function(ev) {
+    inp.value = ''; // reset AFTER reading is complete
+    var result = ev.target.result;
+    if (!result || result.indexOf(',') < 0) { st('w1', '❌ Dosya okunamadı (boş)', 'err'); return; }
+    var b64 = result.split(',')[1];
+    if (!b64 || b64.length < 100) { st('w1', '❌ Base64 hatası (uzunluk: ' + (b64||'').length + ')', 'err'); return; }
+    W1 = { name: file.name, size: file.size, b64: b64 };
+    st('w1', '✅ Hazır: ' + file.name + ' (' + kb(file.size) + ' KB) — Şimdi "Değerlendir" butonuna basın.', 'ok');
+  };
+  reader.onerror = function() {
+    inp.value = '';
+    st('w1', '❌ FileReader hatası — farklı bir tarayıcı deneyin.', 'err');
+  };
+  reader.readAsDataURL(file);
 }
 
 function onPickMulti(mode, inp) {
@@ -444,8 +454,12 @@ function promptW1(week, prev) {
 
 /* ══ RUN W1 ══ */
 async function runW1() {
-  if (!W1 || !W1.b64) { st('w1', '❌ Önce PDF yükleyin', 'err'); return; }
-  if (!getKey()) { st('w1', '❌ API Key eksik', 'err'); return; }
+  // Guard checks
+  if (!W1) { st('w1', '❌ Önce PDF seçin — yukarıdaki dosya butonuna tıklayın.', 'err'); return; }
+  if (!W1.b64) { st('w1', '❌ PDF henüz okunmadı — 1 saniye bekleyip tekrar deneyin.', 'err'); return; }
+  var key = getKey();
+  if (!key) { st('w1', '❌ API Key eksik — üstten girin.', 'err'); return; }
+  console.log('[SB] runW1 başlıyor:', W1.name, 'b64:', W1.b64.length);
   G('w1-btn').disabled = true;
   showP('w1', true);
   var week = G('w1-week').value, tema = G('w1-tema').value || week + '. Tema';
