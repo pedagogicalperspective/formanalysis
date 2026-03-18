@@ -4,19 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>SB Dönüt Raporu</title>
-<script>
-// Load docx library — try cdnjs first, fallback to unpkg
-(function(){
-  var s = document.createElement('script');
-  s.src = 'https://cdnjs.cloudflare.com/ajax/libs/docx/8.5.0/index.js';
-  s.onerror = function() {
-    var s2 = document.createElement('script');
-    s2.src = 'https://unpkg.com/docx@8.5.0/build/index.js';
-    document.head.appendChild(s2);
-  };
-  document.head.appendChild(s);
-})();
-</script>
+
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: Arial, sans-serif; background: #0a0f1e; color: #e2e8f0; padding: 24px; }
@@ -261,18 +249,6 @@ async function runEval(){
 }
 
 async function buildWord(r){
-  // Runtime check — if docx not loaded, try to wait
-  if(typeof docx === 'undefined') {
-    setStatus('docx kütüphanesi yükleniyor, lütfen bekleyin...','#93c5fd');
-    await new Promise(function(resolve,reject){
-      var waited=0;
-      var check=setInterval(function(){
-        waited+=200;
-        if(typeof docx !== 'undefined'){clearInterval(check);resolve();}
-        else if(waited>8000){clearInterval(check);reject(new Error('docx kütüphanesi yüklenemedi. İnternet bağlantınızı kontrol edin ve sayfayı yenileyin.'));}
-      },200);
-    });
-  }
   var D=docx,sc=r.scores||{b1:5,b2:5,b3:5,b4:5,b5:5},t=totSc(sc),gr=getGrade(t);
   var N='0A1E44',BL='1D4ED8',MBL='93C5FD',SL='334155',LT='F1F5F9',WH='FFFFFF',GN='166534',GNBG='DCFCE7',AM='92400E',AMBG='FEF3C7',RD='991B1B',RDBG='FEE2E2',GR='64748B',PU='5B21B6';
   function Bn(c,s){return{style:D.BorderStyle.SINGLE,size:s||4,color:c};}
@@ -295,5 +271,7 @@ async function buildWord(r){
 }
 </script>
 </div>
+<!-- docx loaded synchronously at bottom — guaranteed to be ready before user clicks -->
+<script src="https://unpkg.com/docx@8.5.0/build/index.js"></script>
 </body>
 </html>
