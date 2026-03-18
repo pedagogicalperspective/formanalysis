@@ -1,671 +1,506 @@
 <!doctype html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Form Analiz Aracı</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@400;600;700&family=Source+Sans+3:wght@300;400;600;700&display=swap');
-    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
-    html,body{min-height:100vh}
-    body{background:linear-gradient(160deg,#07101f 0%,#0a1a30 55%,#080f20 100%);font-family:'Source Serif 4',Georgia,serif;color:#dde9ff;min-height:100vh}
-    button{cursor:pointer;font-family:inherit}
-    input[type=file]{display:none}
-    .header{background:linear-gradient(90deg,#060d1a,#09182e);border-bottom:2px solid #1e4270;padding:15px 26px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 4px 28px rgba(0,0,0,0.6)}
-    .header-left{display:flex;align-items:center;gap:12px}
-    .header-icon{width:38px;height:38px;background:linear-gradient(135deg,#2563eb,#1d4ed8);border-radius:9px;font-size:18px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(59,130,246,0.4);transition:background 0.4s}
-    .header-tag{font-size:8.5px;text-transform:uppercase;letter-spacing:3px;color:#7dd3fc;font-family:'Source Sans 3',sans-serif;font-weight:700}
-    .header-title{font-size:16px;font-weight:bold;color:#eef5ff}
-    .header-sub{font-size:10px;color:#7a94a8;font-family:'Source Sans 3',sans-serif}
-    .header-badge{padding:5px 12px;background:rgba(37,99,235,0.15);border:1px solid rgba(59,130,246,0.3);border-radius:7px;font-size:11px;font-family:'Source Sans 3',sans-serif;color:#bfdbfe}
-    .container{max-width:960px;margin:0 auto;padding:22px 18px}
-    .panel{background:rgba(9,20,42,0.93);border:1px solid #192f4a;border-radius:14px;padding:22px;backdrop-filter:blur(8px)}
-    .panel-bright{border-color:#1e4270}
-    .mode-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:13px;margin-bottom:24px}
-    .mode-card{background:rgba(9,20,42,0.93);border:1.5px solid #192f4a;border-radius:14px;padding:22px 18px;cursor:pointer;transition:all 0.25s;text-align:left}
-    .mode-card:hover{transform:translateY(-3px)}
-    .mode-card-icon{font-size:30px;margin-bottom:10px}
-    .mode-card-title{font-size:14px;font-weight:bold;color:#dde9ff;margin-bottom:3px}
-    .mode-card-sub{font-size:10px;font-family:'Source Sans 3',sans-serif;font-weight:600;margin-bottom:9px}
-    .mode-card-desc{font-size:11px;color:#7a94a8;font-family:'Source Sans 3',sans-serif;line-height:1.6}
-    .dim-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-    .dim-item{padding:10px 13px;background:#050c18;border-radius:8px;border:1px solid #192f4a;display:flex;gap:9px;align-items:flex-start}
-    .dim-item-icon{font-size:17px;flex-shrink:0;margin-top:1px}
-    .dim-item-label{font-size:12px;color:#cbd5e1;font-family:'Source Sans 3',sans-serif;font-weight:600}
-    .dim-item-source{font-size:9.5px;font-family:'Source Sans 3',sans-serif}
-    .dim-item-pts{font-size:10px;font-family:'Source Sans 3',sans-serif;font-weight:700;margin-left:auto;flex-shrink:0}
-    .section-label{font-size:9px;text-transform:uppercase;letter-spacing:2px;color:#7dd3fc;font-weight:700;margin-bottom:14px;font-family:'Source Sans 3',sans-serif}
-    .dropzone{border:2px dashed #192f4a;border-radius:13px;padding:36px 22px;text-align:center;cursor:pointer;background:rgba(9,20,42,0.93);transition:all 0.3s;margin-bottom:14px}
-    .dropzone:hover,.dropzone.dragover{border-color:#2563eb;background:rgba(37,99,235,0.07)}
-    .dropzone.has-file{border-color:#22c55e;background:rgba(34,197,94,0.04);cursor:default}
-    .dropzone-icon{font-size:44px;margin-bottom:10px}
-    .dropzone-title{font-size:15px;color:#cbd5e1;margin-bottom:5px}
-    .dropzone-sub{font-size:11px;color:#4d6070;font-family:'Source Sans 3',sans-serif;margin-bottom:13px}
-    .dropzone-chips{display:flex;gap:6px;justify-content:center;flex-wrap:wrap}
-    .chip{padding:3px 10px;border-radius:20px;background:#050c18;border:1px solid #192f4a;color:#7dd3fc;font-size:10px;font-family:'Source Sans 3',sans-serif}
-    .file-name{font-size:14px;color:#86efac;font-weight:bold;margin-bottom:3px}
-    .file-size{font-size:11px;color:#4ade80;font-family:'Source Sans 3',sans-serif}
-    .btn{padding:8px 16px;border-radius:8px;border:none;font-family:'Source Sans 3',sans-serif;font-size:12px;font-weight:700;transition:opacity 0.2s}
-    .btn:hover{opacity:0.85}
-    .btn-primary{width:100%;padding:14px;font-family:'Source Serif 4',Georgia,serif;font-size:15px;font-weight:bold;border:none;border-radius:11px;color:#fff;transition:transform 0.2s,box-shadow 0.2s}
-    .btn-primary:hover{transform:translateY(-2px)}
-    .btn-ghost{background:transparent;border:1px solid #192f4a;color:#7a94a8}
-    .btn-danger{background:linear-gradient(135deg,#dc2626,#b91c1c);color:#fff;box-shadow:0 3px 10px rgba(220,38,38,0.3);display:flex;align-items:center;gap:5px}
-    .btn-danger:disabled{opacity:0.5;cursor:wait}
-    .loading-box{text-align:center;padding:58px 28px;background:rgba(9,20,42,0.93);border:1px solid #1e4270;border-radius:16px}
-    @keyframes spin{to{transform:rotate(360deg)}}
-    .spinner{width:52px;height:52px;margin:0 auto 18px;border:4px solid #192f4a;border-radius:50%;animation:spin 1s linear infinite}
-    @keyframes dp{0%,100%{opacity:.2}50%{opacity:1}}
-    .dot-pulse{width:7px;height:7px;border-radius:50%}
-    .dots{margin-top:15px;display:flex;gap:5px;justify-content:center}
-    .report-toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;padding:11px 15px;background:rgba(9,20,42,0.93);border-radius:11px}
-    .report-toolbar-left{display:flex;align-items:center;gap:9px}
-    .report-toolbar-icon{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:14px}
-    .report-toolbar-title{font-size:12px;font-weight:bold;color:#7dd3fc}
-    .report-toolbar-file{font-size:9.5px;color:#4d6070;font-family:'Source Sans 3',sans-serif}
-    .report-toolbar-btns{display:flex;gap:7px}
-    .tip-box{background:rgba(37,99,235,0.07);border:1px solid rgba(59,130,246,0.18);border-radius:7px;padding:7px 13px;margin-bottom:12px;font-family:'Source Sans 3',sans-serif;font-size:11px;color:#93c5fd;display:flex;gap:6px;align-items:flex-start}
-    .report-body{background:rgba(4,9,20,0.96);border:1px solid #1e4270;border-radius:14px;padding:26px}
-    .report-content h2{font-family:'Source Serif 4',Georgia,serif;font-size:14.5px;color:#7dd3fc;border-bottom:1px solid #192f4a;padding-bottom:6px;margin:22px 0 8px}
-    .report-content h2:first-child{margin-top:0}
-    .report-content h3{font-family:'Source Serif 4',Georgia,serif;font-size:12.5px;color:#93c5fd;margin:12px 0 5px}
-    .report-content strong{color:#e2e8f0;font-weight:700}
-    .report-content em{color:#7a8fa8;font-style:italic}
-    .report-content p{color:#c4d4e8;margin:4px 0;font-family:'Source Sans 3',sans-serif;font-size:11.5px;line-height:1.65}
-    .report-content ul{margin:5px 0 8px 18px}
-    .report-content li{color:#c8d9eb;margin:4px 0;font-family:'Source Sans 3',sans-serif;font-size:11.5px;line-height:1.65}
-    .error-box{background:rgba(220,38,38,0.1);border:1px solid #dc2626;border-radius:9px;padding:12px 15px;margin-top:11px;color:#fca5a5;font-family:'Source Sans 3',sans-serif;font-size:12.5px}
-    .stepbar{display:flex;align-items:center;margin-bottom:22px;font-family:'Source Sans 3',sans-serif;font-size:12px}
-    .step-item{display:flex;align-items:center;gap:6px;padding:5px 14px 5px 8px;border-radius:20px;border:1px solid #192f4a}
-    .step-item.active{background:linear-gradient(135deg,#1d4ed8,#2563eb);border-color:#60a5fa}
-    .step-item.done{background:rgba(30,58,95,0.6);border-color:#234d7a}
-    .step-num{width:18px;height:18px;border-radius:50%;background:#192f4a;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#4d6070}
-    .step-item.active .step-num{background:#fff;color:#1d4ed8}
-    .step-item.done .step-num{background:#3b82f6;color:#fff}
-    .step-label{color:#4d6070;font-weight:400}
-    .step-item.active .step-label{color:#fff;font-weight:700}
-    .step-item.done .step-label{color:#7dd3fc}
-    .step-connector{width:20px;height:1px;background:#192f4a;margin:0 2px}
-    .step-connector.done{background:#3b82f6}
-    .mode-header{background:rgba(9,20,42,0.93);border-radius:11px;padding:13px 16px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between}
-    .mode-header-left{display:flex;align-items:center;gap:9px}
-    .mode-header-title{font-size:13px;font-weight:bold;color:#dde9ff}
-    .mode-header-desc{font-size:11px;color:#7a94a8;font-family:'Source Sans 3',sans-serif}
-  </style>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Form Analiz Aracı</title>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html,body{min-height:100vh;background:#07101f;font-family:Georgia,serif;color:#dde9ff}
+button{cursor:pointer}
+input[type=file]{display:none}
+#fatal{display:none;position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#7f1d1d;color:#fecaca;padding:16px 24px;border-radius:10px;font-family:sans-serif;font-size:14px;z-index:999;max-width:600px;white-space:pre-wrap}
+.hdr{background:linear-gradient(90deg,#060d1a,#09182e);border-bottom:2px solid #1e4270;padding:14px 24px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 4px 24px rgba(0,0,0,.6)}
+.hdr-l{display:flex;align-items:center;gap:12px}
+.hdr-ic{width:38px;height:38px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px;transition:background .4s}
+.hdr-tt{font-size:16px;font-weight:bold;color:#eef5ff}
+.hdr-st{font-size:10px;color:#7a94a8;font-family:sans-serif}
+.hdr-tg{font-size:8px;text-transform:uppercase;letter-spacing:3px;color:#7dd3fc;font-family:sans-serif;font-weight:700}
+.hdr-badge{padding:5px 12px;border-radius:7px;font-size:11px;font-family:sans-serif;color:#bfdbfe;border:1px solid rgba(59,130,246,.3)}
+#apibar{background:#070e1c;border-bottom:1px solid #192f4a;padding:8px 24px;display:flex;align-items:center;gap:8px;min-height:36px;flex-wrap:wrap}
+.wrap{max-width:940px;margin:0 auto;padding:20px 16px}
+.panel{background:rgba(9,20,42,.93);border:1px solid #192f4a;border-radius:14px;padding:20px;margin-bottom:14px}
+.panel-hi{border-color:#1e4270}
+.lbl{font-size:9px;text-transform:uppercase;letter-spacing:2px;color:#7dd3fc;font-weight:700;margin-bottom:12px;font-family:sans-serif}
+.mgrid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:20px}
+.mcard{background:rgba(9,20,42,.93);border:1.5px solid #192f4a;border-radius:14px;padding:20px 16px;cursor:pointer;transition:all .2s;text-align:left}
+.mcard:hover{transform:translateY(-3px)}
+.dgrid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.ditem{padding:9px 12px;background:#050c18;border-radius:8px;border:1px solid #192f4a;display:flex;gap:8px;align-items:flex-start}
+.dropzone{border:2px dashed #192f4a;border-radius:13px;padding:34px 20px;text-align:center;cursor:pointer;background:rgba(9,20,42,.93);transition:all .3s;margin-bottom:12px}
+.dropzone:hover,.dropzone.dg{border-color:#2563eb;background:rgba(37,99,235,.07)}
+.dropzone.hf{border-color:#22c55e;background:rgba(34,197,94,.04);cursor:default}
+.chip{padding:3px 9px;border-radius:20px;background:#050c18;border:1px solid #192f4a;color:#7dd3fc;font-size:10px;font-family:sans-serif;display:inline-block;margin:2px}
+.btnp{width:100%;padding:13px;border:none;border-radius:11px;color:#fff;font-size:15px;font-weight:bold;font-family:Georgia,serif;transition:transform .2s,box-shadow .2s;margin-bottom:4px}
+.btnp:hover{transform:translateY(-2px)}
+.btng{background:transparent;border:1px solid #192f4a;color:#7a94a8;padding:7px 13px;border-radius:8px;font-size:12px;font-family:sans-serif;font-weight:700}
+.btnd{background:linear-gradient(135deg,#dc2626,#b91c1c);color:#fff;border:none;padding:7px 14px;border-radius:8px;font-size:12px;font-family:sans-serif;font-weight:700;box-shadow:0 3px 10px rgba(220,38,38,.3)}
+.lbox{text-align:center;padding:56px 28px;background:rgba(9,20,42,.93);border:1px solid #1e4270;border-radius:16px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.spin{width:50px;height:50px;margin:0 auto 18px;border:4px solid #192f4a;border-radius:50%;animation:spin 1s linear infinite}
+@keyframes dp{0%,100%{opacity:.2}50%{opacity:1}}
+.rbar{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:rgba(9,20,42,.93);border-radius:11px;margin-bottom:12px;gap:8px;flex-wrap:wrap}
+.rbody{background:rgba(4,9,20,.96);border:1px solid #1e4270;border-radius:14px;padding:24px}
+.rbody h2{font-family:Georgia,serif;font-size:14px;color:#7dd3fc;border-bottom:1px solid #192f4a;padding-bottom:5px;margin:20px 0 8px}
+.rbody h2:first-child{margin-top:0}
+.rbody h3{font-family:Georgia,serif;font-size:12px;color:#93c5fd;margin:12px 0 5px}
+.rbody strong{color:#e2e8f0}
+.rbody em{color:#7a8fa8;font-style:italic}
+.rbody p{color:#c4d4e8;margin:4px 0;font-family:sans-serif;font-size:11.5px;line-height:1.65}
+.rbody ul{margin:5px 0 8px 18px}
+.rbody li{color:#c8d9eb;margin:4px 0;font-family:sans-serif;font-size:11.5px;line-height:1.65}
+.err{background:rgba(220,38,38,.1);border:1px solid #dc2626;border-radius:9px;padding:11px 14px;color:#fca5a5;font-family:sans-serif;font-size:12px;margin-top:10px}
+.tip{background:rgba(37,99,235,.07);border:1px solid rgba(59,130,246,.18);border-radius:7px;padding:7px 12px;margin-bottom:11px;font-family:sans-serif;font-size:11px;color:#93c5fd}
+.sbar{display:flex;align-items:center;margin-bottom:20px;font-family:sans-serif;font-size:12px;flex-wrap:wrap;gap:4px}
+.si{display:flex;align-items:center;gap:5px;padding:5px 13px 5px 7px;border-radius:20px;border:1px solid #192f4a}
+.si.a{background:linear-gradient(135deg,#1d4ed8,#2563eb);border-color:#60a5fa}
+.si.d{background:rgba(30,58,95,.6);border-color:#234d7a}
+.sn{width:17px;height:17px;border-radius:50%;background:#192f4a;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:#4d6070}
+.si.a .sn{background:#fff;color:#1d4ed8}
+.si.d .sn{background:#3b82f6;color:#fff}
+.sl{color:#4d6070}
+.si.a .sl{color:#fff;font-weight:700}
+.si.d .sl{color:#7dd3fc}
+.sc{width:18px;height:1px;background:#192f4a}
+.sc.d{background:#3b82f6}
+</style>
 </head>
 <body>
-<div class="header">
-  <div class="header-left">
-    <div class="header-icon" id="headerIcon">🎓</div>
+<div id="fatal"></div>
+<div class="hdr">
+  <div class="hdr-l">
+    <div class="hdr-ic" id="hic" style="background:linear-gradient(135deg,#2563eb,#1d4ed8)">🎓</div>
     <div>
-      <div class="header-tag">Bilişim Teknolojileri Dersi</div>
-      <div class="header-title">Form Analiz Aracı</div>
-      <div class="header-sub">Ölçek 1 · Ölçek 2 · Yansıtma Formu — 7 Boyutlu Değerlendirme</div>
+      <div class="hdr-tg">Bilişim Teknolojileri Dersi</div>
+      <div class="hdr-tt">Form Analiz Aracı</div>
+      <div class="hdr-st">Ölçek 1 · Ölçek 2 · Yansıtma Formu — 7 Boyutlu Değerlendirme</div>
     </div>
   </div>
-  <div class="header-badge" id="headerBadge">10 Haftalık Program</div>
+  <div class="hdr-badge" id="hbadge">10 Haftalık Program</div>
 </div>
-<div id="apiKeyBar" style="background:#070e1c;border-bottom:1px solid #192f4a;padding:8px 26px;display:flex;align-items:center;gap:8px;min-height:36px;"></div>
-<div class="container"><div id="app"></div></div>
-<input type="file" id="fileInput" accept=".pdf,.xlsx,.xls,.csv,.txt" />
+<div id="apibar"></div>
+<div class="wrap"><div id="app"></div></div>
+<input type="file" id="fi" accept=".pdf,.xlsx,.xls,.csv,.txt"/>
+
 <script>
-const DIMS=[
-  {id:"d1",icon:"🔐",label:"YZ Etik Farkındalığı",full:"Yapay Zekâ Etik Farkındalığı ve Eleştirel Tutum",source:"Ölçek 1",pts:10,color:"#dc2626"},
-  {id:"d2",icon:"🧠",label:"YZ Öğrenme Becerileri",full:"YZ Destekli Öğrenme ve Öz-Düzenleme Becerileri",source:"Ölçek 2",pts:10,color:"#7c3aed"},
-  {id:"d3",icon:"⚙️",label:"Materyal Geliştirme Süreci",full:"Dijital Materyal Geliştirme Süreci ve Doğrulama",source:"Yansıtma Formu S.8-14, S.17-18",pts:10,color:"#0891b2"},
-  {id:"d4",icon:"📚",label:"Pedagojik Tasarım",full:"Pedagojik Tasarım ve Öğretimsel Karar Kalitesi",source:"Yansıtma Formu S.3, S.11, S.15-16",pts:10,color:"#16a34a"},
-  {id:"d5",icon:"🗺️",label:"Kazanım & İçerik Uyumu",full:"Sosyal Bilgiler Kazanımları ve İçerik Uyumu",source:"Yansıtma Formu S.2-7",pts:10,color:"#d97706"},
-  {id:"d6",icon:"✍️",label:"Prompt Mühendisliği",full:"Prompt Kalitesi ve YZ İş Birliği Becerisi",source:"Yansıtma Formu S.18",pts:null,color:"#6366f1"},
-  {id:"d7",icon:"📝",label:"Form Yapısal Analizi",full:"Formların Yapısal ve Psikometrik Analizi",source:"Her iki ölçek + form",pts:null,color:"#64748b"},
-];
-const MODES={
-  weekly:{id:"weekly",label:"Haftalık Form Raporu",sub:"Tek öğrenci · Tek hafta",icon:"📋",color:"#2563eb",desc:"Bir öğretmen adayının tek haftaya ait form verilerini 7 boyutta değerlendirir.",scoreMax:50},
-  individual:{id:"individual",label:"Bireysel Gelişim Raporu",sub:"Tek öğrenci · 10 hafta",icon:"📈",color:"#7c3aed",desc:"10 haftalık tüm form verilerini trend analizi ile değerlendirir.",scoreMax:50},
-  class:{id:"class",label:"Sınıf Gelişim Raporu",sub:"Tüm öğrenciler · 10 hafta",icon:"👥",color:"#0891b2",desc:"Tüm öğretmen adaylarının 10 haftalık sürecini karşılaştırmalı analiz eder.",scoreMax:null},
+window.onerror = function(msg,src,line,col,err){
+  var f=document.getElementById('fatal');
+  f.style.display='block';
+  f.textContent='JS Hatası: '+msg+'\nSatır: '+line+'\nKaynak: '+src;
+  return false;
 };
-const STEPS=[{id:"mode",label:"Tür Seç"},{id:"upload",label:"Dosya"},{id:"analyzing",label:"Analiz"},{id:"done",label:"Rapor"}];
-let state={step:"mode",mode:null,file:null,fileContent:null,report:null,error:null,loadingMsg:"",pdfGenerating:false};
-function setState(p){Object.assign(state,p);render();}
 
-const WEEKLY_PROMPT=`Sen, sosyal bilgiler öğretmen adaylarinin Bilisim Teknolojileri dersi kapsaminda hazirliklari haftalik Dijital Ogrenme Urunu Hazirlama ve Yansitma Formu ile iki olcekten (Olcek 1: YZ Etik Tutumlari; Olcek 2: YZ Ogrenme Becerileri) elde edilen verileri butuncel bicimde analiz eden uzman bir egitimci-arastirmacisin.
+// ── CONSTANTS ──
+var DIMS=[
+  {id:'d1',icon:'🔐',label:'YZ Etik Farkındalığı',full:'Yapay Zekâ Etik Farkındalığı ve Eleştirel Tutum',src:'Ölçek 1',pts:10,c:'#dc2626'},
+  {id:'d2',icon:'🧠',label:'YZ Öğrenme Becerileri',full:'YZ Destekli Öğrenme ve Öz-Düzenleme Becerileri',src:'Ölçek 2',pts:10,c:'#7c3aed'},
+  {id:'d3',icon:'⚙️',label:'Materyal Geliştirme',full:'Dijital Materyal Geliştirme Süreci ve Doğrulama',src:'Yansıtma Formu S.8-14,17-18',pts:10,c:'#0891b2'},
+  {id:'d4',icon:'📚',label:'Pedagojik Tasarım',full:'Pedagojik Tasarım ve Öğretimsel Karar Kalitesi',src:'Yansıtma Formu S.3,11,15-16',pts:10,c:'#16a34a'},
+  {id:'d5',icon:'🗺️',label:'Kazanım & İçerik',full:'Sosyal Bilgiler Kazanımları ve İçerik Uyumu',src:'Yansıtma Formu S.2-7',pts:10,c:'#d97706'},
+  {id:'d6',icon:'✍️',label:'Prompt Mühendisliği',full:'Prompt Kalitesi ve YZ İş Birliği Becerisi',src:'Yansıtma Formu S.18',pts:null,c:'#6366f1'},
+  {id:'d7',icon:'📝',label:'Form Yapısal Analizi',full:'Formların Yapısal ve Psikometrik Analizi',src:'Her iki ölçek + form',pts:null,c:'#64748b'}
+];
+var MODES={
+  weekly:{id:'weekly',label:'Haftalık Form Raporu',sub:'Tek öğrenci · Tek hafta',icon:'📋',color:'#2563eb',desc:'Bir öğretmen adayının tek haftaya ait form verilerini 7 boyutta değerlendirir.',max:50},
+  individual:{id:'individual',label:'Bireysel Gelişim Raporu',sub:'Tek öğrenci · 10 hafta',icon:'📈',color:'#7c3aed',desc:'10 haftalık tüm form verilerini trend analizi ile değerlendirir.',max:50},
+  klass:{id:'klass',label:'Sınıf Gelişim Raporu',sub:'Tüm öğrenciler · 10 hafta',icon:'👥',color:'#0891b2',desc:'Tüm öğretmen adaylarının 10 haftalık sürecini karşılaştırmalı analiz eder.',max:null}
+};
+var PROMPTS={
+weekly:'Sen, sosyal bilgiler ogretmen adaylarinin Bilisim Teknolojileri dersi kapsaminda hazirliklari haftalik yansitma formu ve iki olcekten (Olcek 1: YZ Etik Tutumlari; Olcek 2: YZ Ogrenme Becerileri) elde edilen verileri analiz eden uzman bir egitimci-arastirmacisin.\n\n7 BOYUTLU DEGERLENDIRME:\n\nBOYUT 1 - YZ Etik Farkindarligi (10 puan) [Olcek 1]\n- Gizlilik ve veri guvenligi (M.1-4)\n- Onyargi ve algoritmik adalet (M.5-6,21)\n- Seffaflik ve aciklanabilirlik (M.14-18)\n- Ozerklik ve manipulasyon kaygisi (M.8,13)\n- Ogrenme destegi perspektifi (M.7,9-12)\n\nBOYUT 2 - YZ Ogrenme Becerileri (10 puan) [Olcek 2]\n- Arac yetkinligi (M.1,4,5)\n- Geri bildirim entegrasyonu (M.6,7,8)\n- Oz-duzenleme ve bagimlilik bilinci (M.9-11,19)\n- Elestirel dusunme (M.13,14)\n- Ogrenme kaliciligi (M.15-18)\n\nBOYUT 3 - Materyal Gelistirme Sureci (10 puan) [Form S.8-14,17-18]\n- Arac secimi (S.8,9), YZ kullanim asamalari (S.10)\n- Dogrulama kalitesi (S.12), Gizlilik/etik kontrol (S.13,14)\n- YZ orani ve ozgunluk dengesi (S.17): %26-75 ideal\n\nBOYUT 4 - Pedagojik Tasarim (10 puan) [Form S.3,11,15,16]\n- Pedagojik gerekcenin derinligi (S.11)\n- Sinif duzeyine uyum (S.3)\n- Ogrenciye beklenen kazanim (S.15)\n- Ogretmen adayi oz gelisimi (S.16)\n\nBOYUT 5 - Kazanim ve Icerik Uyumu (10 puan) [Form S.2-7]\n- Kazanim ifadesi kalitesi (S.6): MEB kodlu olmali\n- Ders-unite-konu-kazanim zinciri tutarliligi\n- SB becerileri ve degerler entegrasyonu\n\nBOYUT 6 - Prompt Muhendisligi (Nitel) [Form S.18]\n- Prompt acikligi, baglami, kisit ifadeleri\n- Ileri teknikler: zincir dusunme, rol atama\n\nBOYUT 7 - Form Yapisal Analizi (Nitel)\n- Olcek 1 ve 2 madde gecerliligi\n- Yansitma formu kapsam yeterliligi\n- Iyilestirme onerileri\n\nRAPOR FORMATI (Turkce, akademik):\n\n## GENEL DEGERLENDIRME OZETI\n(4-5 cumle)\n\n## BOYUT 1 - YZ Etik Farkindarligi (Olcek 1)\n**Puan: X/10**\n**Guclu Yonler:** ...\n**Gelisim Alanlari:** ...\n**Oneri:** ...\n\n## BOYUT 2 - YZ Ogrenme Becerileri (Olcek 2)\n**Puan: X/10**\n**Guclu Yonler:** ...\n**Gelisim Alanlari:** ...\n**Oneri:** ...\n\n## BOYUT 3 - Materyal Gelistirme\n**Puan: X/10**\n**Guclu Yonler:** ...\n**Gelisim Alanlari:** ...\n**Oneri:** ...\n\n## BOYUT 4 - Pedagojik Tasarim\n**Puan: X/10**\n**Guclu Yonler:** ...\n**Gelisim Alanlari:** ...\n**Oneri:** ...\n\n## BOYUT 5 - Kazanim ve Icerik Uyumu\n**Puan: X/10**\n**Guclu Yonler:** ...\n**Oneri:** ...\n\n## BOYUT 6 - Prompt Muhendisligi (Nitel)\n**Kalite:** [Basit/Orta/Gelismis/Uzman]\n**Analiz:** ...\n\n## BOYUT 7 - Form Yapisal Analizi (Nitel)\n**Degerler:** ...\n**Iyilestirme:** ...\n\n## ONCELIKLI 3 ADIM\n- 1. ...\n- 2. ...\n- 3. ...\n\n## GENEL PUAN: X/50',
+individual:'Sen, bir sosyal bilgiler ogretmen adayinin 10 haftalik yansitma formu ve olcek verilerini analiz eden uzman bir egitimci-arastirmacisin. Her boyutu trend acisindan degerlendir.\n\nTrend: Gerileme / Duragan / Yavas ilerleme / Belirgin ilerleme / Donusum\n\nRAPOR FORMATI:\n\n## BIREYSEL GELISIM RAPORU OZET PROFIL\n(5-6 cumle)\n\n## BOYUT 1 - YZ Etik Farkindarligi Gelisimi\n**Trend:** ...\n**Alt Boyutlar:** Gizlilik: ... | Onyargi: ... | Seffaflik: ... | Ozerklik: ...\n**Kritik Haftalara:** ...\n\n## BOYUT 2 - YZ Ogrenme Becerileri Gelisimi\n**Trend:** ...\n**Kritik Gelisim:** ...\n\n## BOYUT 3 - Materyal Sureci Olgunlasmasi\n**Trend:** ...\n**Arac/Dogrulama/Prompt Evrimi:** ...\n\n## BOYUT 4 - Pedagojik Tasarim Gelisimi\n**Trend:** ...\n**Gerekcenin Derinlesmesi:** ...\n\n## BOYUT 5 - Kazanim Uyumu Gelisimi\n**Trend:** ...\n**Kazanim Zinciri Kalitesi:** ...\n\n## BOYUT 6 - Prompt Muhendisligi Gelisimi\n**Trend:** ...\n**Olgunlasma:** ...\n\n## BOYUT 7 - Yansitici Dusunce Gelisimi\n**Trend:** ...\n**Gozlem:** ...\n\n## GELISIM PROFILI\n**Guclu Boyutlar:** ...\n**En Fazla Gelisim:** ...\n**En Cok Destek:** ...\n\n## SUREC SONU 5 HEDEF\n- 1. ...\n- 2. ...\n- 3. ...\n- 4. ...\n- 5. ...',
+klass:'Sen, bir sinifin 10 haftalik form ve olcek verilerini karsilastirmali analiz eden uzman bir egitimci-arastirmacisin.\n\nRAPOR FORMATI:\n\n## SINIF GELISIM RAPORU - YONETICI OZETI\n(6-7 cumle)\n\n## BOYUT 1 - YZ Etik Sinif Profili\n**Duzey:** [Baslangic/Gelismekte/Yeterli/Ileri]\n**Dagilim:** Gizlilik: ... | Onyargi: ... | Seffaflik: ... | Ozerklik: ...\n**Mudahale:** ...\n\n## BOYUT 2 - YZ Ogrenme Sinif Profili\n**Duzey:** ...\n**Kritik (Bagimlilik):** ...\n**Mudahale:** ...\n\n## BOYUT 3 - Materyal Sureci Sinif Profili\n**En Cok Kullanilan Araclar:** ...\n**Dogrulama Profili:** ...\n**Mudahale:** ...\n\n## BOYUT 4 - Pedagojik Tasarim Sinif Profili\n**Gerekcenin Dagilimi:** ...\n**Mudahale:** ...\n\n## BOYUT 5 - Kazanim Uyumu Sinif Profili\n**Kalite Dagilimi:** ...\n**En Cok Tercih:** ...\n\n## BOYUT 6 - Prompt Sinif Profili\n**Olgunluk Dagilimi:** ...\n**Ortak Gucluk:** ...\n\n## BOYUT 7 - 10 Haftalik Sinif Trendi\n**En Hizli:** ...\n**En Duragan:** ...\n**Kritik Noktalar:** ...\n\n## BOYUT 8 - Karsilastirmali Profiller (Anonim)\n**Yuksek Performans:** ...\n**Hizli Donusum:** ...\n**Ek Destek:** ...\n\n## 5 STRATEJIK MUDAHALE\n- 1. ...\n- 2. ...\n- 3. ...\n- 4. ...\n- 5. ...'
+};
 
-7 BOYUTLU HAFTALIK DEGERLENDIRME:
+// ── STATE ──
+var S={step:'mode',mode:null,file:null,fc:null,report:null,err:null,msg:'',pdfBusy:false};
+function set(p){Object.assign(S,p);render();}
 
-BOYUT 1 - YZ Etik Farkindarligi (10 puan) [Olcek 1]
-- Gizlilik ve veri guvenligi (M.1-4)
-- Onyargi ve algoritmik adalet (M.5-6,21)
-- Seffaflik ve aciklanabilirlik (M.14-18)
-- Ozerklik ve manipulasyon kaygisi (M.8,13)
-- Ogrenme destegi perspektifi (M.7,9-12)
-Puan: 1-2=Farkındalık yok; 5-6=Farkında ama uygulamasız; 9-10=Tutarli uygulama
-
-BOYUT 2 - YZ Ogrenme Becerileri (10 puan) [Olcek 2]
-- Arac yetkinligi ve uyum (M.1,4,5)
-- Geri bildirim entegrasyonu (M.6,7,8)
-- Oz-duzenleme ve bagimlilik bilinci (M.9-11,19)
-- Elestirel dusunme ve problem cozme (M.13,14)
-- Ogrenme kaliciligi ve motivasyon (M.15-18)
-
-BOYUT 3 - Materyal Gelistirme Sureci (10 puan) [Form S.8-14,S.17-18]
-- Arac secimi kalitesi (S.8,9)
-- YZ kullanim asamalari (S.10): cok asamali = iyi
-- Dogrulama kalitesi (S.12): kaynak cesitliligi
-- Gizlilik ve etik kontrol (S.13,14)
-- YZ orani ve ozgunluk dengesi (S.17): %26-75 ideal
-
-BOYUT 4 - Pedagojik Tasarim (10 puan) [Form S.3,S.11,S.15,S.16]
-- Pedagojik gerekcenin derinligi (S.11)
-- Sinif duzeyine uyum (S.3)
-- Ogrenciye beklenen kazanim (S.15)
-- Ogretmen adayi oz gelisimi (S.16)
-
-BOYUT 5 - Kazanim ve Icerik Uyumu (10 puan) [Form S.2-7]
-- Kazanim ifadesinin kalitesi (S.6): MEB kodlu olmali
-- Ders-unite-konu-kazanim zinciri tutarliligi
-- SB becerileri ve degerler entegrasyonu
-
-BOYUT 6 - Prompt Muhendisligi Kalitesi (Nitel) [Form S.18]
-- Prompt acikligi, baglamlari, kisit ifadeleri
-- Ileri teknikler: zincir dusunme, rol atama
-
-BOYUT 7 - Form Sorularinin Yapisal Analizi (Nitel)
-- Olcek 1 ve 2 madde gecerliligi
-- Yansitma formu kapsam yeterliligi
-- Iyilestirme onerileri
-
-RAPOR FORMATI (Turkce, akademik):
-
-## GENEL DEGERLENDIRME OZETI
-(4-5 cumle)
-
-## BOYUT 1 - YZ Etik Farkindarligi (Olcek 1)
-**Puan: X/10**
-**Alt Boyut Profili:** Gizlilik: ... | Onyargi: ... | Seffaflik: ... | Ozerklik: ...
-**Guclu Yonler:** ...
-**Gelisim Alanlari:** ...
-**Oneri:** ...
-
-## BOYUT 2 - YZ Ogrenme Becerileri (Olcek 2)
-**Puan: X/10**
-**Alt Boyut Profili:** Arac: ... | Geri bildirim: ... | Oz-duzenleme: ... | Elestirel: ...
-**Guclu Yonler:** ...
-**Gelisim Alanlari:** ...
-**Oneri:** ...
-
-## BOYUT 3 - Materyal Gelistirme Sureci
-**Puan: X/10**
-**Surec Analizi:** Arac: ... | Asamalar: ... | Dogrulama: ... | Etik: ... | YZ orani: ...
-**Guclu Yonler:** ...
-**Gelisim Alanlari:** ...
-**Oneri:** ...
-
-## BOYUT 4 - Pedagojik Tasarim
-**Puan: X/10**
-**Guclu Yonler:** ...
-**Gelisim Alanlari:** ...
-**Oneri:** ...
-
-## BOYUT 5 - Kazanim ve Icerik Uyumu
-**Puan: X/10**
-**Kazanim Zinciri:** ...
-**Guclu Yonler:** ...
-**Oneri:** ...
-
-## BOYUT 6 - Prompt Muhendisligi (Nitel)
-**Kalite Duzeyi:** [Basit/Orta/Gelismis/Uzman]
-**Analiz:** ...
-**Oneri:** ...
-
-## BOYUT 7 - Form Yapisal Analizi (Nitel)
-**Olcek 1:** ...
-**Olcek 2:** ...
-**Yansitma Formu:** ...
-**Iyilestirme:** ...
-
-## ONCELIKLI 3 ADIM
-- 1. ...
-- 2. ...
-- 3. ...
-
-## GENEL PUAN: X/50`;
-
-const INDIVIDUAL_PROMPT=`Sen, bir sosyal bilgiler ogretmen adayinin 10 haftalik yansitma formu ve olcek verilerini butuncel bicimde analiz eden uzman bir egitimci-arastirmacisin. Her boyutu trend acisindan degerlendir.
-
-Trend seçenekleri: Gerileme / Duragan / Yavas ilerleme / Belirgin ilerleme / Donusum
-
-RAPOR FORMATI:
-
-## BIREYSEL GELISIM RAPORU OZET PROFIL
-(5-6 cumle genel degerlendirme)
-
-## BOYUT 1 - YZ Etik Farkindarligi Gelisimi [Olcek 1]
-**Trend:** ...
-**Alt Boyut Trendleri:** Gizlilik: ... | Onyargi: ... | Seffaflik: ... | Ozerklik: ...
-**Kritik Gelisim Anlari:** ...
-**En Guclu Alan:** ...
-
-## BOYUT 2 - YZ Ogrenme Becerileri Gelisimi [Olcek 2]
-**Trend:** ...
-**Alt Boyut Trendleri:** ...
-**Kritik Haftalara Odaklan:** ...
-
-## BOYUT 3 - Materyal Gelistirme Sureci Olgunlasmasi
-**Trend:** ...
-**Arac Secimi Evrimi:** ...
-**Dogrulama Kalitesi Evrimi:** ...
-**Prompt Olgunlasmasi:** ...
-
-## BOYUT 4 - Pedagojik Tasarim Gelisimi
-**Trend:** ...
-**Gerekcenin Derinlesmesi:** ...
-
-## BOYUT 5 - Kazanim Uyumunun Gelisimi
-**Trend:** ...
-**Kazanim Zinciri Kalitesi:** ...
-
-## BOYUT 6 - Prompt Muhendisligi Gelisimi
-**Trend:** ...
-**Olgunlasma Kanitlari:** ...
-
-## BOYUT 7 - Yansitici Dusunce Gelisimi
-**Trend:** ...
-**Gozlem:** ...
-
-## GELISIM PROFILI
-**Istikrarli Guclu Boyutlar:** ...
-**En Fazla Gelisim Kaydedilen:** ...
-**En Cok Destek Gerektiren:** ...
-
-## SUREC SONU 5 HEDEF
-- 1. ...
-- 2. ...
-- 3. ...
-- 4. ...
-- 5. ...`;
-
-const CLASS_PROMPT=`Sen, sosyal bilgiler ogretmen adaylarindan olusan bir sinifin 10 haftalik form ve olcek verilerini karsilastirmali bicimde analiz eden uzman bir egitimci-arastirmacisin.
-
-RAPOR FORMATI:
-
-## SINIF GELISIM RAPORU - YONETICI OZETI
-(6-7 cumle, en kritik 3 bulgu ve mudahale alanlari)
-
-## BOYUT 1 - YZ Etik Farkindarligi Sinif Profili
-**Genel Duzey:** [Baslangic/Gelismekte/Yeterli/Ileri]
-**Alt Boyut Dagilimi:** Gizlilik: ... | Onyargi: ... | Seffaflik: ... | Ozerklik: ...
-**Soylem-Pratik Boslugu:** ...
-**Mudahale Onerileri:** ...
-
-## BOYUT 2 - YZ Ogrenme Becerileri Sinif Profili
-**Genel Duzey:** ...
-**Kritik Bulgu (Bagimlilik):** ...
-**Mudahale Onerileri:** ...
-
-## BOYUT 3 - Materyal Gelistirme Sinif Profili
-**En Cok Kullanilan Araclar:** ...
-**Dogrulama ve Etik Kontrol Profili:** ...
-**Mudahale Onerileri:** ...
-
-## BOYUT 4 - Pedagojik Tasarim Sinif Profili
-**Gerekcenin Derinligi Dagilimi:** ...
-**Mudahale Onerileri:** ...
-
-## BOYUT 5 - Kazanim Uyumu Sinif Profili
-**Kazanim Kalite Dagilimi:** ...
-**En Cok Tercih Edilen Icerikler:** ...
-
-## BOYUT 6 - Prompt Muhendisligi Sinif Profili
-**Olgunluk Dagilimi:** ...
-**Ortak Gucluk:** ...
-
-## BOYUT 7 - 10 Haftalik Sinif Trendi
-**En Hizli Gelisim:** ...
-**En Duragan/Gerileyen:** ...
-**Kritik Donum Noktalari:** ...
-
-## BOYUT 8 - Karsilastirmali Ogrenci Profilleri (Anonim)
-**Yuksek Performans Profili:** ...
-**Hizli Donusum Profili:** ...
-**Ek Destek Profili:** ...
-
-## SINIF GENELI 5 STRATEJIK MUDAHALE
-- 1. ...
-- 2. ...
-- 3. ...
-- 4. ...
-- 5. ...`;
-
-const PROMPTS={weekly:WEEKLY_PROMPT,individual:INDIVIDUAL_PROMPT,class:CLASS_PROMPT};
-
-function mdToHtml(text){
-  if(!text)return"";
-  const lines=text.split("\n");let html="",inList=false;
-  const esc=s=>s.replace(/\*\*(.+?)\*\*/g,"<strong>$1</strong>").replace(/\*(.+?)\*/g,"<em>$1</em>");
-  for(const line of lines){
-    const t=line.trim();
-    if(!t){if(inList){html+="</ul>";inList=false;}continue;}
-    if(/^## (.+)$/.test(t)){if(inList){html+="</ul>";inList=false;}html+="<h2>"+esc(t.slice(3))+"</h2>";}
-    else if(/^### (.+)$/.test(t)){if(inList){html+="</ul>";inList=false;}html+="<h3>"+esc(t.slice(4))+"</h3>";}
-    else if(/^- (.+)$/.test(t)){if(!inList){html+="<ul>";inList=true;}html+="<li>"+esc(t.slice(2))+"</li>";}
-    else{if(inList){html+="</ul>";inList=false;}html+="<p>"+esc(t)+"</p>";}
+// ── HELPERS ──
+function h(tag,attrs,children){
+  var e=document.createElement(tag);
+  if(attrs){
+    Object.keys(attrs).forEach(function(k){
+      var v=attrs[k];
+      if(k==='cls')e.className=v;
+      else if(k==='html')e.innerHTML=v;
+      else if(k==='style')Object.assign(e.style,v);
+      else if(k.charAt(0)==='$')e.addEventListener(k.slice(1),v);
+      else e.setAttribute(k,v);
+    });
   }
-  if(inList)html+="</ul>";
+  if(children){
+    (Array.isArray(children)?children:[children]).forEach(function(c){
+      if(c==null)return;
+      if(typeof c==='string')e.appendChild(document.createTextNode(c));
+      else if(c instanceof Node)e.appendChild(c);
+    });
+  }
+  return e;
+}
+function d(a,c){return h('div',a,c);}
+function mc(){return S.mode?{weekly:'#2563eb',individual:'#7c3aed',klass:'#0891b2'}[S.mode]:'#2563eb';}
+
+// ── PDF ──
+function makePDF(text,fname,dt){
+  var m=MODES[S.mode],ac=mc();
+  var body=mdHtml(text);
+  var dr=DIMS.map(function(di){return'<div style="display:flex;align-items:center;gap:8px;font-size:9.5pt;margin-bottom:6px"><div style="width:7px;height:7px;border-radius:50%;background:'+di.c+';flex-shrink:0"></div><span>'+di.icon+' '+di.full+'</span><span style="margin-left:auto;font-size:8.5pt;font-weight:700;color:'+ac+'">'+( di.pts?di.pts+' puan':'Nitel')+'</span></div>';}).join('');
+  var w=window.open('','_blank');
+  if(!w){alert('Lütfen açılır pencere engelleyicisini kapatın.');return;}
+  var ps='<scr'+'ipt>window.onload=function(){setTimeout(window.print,900);}<'+'/scr'+'ipt>';
+  w.document.write('<!DOCTYPE html><html lang="tr"><head><meta charset="UTF-8"/><title>'+m.label+'</title>'
+  +'<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:Arial,sans-serif;font-size:10.5pt;color:#1a1a2e;background:#fff;line-height:1.75}'
+  +'.cv{page-break-after:always;min-height:100vh;display:flex;flex-direction:column}'
+  +'.hero{background:linear-gradient(135deg,#0a1e3d,'+ac+');padding:48px 56px 40px;color:#fff;flex:1}'
+  +'.ct{font-size:30pt;font-weight:700;color:#fff;margin-bottom:8px}'
+  +'.cs{font-size:12pt;color:rgba(255,255,255,.7);margin-bottom:10px}'
+  +'.meta{padding:28px 56px;background:#f8fafc}'
+  +'.mg{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px}'
+  +'.mi{padding:11px 15px;border:1.5px solid #e2e8f0;border-radius:8px;background:#fff}'
+  +'.ml{font-size:7.5pt;text-transform:uppercase;letter-spacing:2px;color:#64748b;font-weight:700;margin-bottom:3px}'
+  +'.mv{font-size:10.5pt;font-weight:700}'
+  +'.ft{padding:12px 56px;border-top:1px solid #e2e8f0;display:flex;justify-content:space-between;font-size:8pt;color:#94a3b8}'
+  +'.ph{background:#0f2744;padding:10px 56px;display:flex;justify-content:space-between;color:#7dd3fc;font-size:7.5pt}'
+  +'.ct2{padding:32px 56px 65px}'
+  +'h2{font-size:13pt;font-weight:700;color:#0f2744;margin:28px 0 8px;padding-bottom:6px;border-bottom:2px solid '+ac+';page-break-after:avoid}'
+  +'h2:first-child{margin-top:0}h3{font-size:10.5pt;font-weight:600;color:#1e3a5f;margin:13px 0 5px}'
+  +'p{margin:5px 0;color:#1e293b;font-size:10pt}strong{font-weight:700}em{color:#475569;font-style:italic}'
+  +'ul{margin:6px 0 10px 20px}li{margin:4px 0;color:#334155;font-size:9.5pt}li::marker{color:'+ac+'}'
+  +'.pf{position:fixed;bottom:0;left:0;right:0;padding:8px 56px;border-top:1px solid #e2e8f0;display:flex;justify-content:space-between;font-size:7.5pt;color:#94a3b8;background:#fff}'
+  +'@media print{@page{size:A4;margin:0}body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}'
+  +'</style></head><body>'
+  +'<div class="cv"><div class="hero"><div style="font-size:8pt;text-transform:uppercase;letter-spacing:2px;color:rgba(255,255,255,.5);margin-bottom:20px">'+m.icon+' '+m.label+'</div>'
+  +'<div class="ct">Geri Dönüt<br>Raporu</div><div class="cs">'+m.sub+'</div>'
+  +'<div style="font-size:8pt;color:rgba(255,255,255,.4);letter-spacing:2px;text-transform:uppercase">Bilişim Teknolojileri · SB Öğretmen Adayı Değerlendirme Projesi</div>'
+  +'</div><div class="meta"><div class="mg">'
+  +'<div class="mi"><div class="ml">Dosya</div><div class="mv">'+fname+'</div></div>'
+  +'<div class="mi"><div class="ml">Tarih</div><div class="mv">'+dt+'</div></div>'
+  +'<div class="mi"><div class="ml">Rapor Türü</div><div class="mv">'+m.label+'</div></div>'
+  +'<div class="mi"><div class="ml">Puanlama</div><div class="mv">'+(m.max?m.max+' üzerinden':'Nitel+Puanlı')+'</div></div>'
+  +'</div><div style="font-size:8pt;text-transform:uppercase;letter-spacing:2px;color:#475569;font-weight:700;margin-bottom:10px">Değerlendirme Boyutları</div>'+dr+'</div>'
+  +'<div class="ft"><span style="font-weight:700;color:'+ac+'">Form Analiz Aracı</span><span>Claude AI tarafından oluşturulmuştur</span></div></div>'
+  +'<div><div class="ph"><span>'+m.label.toUpperCase()+' · '+fname+'</span><span>'+dt+'</span></div>'
+  +'<div class="ct2">'+body+'</div>'
+  +'<div class="pf"><span>SB Öğretmen Adayı Değerlendirme Projesi - '+m.label+'</span><span>Claude AI · Form Analiz Aracı</span></div>'
+  +'</div>'+ps+'</body></html>');
+  w.document.close();
+}
+
+// ── MARKDOWN ──
+function mdHtml(t){
+  if(!t)return'';
+  var lines=t.split('\n'),html='',inL=false;
+  function esc(s){return s.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\*(.+?)\*/g,'<em>$1</em>');}
+  lines.forEach(function(line){
+    var l=line.trim();
+    if(!l){if(inL){html+='</ul>';inL=false;}return;}
+    if(/^## (.+)$/.test(l)){if(inL){html+='</ul>';inL=false;}html+='<h2>'+esc(l.slice(3))+'</h2>';}
+    else if(/^### (.+)$/.test(l)){if(inL){html+='</ul>';inL=false;}html+='<h3>'+esc(l.slice(4))+'</h3>';}
+    else if(/^- (.+)$/.test(l)){if(!inL){html+='<ul>';inL=true;}html+='<li>'+esc(l.slice(2))+'</li>';}
+    else{if(inL){html+='</ul>';inL=false;}html+='<p>'+esc(l)+'</p>';}
+  });
+  if(inL)html+='</ul>';
   return html;
 }
 
-function generatePDF(reportText,fileName,dateStr,modeId){
-  const m=MODES[modeId];
-  const colors={weekly:"#1d4ed8",individual:"#7c3aed",class:"#0891b2"};
-  const ac=colors[modeId];
-  const htmlContent=mdToHtml(reportText);
-  const dimRows=DIMS.map(d=>'<div class="dim-row"><div class="dim-dot" style="background:'+d.color+'"></div><span>'+d.icon+' '+d.full+'</span><span class="dim-pts">'+(d.pts?d.pts+" puan":"Nitel")+'</span></div>').join("");
-  const win=window.open("","_blank");
-  if(!win){alert("Lütfen açılır pencere engelleyicisini kapatın.");return;}
-  const ps="<scr"+"ipt>window.onload=function(){setTimeout(function(){window.print();},900);}</"+"script>";
-  win.document.write('<!DOCTYPE html><html lang="tr"><head><meta charset="UTF-8"/><title>'+m.label+'</title><style>'
-  +"@import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@400;600;700&family=Source+Sans+3:wght@300;400;600;700&display=swap');"
-  +"*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Source Sans 3',Arial,sans-serif;font-size:10.5pt;color:#1a1a2e;background:#fff;line-height:1.75}"
-  +".cover{width:100%;min-height:100vh;display:flex;flex-direction:column;page-break-after:always}"
-  +".hero{background:linear-gradient(140deg,#0a1e3d 0%,#0f2744 45%,"+ac+" 100%);padding:48px 56px 40px;color:#fff;flex:1}"
-  +".mb{display:inline-flex;align-items:center;gap:7px;padding:5px 16px;border-radius:20px;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);font-size:8pt;color:#dbeafe;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:24px}"
-  +".ct{font-family:'Source Serif 4',Georgia,serif;font-size:32pt;font-weight:700;line-height:1.1;color:#fff;margin-bottom:8px}"
-  +".ct span{color:rgba(255,255,255,0.6)}.cs{font-size:12pt;color:rgba(255,255,255,0.7);font-weight:300;margin-bottom:12px}"
-  +".cp{font-size:8pt;color:rgba(255,255,255,0.45);letter-spacing:2px;text-transform:uppercase}"
-  +".meta{padding:28px 56px;background:#f8fafc}.mg{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}"
-  +".mi{padding:11px 15px;border:1.5px solid #e2e8f0;border-radius:8px;background:#fff}"
-  +".ml{font-size:7.5pt;text-transform:uppercase;letter-spacing:2px;color:#64748b;font-weight:700;margin-bottom:3px}"
-  +".mv{font-size:10.5pt;font-weight:700;color:#0f172a}"
-  +".dt{font-size:8pt;text-transform:uppercase;letter-spacing:2px;color:#475569;font-weight:700;margin-bottom:10px}"
-  +".dim-row{display:flex;align-items:center;gap:9px;font-size:9.5pt;color:#334155;margin-bottom:7px}"
-  +".dim-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}"
-  +".dim-pts{margin-left:auto;font-size:8.5pt;font-weight:700;color:"+ac+"}"
-  +".foot{padding:13px 56px;border-top:1px solid #e2e8f0;display:flex;justify-content:space-between;font-size:8pt;color:#94a3b8}"
-  +".logo{font-family:'Source Serif 4',Georgia,serif;font-size:11pt;font-weight:700;color:"+ac+"}"
-  +".ph{background:#0f2744;padding:10px 56px;display:flex;justify-content:space-between;color:#7dd3fc;font-size:7.5pt;letter-spacing:1px}"
-  +".dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:"+ac+";margin-right:6px}"
-  +".content{padding:32px 56px 65px}"
-  +"h2{font-family:'Source Serif 4',Georgia,serif;font-size:13pt;font-weight:700;color:#0f2744;margin:30px 0 8px;padding-bottom:6px;border-bottom:2px solid "+ac+";page-break-after:avoid}"
-  +"h2:first-child{margin-top:0}h3{font-family:'Source Serif 4',Georgia,serif;font-size:10.5pt;font-weight:600;color:#1e3a5f;margin:14px 0 5px}"
-  +"p{margin:5px 0;color:#1e293b;font-size:10pt}strong{font-weight:700;color:#0f172a}em{color:#475569;font-style:italic}"
-  +"ul{margin:6px 0 10px 20px}li{margin:4px 0;color:#334155;font-size:9.5pt}li::marker{color:"+ac+"}"
-  +".pf{position:fixed;bottom:0;left:0;right:0;padding:8px 56px;border-top:1px solid #e2e8f0;display:flex;justify-content:space-between;font-size:7.5pt;color:#94a3b8;background:#fff}"
-  +"@media print{@page{size:A4;margin:0}body{-webkit-print-color-adjust:exact;print-color-adjust:exact}.cover{page-break-after:always}}"
-  +"</style></head><body>"
-  +'<div class="cover"><div class="hero">'
-  +'<div class="mb">'+m.icon+' '+m.label+'</div>'
-  +'<div class="ct">Geri Dönüt<br><span>Raporu</span></div>'
-  +'<div class="cs">'+m.sub+'</div>'
-  +'<div class="cp">Bilişim Teknolojileri Dersi · SB Öğretmen Adayı Değerlendirme Projesi</div>'
-  +'</div><div class="meta"><div class="mg">'
-  +'<div class="mi"><div class="ml">Dosya</div><div class="mv">'+fileName+'</div></div>'
-  +'<div class="mi"><div class="ml">Tarih</div><div class="mv">'+dateStr+'</div></div>'
-  +'<div class="mi"><div class="ml">Rapor Türü</div><div class="mv">'+m.label+'</div></div>'
-  +'<div class="mi"><div class="ml">Puanlama</div><div class="mv">'+(m.scoreMax?m.scoreMax+" üzerinden":"Nitel+Puanlı")+'</div></div>'
-  +'</div><div class="dt">Değerlendirme Boyutları</div>'+dimRows+'</div>'
-  +'<div class="foot"><div class="logo">Form Analiz Aracı</div><div>Claude AI tarafından oluşturulmuştur</div></div>'
-  +'</div>'
-  +'<div><div class="ph"><span><span class="dot"></span>'+m.label.toUpperCase()+' · '+fileName+'</span><span>'+dateStr+'</span></div>'
-  +'<div class="content">'+htmlContent+'</div>'
-  +'<div class="pf"><span>SB Öğretmen Adayı Değerlendirme Projesi - '+m.label+'</span><span>Claude AI · Form Analiz Aracı</span></div>'
-  +'</div>'+ps+'</body></html>');
-  win.document.close();
+// ── FILE READ ──
+function readFile(file,cb){
+  var ext=file.name.split('.').pop().toLowerCase();
+  if(['xlsx','xls','csv'].indexOf(ext)>=0){
+    if(typeof XLSX==='undefined'){cb('XLSX kütüphanesi yüklenemedi. Lütfen sayfayı yenileyin.',null);return;}
+    var r=new FileReader();
+    r.onload=function(e){
+      try{
+        var wb=XLSX.read(e.target.result,{type:'binary'});
+        var t='DOSYA: '+file.name+'\n\n';
+        wb.SheetNames.forEach(function(s){
+          var ws=wb.Sheets[s];
+          var data=XLSX.utils.sheet_to_json(ws,{header:1});
+          t+='=== '+s+' ===\n';
+          data.forEach(function(row){if(row.some(function(c){return c!=null&&c!=='';})){ t+=row.join(' | ')+'\n';}});
+          t+='\n';
+        });
+        cb(null,t);
+      }catch(e){cb(e.message,null);}
+    };
+    r.onerror=function(){cb('Dosya okunamadı',null);};
+    r.readAsBinaryString(file);
+  } else if(ext==='pdf'){
+    var r2=new FileReader();
+    r2.onload=function(e){cb(null,{type:'pdf',b64:e.target.result.split(',')[1]});};
+    r2.onerror=function(){cb('PDF okunamadı',null);};
+    r2.readAsDataURL(file);
+  } else if(ext==='txt'||ext==='md'){
+    var r3=new FileReader();
+    r3.onload=function(e){cb(null,e.target.result);};
+    r3.onerror=function(){cb('Dosya okunamadı',null);};
+    r3.readAsText(file,'UTF-8');
+  } else {
+    cb('Desteklenmeyen dosya türü. PDF, Excel veya CSV yükleyin.',null);
+  }
 }
 
-function readFile(file){
-  return new Promise((resolve,reject)=>{
-    const ext=file.name.split(".").pop().toLowerCase();
-    if(["xlsx","xls","csv"].includes(ext)){
-      const r=new FileReader();
-      r.onload=e=>{try{
-        const wb=XLSX.read(e.target.result,{type:"binary"});
-        let t="DOSYA: "+file.name+"\n\n";
-        wb.SheetNames.forEach(s=>{const ws=wb.Sheets[s];const d=XLSX.utils.sheet_to_json(ws,{header:1});t+="=== "+s+" ===\n";d.forEach(row=>{if(row.some(c=>c!=null&&c!==""))t+=row.join(" | ")+"\n";});t+="\n";});
-        resolve(t);
-      }catch(e){reject(e);}};
-      r.onerror=reject;r.readAsBinaryString(file);
-    }else if(ext==="pdf"){
-      const r=new FileReader();
-      r.onload=e=>resolve({type:"pdf",base64:e.target.result.split(",")[1]});
-      r.onerror=reject;r.readAsDataURL(file);
-    }else if(["txt","md"].includes(ext)){
-      const r=new FileReader();
-      r.onload=e=>resolve(e.target.result);
-      r.onerror=reject;r.readAsText(file,"UTF-8");
-    }else reject(new Error("Desteklenmeyen dosya türü."));
-  });
-}
-
-async function analyzeForm(){
-  if(!state.fileContent||!state.mode)return;
-  const MSGS=["Form verileri işleniyor...","Ölçek 1 analiz ediliyor...","Ölçek 2 değerlendiriliyor...","Materyal süreci inceleniyor...","Pedagojik tasarım analiz ediliyor...","Kazanım uyumu kontrol ediliyor...","Prompt kalitesi değerlendiriliyor...","Rapor yapılandırılıyor..."];
-  let idx=0;
-  setState({step:"analyzing",error:null,report:null,loadingMsg:MSGS[0]});
-  const iv=setInterval(()=>{idx=(idx+1)%MSGS.length;const el=document.getElementById("loadingMsg");if(el)el.textContent=MSGS[idx];},2500);
-  const labels={weekly:"tek haftaya ait yansıtma formu ve ölçek verileri",individual:"10 haftalık tüm yansıtma formu ve ölçek verileri",class:"tüm öğretmen adaylarının 10 haftalık yansıtma formu ve ölçek verileri"};
-  const prompt="Bu dosya, sosyal bilgiler öğretmen adaylarının "+labels[state.mode]+" içermektedir. Sistem talimatlarındaki 7 boyutlu değerlendirme çerçevesine göre kapsamlı bir rapor hazırla.";
-  try{
-    let messages;
-    if(typeof state.fileContent==="object"&&state.fileContent.type==="pdf"){
-      messages=[{role:"user",content:[{type:"document",source:{type:"base64",media_type:"application/pdf",data:state.fileContent.base64}},{type:"text",text:prompt}]}];
-    }else{
-      messages=[{role:"user",content:prompt+"\n\n---\n"+state.fileContent+"\n---"}];
-    }
-    const apiKey=localStorage.getItem("anthropic_api_key")||"";
-    if(!apiKey){setState({error:"Lütfen önce API anahtarınızı girin.",step:"ready"});clearInterval(iv);return;}
-    const res=await fetch("https://api.anthropic.com/v1/messages",{
-      method:"POST",
-      headers:{
-        "Content-Type":"application/json",
-        "x-api-key":apiKey,
-        "anthropic-version":"2023-06-01",
-        "anthropic-dangerous-direct-browser-access":"true"
-      },
-      body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,system:PROMPTS[state.mode],messages})
-    });
-    const data=await res.json();
+// ── API ──
+function runAnalysis(){
+  var key=localStorage.getItem('ak')||'';
+  if(!key){set({err:'Lütfen önce API anahtarınızı girin (üstteki sarı bant).',step:'ready'});return;}
+  if(!S.fc||!S.mode)return;
+  var msgs=['Form verileri işleniyor...','Ölçek 1 analiz ediliyor...','Ölçek 2 değerlendiriliyor...','Materyal süreci inceleniyor...','Pedagojik tasarım analiz ediliyor...','Kazanım uyumu kontrol ediliyor...','Prompt kalitesi değerlendiriliyor...','Rapor yapılandırılıyor...'];
+  var i=0;
+  set({step:'analyzing',err:null,report:null,msg:msgs[0]});
+  var iv=setInterval(function(){
+    i=(i+1)%msgs.length;
+    var el=document.getElementById('lmsg');
+    if(el)el.textContent=msgs[i];
+  },2500);
+  var labels={weekly:'tek haftaya ait yansıtma formu ve ölçek verileri',individual:'10 haftalık tüm yansıtma formu ve ölçek verileri',klass:'tüm öğretmen adaylarının 10 haftalık verileri'};
+  var prompt='Bu dosya, sosyal bilgiler öğretmen adaylarının '+labels[S.mode]+' içermektedir. Sistem talimatlarındaki 7 boyutlu değerlendirme çerçevesine göre kapsamlı bir rapor hazırla.';
+  var messages;
+  if(S.fc&&typeof S.fc==='object'&&S.fc.type==='pdf'){
+    messages=[{role:'user',content:[{type:'document',source:{type:'base64',media_type:'application/pdf',data:S.fc.b64}},{type:'text',text:prompt}]}];
+  } else {
+    messages=[{role:'user',content:prompt+'\n\n---\n'+S.fc+'\n---'}];
+  }
+  fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{
+      'Content-Type':'application/json',
+      'x-api-key':key,
+      'anthropic-version':'2023-06-01',
+      'anthropic-dangerous-direct-browser-access':'true'
+    },
+    body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1500,system:PROMPTS[S.mode],messages:messages})
+  }).then(function(r){return r.json();}).then(function(data){
+    clearInterval(iv);
     if(data.error)throw new Error(data.error.message);
-    const text=(data.content||[]).map(b=>b.text||"").join("\n");
-    setState({report:text,step:"done"});
-  }catch(e){setState({error:"Analiz hatası: "+e.message,step:"ready"});}
-  finally{clearInterval(iv);}
-}
-
-function el(tag,attrs,...children){
-  const e=document.createElement(tag);
-  if(attrs)Object.entries(attrs).forEach(([k,v])=>{
-    if(k==="class")e.className=v;
-    else if(k==="style")Object.assign(e.style,v);
-    else if(k.startsWith("on"))e.addEventListener(k.slice(2).toLowerCase(),v);
-    else e.setAttribute(k,v);
+    var text=(data.content||[]).map(function(b){return b.text||'';}).join('\n');
+    set({report:text,step:'done'});
+  }).catch(function(e){
+    clearInterval(iv);
+    set({err:'Analiz hatası: '+e.message,step:'ready'});
   });
-  children.forEach(c=>{if(c==null)return;if(typeof c==="string")e.appendChild(document.createTextNode(c));else if(c instanceof Node)e.appendChild(c);});
-  return e;
 }
-function div(a,...c){return el("div",a,...c);}
-function span(a,...c){return el("span",a,...c);}
-function btn(a,...c){return el("button",a,...c);}
 
-function renderStepBar(){
-  const order=["mode","upload","ready","analyzing","done"];
-  const cur=order.indexOf(state.step==="ready"?"upload":state.step);
-  const stepIds=["mode","upload","analyzing","done"];
-  const bar=div({class:"stepbar"});
-  stepIds.forEach((sid,i)=>{
-    const me=order.indexOf(sid);
-    const active=(sid==="upload"&&(state.step==="upload"||state.step==="ready"))||state.step===sid;
-    const done=me<cur;
-    const s=STEPS.find(x=>x.id===sid);
-    const item=div({class:"step-item"+(active?" active":"")+(done?" done":"")});
-    item.appendChild(div({class:"step-num"},done?"✓":String(i+1).padStart(2,"0")));
-    item.appendChild(span({class:"step-label"},s.label));
+// ── STEPBAR ──
+function stepBar(){
+  var order=['mode','upload','ready','analyzing','done'];
+  var cur=order.indexOf(S.step==='ready'?'upload':S.step);
+  var ids=[{id:'mode',l:'Tür Seç'},{id:'upload',l:'Dosya'},{id:'analyzing',l:'Analiz'},{id:'done',l:'Rapor'}];
+  var bar=d({cls:'sbar'});
+  ids.forEach(function(s,idx){
+    var me=order.indexOf(s.id);
+    var act=(s.id==='upload'&&(S.step==='upload'||S.step==='ready'))||S.step===s.id;
+    var dn=me<cur;
+    var item=d({cls:'si'+(act?' a':'')+(dn?' d':'')});
+    item.appendChild(d({cls:'sn'},dn?'✓':String(idx+1)));
+    item.appendChild(h('span',{cls:'sl'},s.l));
     bar.appendChild(item);
-    if(i<stepIds.length-1)bar.appendChild(div({class:"step-connector"+(done?" done":"")}));
+    if(idx<ids.length-1)bar.appendChild(d({cls:'sc'+(dn?' d':'')}));
   });
   return bar;
 }
 
+// ── RENDER ──
 function render(){
-  const app=document.getElementById("app");
-  app.innerHTML="";
-  const mc=state.mode?{weekly:"#2563eb",individual:"#7c3aed",class:"#0891b2"}[state.mode]:"#2563eb";
-  document.getElementById("headerIcon").style.background="linear-gradient(135deg,"+mc+","+mc+"cc)";
-  if(state.mode){
-    const hb=document.getElementById("headerBadge");
-    hb.textContent=MODES[state.mode].icon+" "+MODES[state.mode].label;
-    hb.style.borderColor=mc+"40";hb.style.background=mc+"18";
-  }
+  var app=document.getElementById('app');
+  if(!app)return;
+  app.innerHTML='';
+  var color=mc();
+  var ic=document.getElementById('hic');
+  if(ic)ic.style.background='linear-gradient(135deg,'+color+','+color+'cc)';
+  var hb=document.getElementById('hbadge');
+  if(hb&&S.mode){hb.textContent=MODES[S.mode].icon+' '+MODES[S.mode].label;hb.style.background=color+'18';hb.style.borderColor=color+'40';}
 
-  if(state.step!=="mode")app.appendChild(renderStepBar());
+  if(S.step!=='mode')app.appendChild(stepBar());
 
-  if(state.step==="mode"){
-    app.appendChild(div({style:{textAlign:"center",marginBottom:"24px"}},
-      el("div",{style:{fontSize:"21px",fontWeight:"bold",color:"#dde9ff",marginBottom:"5px"}},"Rapor Türünü Seçin"),
-      el("div",{style:{fontSize:"12px",color:"#4d6070",fontFamily:"'Source Sans 3',sans-serif"}},"Hangi analizi oluşturmak istiyorsunuz?")
-    ));
-    const grid=div({class:"mode-grid"});
-    Object.values(MODES).forEach(m=>{
-      const card=div({class:"mode-card",
-        onMouseover:e=>{e.currentTarget.style.borderColor=m.color;e.currentTarget.style.background=m.color+"10";e.currentTarget.style.boxShadow="0 10px 28px "+m.color+"28";},
-        onMouseout:e=>{e.currentTarget.style.borderColor="";e.currentTarget.style.background="";e.currentTarget.style.boxShadow="";},
-        onClick:()=>setState({mode:m.id,step:"upload"})
-      },
-        div({class:"mode-card-icon"},m.icon),
-        div({class:"mode-card-title"},m.label),
-        div({class:"mode-card-sub",style:{color:m.color}},m.sub),
-        div({class:"mode-card-desc"},m.desc)
-      );
-      grid.appendChild(card);
+  // MODE SELECT
+  if(S.step==='mode'){
+    app.appendChild(d({style:{textAlign:'center',marginBottom:'20px'}},[
+      d({style:{fontSize:'21px',fontWeight:'bold',color:'#dde9ff',marginBottom:'5px'}},'Rapor Türünü Seçin'),
+      d({style:{fontSize:'12px',color:'#4d6070',fontFamily:'sans-serif'}},'Hangi analizi oluşturmak istiyorsunuz?')
+    ]));
+    var g=d({cls:'mgrid'});
+    Object.values(MODES).forEach(function(m){
+      var card=d({cls:'mcard',
+        $mouseover:function(e){var t=e.currentTarget;t.style.borderColor=m.color;t.style.background=m.color+'10';t.style.boxShadow='0 10px 28px '+m.color+'28';},
+        $mouseout:function(e){var t=e.currentTarget;t.style.borderColor='';t.style.background='';t.style.boxShadow='';},
+        $click:function(){set({mode:m.id,step:'upload'});}
+      },[
+        d({style:{fontSize:'28px',marginBottom:'9px'}},m.icon),
+        d({style:{fontSize:'13px',fontWeight:'bold',color:'#dde9ff',marginBottom:'3px'}},m.label),
+        d({style:{fontSize:'10px',color:m.color,fontFamily:'sans-serif',fontWeight:'600',marginBottom:'8px'}},m.sub),
+        d({style:{fontSize:'11px',color:'#7a94a8',fontFamily:'sans-serif',lineHeight:'1.6'}},m.desc)
+      ]);
+      g.appendChild(card);
     });
-    app.appendChild(grid);
-    const panel=div({class:"panel panel-bright"});
-    panel.appendChild(div({class:"section-label"},"7 Değerlendirme Boyutu"));
-    const dg=div({class:"dim-grid"});
-    DIMS.forEach(d=>{
-      const item=div({class:"dim-item"},
-        div({class:"dim-item-icon"},d.icon),
-        div({style:{flex:"1"}},div({class:"dim-item-label"},d.label),div({class:"dim-item-source",style:{color:d.color}},d.source)),
-        div({class:"dim-item-pts",style:{color:d.color}},d.pts?d.pts+"p":"Nitel")
-      );
+    app.appendChild(g);
+    var pnl=d({cls:'panel panel-hi'});
+    pnl.appendChild(d({cls:'lbl'},'7 Değerlendirme Boyutu'));
+    var dg=d({cls:'dgrid'});
+    DIMS.forEach(function(di){
+      var item=d({cls:'ditem'},[
+        d({style:{fontSize:'16px',flexShrink:'0'}},di.icon),
+        d({style:{flex:'1'}},[
+          d({style:{fontSize:'11.5px',color:'#cbd5e1',fontFamily:'sans-serif',fontWeight:'600'}},di.label),
+          d({style:{fontSize:'9px',color:di.c,fontFamily:'sans-serif'}},di.src)
+        ]),
+        d({style:{fontSize:'10px',color:di.c,fontWeight:'700',fontFamily:'sans-serif',marginLeft:'auto',flexShrink:'0'}},di.pts?di.pts+'p':'Nitel')
+      ]);
       dg.appendChild(item);
     });
-    panel.appendChild(dg);
-    app.appendChild(panel);
+    pnl.appendChild(dg);
+    app.appendChild(pnl);
     return;
   }
 
-  const m=MODES[state.mode];
-  app.appendChild(div({class:"mode-header",style:{borderColor:mc+"35"}},
-    div({class:"mode-header-left"},
-      span({style:{fontSize:"20px"}},m.icon),
-      div({},div({class:"mode-header-title"},m.label),div({class:"mode-header-desc"},m.desc))
-    ),
-    btn({class:"btn btn-ghost",style:{fontSize:"11px"},onClick:()=>setState({mode:null,step:"mode",file:null,fileContent:null,report:null,error:null})},"← Değiştir")
-  ));
+  var m=MODES[S.mode];
+  // MODE HEADER
+  var mh=d({cls:'panel',style:{display:'flex',alignItems:'center',justifyContent:'space-between',borderColor:color+'35'}},[
+    d({style:{display:'flex',alignItems:'center',gap:'9px'}},[
+      d({style:{fontSize:'20px'}},m.icon),
+      d({},[
+        d({style:{fontSize:'13px',fontWeight:'bold',color:'#dde9ff'}},m.label),
+        d({style:{fontSize:'11px',color:'#7a94a8',fontFamily:'sans-serif'}},m.desc)
+      ])
+    ]),
+    h('button',{cls:'btng',$click:function(){set({mode:null,step:'mode',file:null,fc:null,report:null,err:null});}},'\u2190 Değiştir')
+  ]);
+  app.appendChild(mh);
 
-  if(state.step==="upload"||state.step==="ready"){
-    const fileInput=document.getElementById("fileInput");
-    const dropzone=div({class:"dropzone"+(state.file?" has-file":"")});
-    if(state.file){
-      dropzone.appendChild(div({class:"dropzone-icon"},state.file.name.endsWith(".pdf")?"📄":"📊"));
-      dropzone.appendChild(div({class:"file-name"},state.file.name));
-      dropzone.appendChild(div({class:"file-size"},"✓ Yüklendi — "+(state.file.size/1024).toFixed(1)+" KB"));
-      dropzone.appendChild(btn({class:"btn btn-ghost",style:{marginTop:"9px",fontSize:"11px"},onClick:e=>{e.stopPropagation();setState({file:null,fileContent:null,report:null,error:null,step:"upload"});}},"Farklı dosya"));
-    }else{
-      const lmap={weekly:"Tek haftanın Yansıtma Formu + Ölçek verileri",individual:"10 haftalık Yansıtma Formu + Ölçek verileri",class:"Tüm öğrencilerin 10 haftalık verileri"};
-      dropzone.appendChild(div({class:"dropzone-icon"},"📂"));
-      dropzone.appendChild(div({class:"dropzone-title"},"Dosyayı sürükleyin veya seçin"));
-      dropzone.appendChild(div({class:"dropzone-sub"},lmap[state.mode]));
-      const chips=div({class:"dropzone-chips"});
-      ["PDF","Excel (.xlsx)","CSV","Metin (.txt)"].forEach(f=>chips.appendChild(span({class:"chip"},f)));
-      dropzone.appendChild(chips);
-      dropzone.addEventListener("click",()=>fileInput.click());
+  // UPLOAD / READY
+  if(S.step==='upload'||S.step==='ready'){
+    var fi=document.getElementById('fi');
+    var dz=d({cls:'dropzone'+(S.file?' hf':'')});
+    if(S.file){
+      dz.appendChild(d({style:{fontSize:'36px',marginBottom:'7px'}},S.file.name.endsWith('.pdf')?'📄':'📊'));
+      dz.appendChild(d({style:{fontSize:'14px',color:'#86efac',fontWeight:'bold',marginBottom:'3px'}},S.file.name));
+      dz.appendChild(d({style:{fontSize:'11px',color:'#4ade80',fontFamily:'sans-serif'}},'✓ Yüklendi — '+(S.file.size/1024).toFixed(1)+' KB'));
+      var cb=h('button',{cls:'btng',style:{marginTop:'9px',fontSize:'11px'},$click:function(e){e.stopPropagation();set({file:null,fc:null,report:null,err:null,step:'upload'});}},'\u2190 Farklı dosya');
+      dz.appendChild(cb);
+    } else {
+      var hlp={weekly:'Tek haftanın Yansıtma Formu + Ölçek verileri',individual:'10 haftalık Yansıtma Formu + Ölçek verileri',klass:'Tüm öğrencilerin 10 haftalık verileri'};
+      dz.appendChild(d({style:{fontSize:'42px',marginBottom:'9px'}},'📂'));
+      dz.appendChild(d({style:{fontSize:'15px',color:'#cbd5e1',marginBottom:'4px'}},'Dosyayı sürükleyin veya seçin'));
+      dz.appendChild(d({style:{fontSize:'11px',color:'#4d6070',fontFamily:'sans-serif',marginBottom:'12px'}},hlp[S.mode]));
+      var ch=d({style:{display:'flex',gap:'5px',justifyContent:'center',flexWrap:'wrap'}});
+      ['PDF','Excel (.xlsx)','CSV','Metin (.txt)'].forEach(function(f){ch.appendChild(h('span',{cls:'chip'},f));});
+      dz.appendChild(ch);
+      dz.addEventListener('click',function(){fi.click();});
     }
-    dropzone.addEventListener("dragover",e=>{e.preventDefault();dropzone.classList.add("dragover");});
-    dropzone.addEventListener("dragleave",()=>dropzone.classList.remove("dragover"));
-    dropzone.addEventListener("drop",e=>{e.preventDefault();dropzone.classList.remove("dragover");const f=e.dataTransfer.files[0];if(f)handleFileSelect(f);});
-    fileInput.onchange=e=>{if(e.target.files[0])handleFileSelect(e.target.files[0]);fileInput.value="";};
-    app.appendChild(dropzone);
+    dz.addEventListener('dragover',function(e){e.preventDefault();dz.classList.add('dg');});
+    dz.addEventListener('dragleave',function(){dz.classList.remove('dg');});
+    dz.addEventListener('drop',function(e){e.preventDefault();dz.classList.remove('dg');var f=e.dataTransfer.files[0];if(f)pickFile(f);});
+    fi.onchange=function(e){if(e.target.files[0])pickFile(e.target.files[0]);fi.value='';};
+    app.appendChild(dz);
 
-    if(state.step==="ready"){
-      const dp=div({class:"panel panel-bright",style:{marginBottom:"13px"}});
-      dp.appendChild(div({class:"section-label",style:{marginBottom:"9px"}},"Bu raporda değerlendirilecek 7 boyut"));
-      const dg=div({class:"dim-grid"});
-      DIMS.forEach(d=>{const i=div({class:"dim-item"},div({class:"dim-item-icon"},d.icon),div({style:{flex:"1"}},div({class:"dim-item-label"},d.label)),div({class:"dim-item-pts",style:{color:d.color}},d.pts?d.pts+"p":"Nitel"));dg.appendChild(i);});
-      dp.appendChild(dg);app.appendChild(dp);
-      const ab=btn({class:"btn btn-primary",style:{background:"linear-gradient(135deg,"+mc+","+mc+"cc)",boxShadow:"0 5px 24px "+mc+"40"},
-        onMouseover:e=>{e.currentTarget.style.transform="translateY(-2px)";e.currentTarget.style.boxShadow="0 9px 32px "+mc+"60";},
-        onMouseout:e=>{e.currentTarget.style.transform="";e.currentTarget.style.boxShadow="0 5px 24px "+mc+"40";},
-        onClick:analyzeForm
-      },m.icon+" 7 Boyutlu Analiz Başlat — PDF Rapor Oluştur");
+    if(S.step==='ready'){
+      var dp=d({cls:'panel panel-hi'});
+      dp.appendChild(d({cls:'lbl',style:{marginBottom:'9px'}},'Bu raporda değerlendirilecek 7 boyut'));
+      var dg2=d({cls:'dgrid'});
+      DIMS.forEach(function(di){
+        dg2.appendChild(d({cls:'ditem'},[
+          d({style:{fontSize:'16px',flexShrink:'0'}},di.icon),
+          d({style:{flex:'1'}},d({style:{fontSize:'11.5px',color:'#cbd5e1',fontFamily:'sans-serif',fontWeight:'600'}},di.label)),
+          d({style:{fontSize:'10px',color:di.c,fontWeight:'700',fontFamily:'sans-serif',marginLeft:'auto',flexShrink:'0'}},di.pts?di.pts+'p':'Nitel')
+        ]));
+      });
+      dp.appendChild(dg2);
+      app.appendChild(dp);
+      var ab=h('button',{cls:'btnp',style:{background:'linear-gradient(135deg,'+color+','+color+'cc)',boxShadow:'0 5px 24px '+color+'40'},
+        $mouseover:function(e){e.currentTarget.style.transform='translateY(-2px)';e.currentTarget.style.boxShadow='0 9px 32px '+color+'60';},
+        $mouseout:function(e){e.currentTarget.style.transform='';e.currentTarget.style.boxShadow='0 5px 24px '+color+'40';},
+        $click:runAnalysis
+      },m.icon+' 7 Boyutlu Analiz Başlat — PDF Rapor Oluştur');
       app.appendChild(ab);
     }
   }
 
-  if(state.step==="analyzing"){
-    const box=div({class:"loading-box"});
-    box.appendChild(div({class:"spinner",style:{borderTopColor:mc}}));
-    box.appendChild(div({style:{fontSize:"17px",color:"#93c5fd",marginBottom:"5px",fontWeight:"bold"}},"7 Boyutlu Analiz Yapılıyor…"));
-    box.appendChild(div({style:{fontSize:"12px",color:"#4d6070",fontFamily:"'Source Sans 3',sans-serif",marginBottom:"3px"}},m.label));
-    box.appendChild(div({style:{fontSize:"11.5px",color:"#4d6070",fontFamily:"'Source Sans 3',sans-serif"},id:"loadingMsg"},state.loadingMsg));
-    const dots=div({class:"dots"});
-    [0,1,2].forEach(i=>dots.appendChild(div({class:"dot-pulse",style:{background:mc,animation:"dp "+(1+i*0.25)+"s ease-in-out infinite"}})));
-    box.appendChild(dots);app.appendChild(box);
+  // ANALYZING
+  if(S.step==='analyzing'){
+    var lb=d({cls:'lbox'});
+    lb.appendChild(d({cls:'spin',style:{borderTopColor:color}}));
+    lb.appendChild(d({style:{fontSize:'17px',color:'#93c5fd',marginBottom:'5px',fontWeight:'bold'}},'7 Boyutlu Analiz Yapılıyor…'));
+    lb.appendChild(d({style:{fontSize:'12px',color:'#4d6070',fontFamily:'sans-serif',marginBottom:'3px'}},m.label));
+    lb.appendChild(d({style:{fontSize:'11px',color:'#4d6070',fontFamily:'sans-serif'},id:'lmsg'},S.msg));
+    var dots=d({style:{marginTop:'14px',display:'flex',gap:'5px',justifyContent:'center'}});
+    [0,1,2].forEach(function(i){dots.appendChild(d({style:{width:'7px',height:'7px',borderRadius:'50%',background:color,animation:'dp '+(1+i*.25)+'s ease-in-out infinite'}}));});
+    lb.appendChild(dots);
+    app.appendChild(lb);
   }
 
-  if(state.error)app.appendChild(div({class:"error-box"},"⚠️ "+state.error));
+  // ERROR
+  if(S.err)app.appendChild(d({cls:'err'},'⚠️ '+S.err));
 
-  if(state.step==="done"&&state.report){
-    const toolbar=div({class:"report-toolbar",style:{borderColor:mc+"30"}});
-    const tl=div({class:"report-toolbar-left"});
-    tl.appendChild(div({class:"report-toolbar-icon",style:{background:"linear-gradient(135deg,"+mc+","+mc+"bb)"}},m.icon));
-    tl.appendChild(div({},div({class:"report-toolbar-title"},m.label),div({class:"report-toolbar-file"},state.file?state.file.name:"")));
-    toolbar.appendChild(tl);
-    const tb=div({class:"report-toolbar-btns"});
-    const pb=btn({class:"btn btn-danger",disabled:state.pdfGenerating,
-      onClick:()=>{setState({pdfGenerating:true});const d=new Date().toLocaleDateString("tr-TR",{day:"2-digit",month:"long",year:"numeric"});generatePDF(state.report,state.file?state.file.name:"form",d,state.mode);setTimeout(()=>setState({pdfGenerating:false}),2000);}
-    },state.pdfGenerating?"⏳ Hazırlanıyor…":"⬇️ PDF İndir");
-    tb.appendChild(pb);
-    tb.appendChild(btn({class:"btn btn-ghost",onClick:()=>setState({file:null,fileContent:null,report:null,error:null,step:"upload"})},"🔄 Yeni Dosya"));
-    tb.appendChild(btn({class:"btn btn-ghost",onClick:()=>setState({mode:null,step:"mode",file:null,fileContent:null,report:null,error:null})},"⬅️ Mod Seç"));
-    toolbar.appendChild(tb);app.appendChild(toolbar);
-    const tip=div({class:"tip-box"});
-    tip.innerHTML='💡 <span>Tarayıcının yazdırma penceresinde <strong>"PDF olarak kaydet"</strong> seçeneğiyle raporu indirebilirsiniz.</span>';
+  // DONE
+  if(S.step==='done'&&S.report){
+    var rbar=d({cls:'rbar',style:{borderColor:color+'30'}});
+    var rl=d({style:{display:'flex',alignItems:'center',gap:'9px'}});
+    rl.appendChild(d({style:{width:'28px',height:'28px',borderRadius:'7px',background:'linear-gradient(135deg,'+color+','+color+'bb)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'14px'}},m.icon));
+    rl.appendChild(d({},[d({style:{fontSize:'12px',fontWeight:'bold',color:'#7dd3fc'}},m.label),d({style:{fontSize:'9.5px',color:'#4d6070',fontFamily:'sans-serif'}},S.file?S.file.name:'')]));
+    rbar.appendChild(rl);
+    var rb2=d({style:{display:'flex',gap:'7px',flexWrap:'wrap'}});
+    var pdfbtn=h('button',{cls:'btnd',disabled:S.pdfBusy,$click:function(){
+      set({pdfBusy:true});
+      var dt=new Date().toLocaleDateString('tr-TR',{day:'2-digit',month:'long',year:'numeric'});
+      makePDF(S.report,S.file?S.file.name:'form',dt);
+      setTimeout(function(){set({pdfBusy:false});},2000);
+    }},S.pdfBusy?'⏳ Hazırlanıyor…':'⬇️ PDF İndir');
+    rb2.appendChild(pdfbtn);
+    rb2.appendChild(h('button',{cls:'btng',$click:function(){set({file:null,fc:null,report:null,err:null,step:'upload'});}},'🔄 Yeni Dosya'));
+    rb2.appendChild(h('button',{cls:'btng',$click:function(){set({mode:null,step:'mode',file:null,fc:null,report:null,err:null});}},'⬅️ Mod Seç'));
+    rbar.appendChild(rb2);
+    app.appendChild(rbar);
+    var tip=d({cls:'tip'});
+    tip.innerHTML='💡 <strong>"PDF olarak kaydet"</strong> seçeneğiyle kapak dahil tüm raporu indirebilirsiniz.';
     app.appendChild(tip);
-    const rb=div({class:"report-body"});
-    const rc=div({class:"report-content"});
-    rc.innerHTML=mdToHtml(state.report);
-    rb.appendChild(rc);app.appendChild(rb);
+    var rb=d({cls:'rbody'});
+    rb.innerHTML=mdHtml(S.report);
+    app.appendChild(rb);
   }
 }
 
-async function handleFileSelect(file){
-  setState({file,error:null,report:null,step:"upload"});
-  try{const content=await readFile(file);setState({fileContent:content,step:"ready"});}
-  catch(e){setState({error:"Dosya okunamadı: "+e.message});}
+function pickFile(file){
+  set({file:file,err:null,report:null,step:'upload'});
+  readFile(file,function(err,content){
+    if(err)set({err:'Dosya okunamadı: '+err});
+    else set({fc:content,step:'ready'});
+  });
 }
 
-render();
-
-// API Key management
-function renderApiKeyBar(){
-  const bar=document.getElementById("apiKeyBar");
+// ── API KEY BAR ──
+function renderApiBar(){
+  var bar=document.getElementById('apibar');
   if(!bar)return;
-  const key=localStorage.getItem("anthropic_api_key")||"";
+  var key=localStorage.getItem('ak')||'';
+  bar.innerHTML='';
   if(key){
-    bar.innerHTML='<span style="font-size:11px;color:#4ade80;font-family:'Source Sans 3',sans-serif;">🔑 API Anahtarı kayıtlı &nbsp;</span><button onclick="clearApiKey()" style="padding:3px 10px;background:transparent;border:1px solid #dc2626;border-radius:5px;color:#fca5a5;font-size:11px;cursor:pointer;font-family:'Source Sans 3',sans-serif;">Sil</button>';
-  }else{
-    bar.innerHTML='<span style="font-size:11px;color:#f59e0b;font-family:'Source Sans 3',sans-serif;">🔑 Anthropic API Anahtarı &nbsp;</span><input id="apiKeyInput" type="password" placeholder="sk-ant-..." style="padding:4px 10px;background:#050c18;border:1px solid #234d7a;border-radius:5px;color:#dde9ff;font-size:11px;font-family:'Source Sans 3',sans-serif;width:280px;" /><button onclick="saveApiKey()" style="margin-left:6px;padding:4px 12px;background:linear-gradient(135deg,#2563eb,#1d4ed8);border:none;border-radius:5px;color:#fff;font-size:11px;cursor:pointer;font-family:'Source Sans 3',sans-serif;">Kaydet</button>';
+    bar.appendChild(h('span',{style:{fontSize:'11px',color:'#4ade80',fontFamily:'sans-serif'}},'🔑 API Anahtarı kayıtlı  '));
+    var clr=h('button',{style:{padding:'3px 10px',background:'transparent',border:'1px solid #dc2626',borderRadius:'5px',color:'#fca5a5',fontSize:'11px',cursor:'pointer',fontFamily:'sans-serif'},$click:function(){localStorage.removeItem('ak');renderApiBar();}},'Sil');
+    bar.appendChild(clr);
+  } else {
+    bar.appendChild(h('span',{style:{fontSize:'11px',color:'#f59e0b',fontFamily:'sans-serif'}},'🔑 Anthropic API Anahtarı  '));
+    var inp=h('input',{type:'password',id:'aki',placeholder:'sk-ant-...',style:{padding:'4px 10px',background:'#050c18',border:'1px solid #234d7a',borderRadius:'5px',color:'#dde9ff',fontSize:'11px',fontFamily:'sans-serif',width:'280px'}});
+    bar.appendChild(inp);
+    inp.addEventListener('keydown',function(e){if(e.key==='Enter')saveKey();});
+    var sv=h('button',{style:{marginLeft:'6px',padding:'4px 12px',background:'linear-gradient(135deg,#2563eb,#1d4ed8)',border:'none',borderRadius:'5px',color:'#fff',fontSize:'11px',cursor:'pointer',fontFamily:'sans-serif'},$click:saveKey},'Kaydet');
+    bar.appendChild(sv);
   }
 }
-function saveApiKey(){
-  const v=document.getElementById("apiKeyInput").value.trim();
-  if(v){localStorage.setItem("anthropic_api_key",v);renderApiKeyBar();}
+function saveKey(){
+  var v=(document.getElementById('aki')||{}).value;
+  if(v&&v.trim()){localStorage.setItem('ak',v.trim());renderApiBar();}
 }
-function clearApiKey(){
-  localStorage.removeItem("anthropic_api_key");renderApiKeyBar();
-}
-renderApiKeyBar();
+
+// ── INIT ──
+document.addEventListener('DOMContentLoaded',function(){
+  // Load XLSX dynamically so it doesn't block page render
+  var s=document.createElement('script');
+  s.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+  s.onerror=function(){console.warn('XLSX CDN failed to load. Excel/CSV files will not work.');};
+  document.head.appendChild(s);
+  renderApiBar();
+  render();
+});
 </script>
 </body>
 </html>
