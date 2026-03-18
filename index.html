@@ -222,7 +222,55 @@ async function runEval(){
   if(!key){setStatus('API Key yok! Üstteki alana sk-ant-api03-... anahtarı girin.','#fca5a5');return;}
   G('runBtn').disabled=true;G('dlBtn').style.display='none';G('resultBox').style.display='none';
   var week=G('weekSel').value, tema=G('temaInp').value||week+'. Tema';
-  var prompt='Bu PDF '+week+'. hafta ogretmen adayi degerlendirme formudur.\nB1=YZ kullanim(0-10) B2=Dogrulama(0-10) B3=Pedagoji(0-10) B4=Kazanim(0-10) B5=Prompt(0-10)\nSADECE JSON:\n{"studentName":"AD SOYAD","sinif":"X. Sinif","ders":"Sosyal Bilgiler","tema":"'+tema+'","tarih":"tarih","unite":"unite","konu":"konu","kazanim":"SB.X.X.X - ifade","dijitalArac":"arac","yzArac":"YZ","icerikTuru":"tur","yzKatki":"%26-50","urunLink":"","scores":{"b1":6,"b2":7,"b3":5,"b4":8,"b5":3},"genelOzet":"3-4 cumle","dims":{"b1":{"status":"aciklama","good":["g1","g2","g3"],"weak":["w1","w2"],"rec":"oneri"},"b2":{"status":"","good":[],"weak":[],"rec":""},"b3":{"status":"","good":[],"weak":[],"rec":""},"b4":{"status":"","good":[],"weak":[],"rec":""},"b5":{"status":"","good":[],"weak":[],"rec":""}},"steps":[{"title":"adim 1","desc":"aciklama"},{"title":"adim 2","desc":"..."},{"title":"adim 3","desc":"..."}]}';
+  var prompt=
+    'Bu PDF, Sosyal Bilgiler ogretmen adayinin '+week+'. hafta dijital ogrenme urunu hazirlama ve yansitma formudur.\n\n'+
+    'TEMEL DEGERLENDIRME CERCEVESI:\n'+
+    'Ogretmen adaylarindan yapay zeka araclarini ogretim sureclerine ETIK ve SORUMLU bir sekilde entegre etmeleri beklenmektedir.\n'+
+    'Bu; YZ ciktisini korfue kabul etmemek, dogrulama yapmak, ozgunlugu korumak, gizlilik ve onyargiya dikkat etmek, pedagojik amaci on plana almak demektir.\n\n'+
+    '5 BOYUT (her biri 0-10 puan):\n'+
+    'B1 - YZ Aracinin Etik ve Etkin Kullanimi:\n'+
+    '  * YZ bir arac mi, yoksa tum isleri yapan bir sistem mi? Adayin kendi katki ve dusuncesi ne kadar?\n'+
+    '  * YZ katki orani (%26-50 ideal; %76-100 ozgunluk riski; %0 entegrasyon yok)\n'+
+    '  * YZ hangi asama/larda kullanilmis? (planlama/icerik/soru/duzenleme)\n'+
+    '  * Pedagojik amac acik mi? YZ kullanimi rastgele mi, bilinclice mi?\n\n'+
+    'B2 - Materyal Gelistirme, Dogrulama ve Etik Sorumluluk:\n'+
+    '  * YZ ciktisi dogrulandi mi? (MEB kitabi, resmi site, uzman, farkli kaynak)\n'+
+    '  * Kaynak referanslari eksiksiz mi? (sayfa/URL/bolum belirtilmis mi?)\n'+
+    '  * Gizlilik: ogrenci verisi/kisisel veri kullanildi mi? Telif kontrol edildi mi?\n'+
+    '  * Onyargi/kapsayicilik: icerik ayrimci dil, stereotip, kulturel yanlilik iceriyor mu? Kontrol edildi mi?\n\n'+
+    'B3 - Pedagojik Tasarim ve Ogretmen Adayi Yansimasi:\n'+
+    '  * Pedagojik gerekcesi derinlikli mi? (Etiket duzeyinde "somutlastirir" vs. kazanima ozgu aciklama)\n'+
+    '  * Materyal ogrenci merkezli mi, farklilasmaya uygun mu?\n'+
+    '  * Aday, sureci yansitici bicimde degerlendirebiliyor mu? (oz gelisim somut ve gercekci mi?)\n'+
+    '  * Ogretmenin rehber/tasarimci rolu gozukunuyor mu, yoksa YZ'ye teslim mi olunmus?\n\n'+
+    'B4 - SB Kazanim ve Icerik Uyumu:\n'+
+    '  * Kazanim kodu (SB.X.X.X) ve tam ifadesi var mi?\n'+
+    '  * Unite-konu-kazanim zinciri tutarli mi?\n'+
+    '  * Urun linki paylasiliyor mu? Format kazanima uygun mu?\n\n'+
+    'B5 - Prompt Muhendisligi Kalitesi:\n'+
+    '  * Prompt paylassildi mi? (link veya metin)\n'+
+    '  * Prompt pedagojik amaci, sinif duzeyini, icerik kapsamini, format kisitini iceriyor mu?\n'+
+    '  * Prompt "etik YZ kullanimi" yansitıyor mu? (kazanim baglamli, seviyeye uygun, dogrulama niyetiyle mi yazilmis?)\n\n'+
+    'YORUMLAMA ILKELERI:\n'+
+    '- Guclu yonleri taniyin; gelisim alanlarini yapici ve ileri bakilsli ifade edin.\n'+
+    '- YZ'yi korfue kullanan ama dogrulamayan adaylar icin B2 dusuk puanlanir.\n'+
+    '- %76-100 YZ katki orani otomatik dusuk B1 demek degildir; icerige katki ve ozgunluk da degerlendirilir.\n'+
+    '- Etik boyut (gizlilik, telif, onyargi) mutlaka yoruma dahil edilmeli.\n'+
+    '- Oner ici somut, uygulanabilir ve bir sonraki temaya tasinalacak nitelikte olsun.\n\n'+
+    'SADECE JSON dokundur:\n'+
+    '{"studentName":"AD SOYAD","sinif":"X. Sinif","ders":"Sosyal Bilgiler","tema":"'+tema+'","tarih":"tarih","unite":"unite","konu":"konu","kazanim":"SB.X.X.X - ifade","dijitalArac":"arac","yzArac":"YZ","icerikTuru":"tur","yzKatki":"%26-50","urunLink":"",'+
+    '"scores":{"b1":6,"b2":7,"b3":5,"b4":8,"b5":3},'+
+    '"genelOzet":"3-4 cumle: Adayin YZ entegrasyon olgunlugu, etik sorumluluk farkindaligi ve pedagojik tasarim kalitesi. En guclu ve en kritik gelisim alani belirtilmeli.",'+
+    '"dims":{'+
+    '"b1":{"status":"ORTA DUZEY — kisa aciklama (YZ etik/etkin mi?)","good":["guclu 1","guclu 2","guclu 3"],"weak":["gelisim 1","gelisim 2"],"rec":"Somut, pedagojik amacli, etik cerceveli oneri"},'+
+    '"b2":{"status":"","good":[],"weak":[],"rec":""},'+
+    '"b3":{"status":"","good":[],"weak":[],"rec":""},'+
+    '"b4":{"status":"","good":[],"weak":[],"rec":""},'+
+    '"b5":{"status":"","good":[],"weak":[],"rec":""}},'+
+    '"steps":['+
+    '{"title":"En kritik gelisim — etik/pedagojik odakli","desc":"Somut, olculebilir, bir sonraki hafta uygulanabilir oneri"},'+
+    '{"title":"Ikinci oncelik","desc":"..."},'+
+    '{"title":"Ucuncu oncelik","desc":"..."}]}';
   try{
     setStatus('Claude analiz ediyor...');setP(25);
     var resp=await fetch('https://api.anthropic.com/v1/messages',{
