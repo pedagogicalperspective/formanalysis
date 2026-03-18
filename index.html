@@ -123,7 +123,9 @@ body{font-family:'DM Sans',sans-serif;background:#080F1E;color:#CBD5E1;min-heigh
   <div class="topbar-sep"></div>
   <div class="api-wrap">
     <label>API Key</label>
-    <input class="api-inp" id="apiKey" type="password" placeholder="sk-ant-api03-..." autocomplete="off" spellcheck="false">
+    <input class="api-inp" id="apiKey" type="password" placeholder="sk-ant-api03-..." autocomplete="off" spellcheck="false"
+      oninput="localStorage.setItem('sb_apikey',this.value)" style="width:220px">
+    <span id="apiSaveStatus" style="font-size:10px;color:#86EFAC;display:none">✓ Kayıtlı</span>
   </div>
 </div>
 
@@ -211,7 +213,7 @@ body{font-family:'DM Sans',sans-serif;background:#080F1E;color:#CBD5E1;min-heigh
         <input type="file" id="wc-fi" accept=".pdf" multiple onchange="onMultiFileChange('wc',this)">
         <div class="drop-icon">📂</div>
         <div class="drop-title">Sınıfın Tüm Formlarını Seçin</div>
-        <div class="drop-hint">Birden fazla PDF seçilebilir (Ctrl+A)</div>
+        <div class="drop-hint" id="wc-drop-hint">Birden fazla PDF seçilebilir — her seferinde ekleyebilirsiniz</div>
       </div>
 
       <div class="file-list" id="wc-files"></div>
@@ -326,7 +328,13 @@ function onFileChange(mode, inp){
 function onMultiFileChange(mode, inp){
   const files=Array.from(inp.files).filter(f=>f.type==='application/pdf');
   if(!files.length){setErr(mode,'Lütfen PDF dosyası seçin.');return;}
-  readFile(mode,files,false);
+  // Prevent duplicate file names
+  const existing=new Set(FS[mode].map(f=>f.name));
+  const newFiles=files.filter(f=>!existing.has(f.name));
+  if(!newFiles.length){setErr(mode,'Bu dosyalar zaten eklenmiş.');inp.value='';return;}
+  setErr(mode,null);
+  readFile(mode,newFiles,false);
+  inp.value=''; // Reset so same files can be re-selected if needed
 }
 function handleDrop(mode,e){
   e.preventDefault();dragLeave(mode+'-drop-label');
@@ -345,24 +353,31 @@ function dragLeave(id){const el=$(id);if(el)el.classList.remove('over');}
 
 function readFile(mode,files,single){
   if(single)FS[mode]=[];
-  let loaded=0;
-  files.forEach(f=>{
+  // Show loading state
+  if(mode==='w1'){$('w1-drop-icon').textContent='⏳';$('w1-drop-title').textContent='PDF Yükleniyor...';}
+  const promises=Array.from(files).map(f=>new Promise((resolve,reject)=>{
     const rd=new FileReader();
-    rd.onload=e=>{
-      FS[mode].push({name:f.name,size:f.size,b64:e.target.result.split(',')[1]});
-      loaded++;
-      if(loaded===files.length){
-        renderFiles(mode);
-        if(mode==='w1'){
-          const lbl=$('w1-drop-label');
-          lbl.classList.add('has-file');
-          $('w1-drop-icon').textContent='✅';
-          $('w1-drop-title').textContent=f.name;
-          $('w1-drop-hint').textContent=(f.size/1024).toFixed(1)+' KB — PDF hazır';
-        }
-      }
-    };
+    rd.onload=e=>{resolve({name:f.name,size:f.size,b64:e.target.result.split(',')[1]});};
+    rd.onerror=()=>reject(new Error('Dosya okunamadı: '+f.name));
     rd.readAsDataURL(f);
+  }));
+  Promise.all(promises).then(results=>{
+    results.forEach(r=>FS[mode].push(r));
+    renderFiles(mode);
+    if(mode==='w1'&&results.length>0){
+      const f=results[0];
+      $('w1-drop-label').classList.add('has-file');
+      $('w1-drop-icon').textContent='✅';
+      $('w1-drop-title').textContent=f.name;
+      $('w1-drop-hint').textContent=(f.size/1024).toFixed(1)+' KB — PDF hazır, değerlendirilebilir';
+    }
+    if(mode==='wc'){
+      $('wc-drop').style.borderColor='rgba(22,101,52,.4)';
+      $('wc-drop').style.background='rgba(22,101,52,.06)';
+    }
+  }).catch(e=>{
+    setErr(mode,'Dosya okuma hatası: '+e.message);
+    if(mode==='w1')resetDropLabel();
   });
 }
 function rmFile(mode,i){FS[mode].splice(i,1);renderFiles(mode);if(!FS[mode].length&&mode==='w1')resetDropLabel();}
@@ -375,6 +390,10 @@ function renderFiles(mode){
       <div class="fp-sz">${(f.size/1024).toFixed(1)}KB</div>
       <button class="fp-rm" onclick="rmFile('${mode}',${i})">✕</button>
     </div>`).join('');
+  if(mode==='wc'){
+    const hint=$('wc-drop-hint');
+    if(hint)hint.textContent=FS.wc.length>0?FS.wc.length+' PDF yüklendi — daha fazla ekleyebilirsiniz':'Birden fazla PDF seçilebilir — her seferinde ekleyebilirsiniz';
+  }
 }
 
 // ── SCREEN NAV ─────────────────────────────────────────────────────────
@@ -445,6 +464,7 @@ function promptW10C(allData){
 // ══════════════════════════════════════════════════════════════════════
 async function runW1(){
   if(!FS.w1.length){setErr('w1','Lütfen bir PDF yükleyin.');return;}
+  if(!FS.w1[0].b64){setErr('w1','PDF henüz yüklenmedi, lütfen bir saniye bekleyin.');return;}
   setErr('w1',null);showP('w1',true);$('w1-btn').disabled=true;$('w1-result').style.display='none';
   const week=$('w1-week').value,tema=$('w1-tema').value||week+'. Tema';
   try{
@@ -482,7 +502,8 @@ async function runW1(){
 // RUN WC
 // ══════════════════════════════════════════════════════════════════════
 async function runWC(){
-  if(!FS.wc.length){setErr('wc','PDF yükleyin.');return;}
+  if(!FS.wc.length){setErr('wc','En az 1 PDF yükleyin.');return;}
+  if(FS.wc.some(f=>!f.b64)){setErr('wc','PDF'ler henüz yüklenmedi, bir saniye bekleyin.');return;}
   setErr('wc',null);showP('wc',true);$('wc-btn').disabled=true;$('wc-result').style.display='none';
   const week=$('wc-week').value,tema=$('wc-tema').value||week+'. Tema';
   try{
@@ -829,7 +850,15 @@ function saveDL(blob,filename){
   document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(()=>URL.revokeObjectURL(a.href),15000);
 }
 
-// INIT
+// INIT — load saved API key
+(function(){
+  const saved=localStorage.getItem('sb_apikey');
+  if(saved){
+    $('apiKey').value=saved;
+    const st=$('apiSaveStatus');
+    if(st){st.style.display='inline';setTimeout(()=>{st.style.display='none';},2000);}
+  }
+})();
 show('w1');
 </script>
 </body>
