@@ -3,519 +3,327 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Sosyal Bilgiler Öğretmen Adayı Form Analiz Aracı -- 7 Boyutlu AI Destekli Değerlendirme" />
   <title>Form Analiz Aracı</title>
-  <!-- React 18 -->
-  <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
-  <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
-  <!-- SheetJS (XLSX) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-  <!-- Babel Standalone (JSX transform in browser) -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { background: #07101f; }
-    #root { min-height: 100vh; }
+    @import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@400;600;700&family=Source+Sans+3:wght@300;400;600;700&display=swap');
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+    html,body{min-height:100vh}
+    body{background:linear-gradient(160deg,#07101f 0%,#0a1a30 55%,#080f20 100%);font-family:'Source Serif 4',Georgia,serif;color:#dde9ff;min-height:100vh}
+    button{cursor:pointer;font-family:inherit}
+    input[type=file]{display:none}
+    .header{background:linear-gradient(90deg,#060d1a,#09182e);border-bottom:2px solid #1e4270;padding:15px 26px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 4px 28px rgba(0,0,0,0.6)}
+    .header-left{display:flex;align-items:center;gap:12px}
+    .header-icon{width:38px;height:38px;background:linear-gradient(135deg,#2563eb,#1d4ed8);border-radius:9px;font-size:18px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(59,130,246,0.4);transition:background 0.4s}
+    .header-tag{font-size:8.5px;text-transform:uppercase;letter-spacing:3px;color:#7dd3fc;font-family:'Source Sans 3',sans-serif;font-weight:700}
+    .header-title{font-size:16px;font-weight:bold;color:#eef5ff}
+    .header-sub{font-size:10px;color:#7a94a8;font-family:'Source Sans 3',sans-serif}
+    .header-badge{padding:5px 12px;background:rgba(37,99,235,0.15);border:1px solid rgba(59,130,246,0.3);border-radius:7px;font-size:11px;font-family:'Source Sans 3',sans-serif;color:#bfdbfe}
+    .container{max-width:960px;margin:0 auto;padding:22px 18px}
+    .panel{background:rgba(9,20,42,0.93);border:1px solid #192f4a;border-radius:14px;padding:22px;backdrop-filter:blur(8px)}
+    .panel-bright{border-color:#1e4270}
+    .mode-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:13px;margin-bottom:24px}
+    .mode-card{background:rgba(9,20,42,0.93);border:1.5px solid #192f4a;border-radius:14px;padding:22px 18px;cursor:pointer;transition:all 0.25s;text-align:left}
+    .mode-card:hover{transform:translateY(-3px)}
+    .mode-card-icon{font-size:30px;margin-bottom:10px}
+    .mode-card-title{font-size:14px;font-weight:bold;color:#dde9ff;margin-bottom:3px}
+    .mode-card-sub{font-size:10px;font-family:'Source Sans 3',sans-serif;font-weight:600;margin-bottom:9px}
+    .mode-card-desc{font-size:11px;color:#7a94a8;font-family:'Source Sans 3',sans-serif;line-height:1.6}
+    .dim-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .dim-item{padding:10px 13px;background:#050c18;border-radius:8px;border:1px solid #192f4a;display:flex;gap:9px;align-items:flex-start}
+    .dim-item-icon{font-size:17px;flex-shrink:0;margin-top:1px}
+    .dim-item-label{font-size:12px;color:#cbd5e1;font-family:'Source Sans 3',sans-serif;font-weight:600}
+    .dim-item-source{font-size:9.5px;font-family:'Source Sans 3',sans-serif}
+    .dim-item-pts{font-size:10px;font-family:'Source Sans 3',sans-serif;font-weight:700;margin-left:auto;flex-shrink:0}
+    .section-label{font-size:9px;text-transform:uppercase;letter-spacing:2px;color:#7dd3fc;font-weight:700;margin-bottom:14px;font-family:'Source Sans 3',sans-serif}
+    .dropzone{border:2px dashed #192f4a;border-radius:13px;padding:36px 22px;text-align:center;cursor:pointer;background:rgba(9,20,42,0.93);transition:all 0.3s;margin-bottom:14px}
+    .dropzone:hover,.dropzone.dragover{border-color:#2563eb;background:rgba(37,99,235,0.07)}
+    .dropzone.has-file{border-color:#22c55e;background:rgba(34,197,94,0.04);cursor:default}
+    .dropzone-icon{font-size:44px;margin-bottom:10px}
+    .dropzone-title{font-size:15px;color:#cbd5e1;margin-bottom:5px}
+    .dropzone-sub{font-size:11px;color:#4d6070;font-family:'Source Sans 3',sans-serif;margin-bottom:13px}
+    .dropzone-chips{display:flex;gap:6px;justify-content:center;flex-wrap:wrap}
+    .chip{padding:3px 10px;border-radius:20px;background:#050c18;border:1px solid #192f4a;color:#7dd3fc;font-size:10px;font-family:'Source Sans 3',sans-serif}
+    .file-name{font-size:14px;color:#86efac;font-weight:bold;margin-bottom:3px}
+    .file-size{font-size:11px;color:#4ade80;font-family:'Source Sans 3',sans-serif}
+    .btn{padding:8px 16px;border-radius:8px;border:none;font-family:'Source Sans 3',sans-serif;font-size:12px;font-weight:700;transition:opacity 0.2s}
+    .btn:hover{opacity:0.85}
+    .btn-primary{width:100%;padding:14px;font-family:'Source Serif 4',Georgia,serif;font-size:15px;font-weight:bold;border:none;border-radius:11px;color:#fff;transition:transform 0.2s,box-shadow 0.2s}
+    .btn-primary:hover{transform:translateY(-2px)}
+    .btn-ghost{background:transparent;border:1px solid #192f4a;color:#7a94a8}
+    .btn-danger{background:linear-gradient(135deg,#dc2626,#b91c1c);color:#fff;box-shadow:0 3px 10px rgba(220,38,38,0.3);display:flex;align-items:center;gap:5px}
+    .btn-danger:disabled{opacity:0.5;cursor:wait}
+    .loading-box{text-align:center;padding:58px 28px;background:rgba(9,20,42,0.93);border:1px solid #1e4270;border-radius:16px}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .spinner{width:52px;height:52px;margin:0 auto 18px;border:4px solid #192f4a;border-radius:50%;animation:spin 1s linear infinite}
+    @keyframes dp{0%,100%{opacity:.2}50%{opacity:1}}
+    .dot-pulse{width:7px;height:7px;border-radius:50%}
+    .dots{margin-top:15px;display:flex;gap:5px;justify-content:center}
+    .report-toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;padding:11px 15px;background:rgba(9,20,42,0.93);border-radius:11px}
+    .report-toolbar-left{display:flex;align-items:center;gap:9px}
+    .report-toolbar-icon{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:14px}
+    .report-toolbar-title{font-size:12px;font-weight:bold;color:#7dd3fc}
+    .report-toolbar-file{font-size:9.5px;color:#4d6070;font-family:'Source Sans 3',sans-serif}
+    .report-toolbar-btns{display:flex;gap:7px}
+    .tip-box{background:rgba(37,99,235,0.07);border:1px solid rgba(59,130,246,0.18);border-radius:7px;padding:7px 13px;margin-bottom:12px;font-family:'Source Sans 3',sans-serif;font-size:11px;color:#93c5fd;display:flex;gap:6px;align-items:flex-start}
+    .report-body{background:rgba(4,9,20,0.96);border:1px solid #1e4270;border-radius:14px;padding:26px}
+    .report-content h2{font-family:'Source Serif 4',Georgia,serif;font-size:14.5px;color:#7dd3fc;border-bottom:1px solid #192f4a;padding-bottom:6px;margin:22px 0 8px}
+    .report-content h2:first-child{margin-top:0}
+    .report-content h3{font-family:'Source Serif 4',Georgia,serif;font-size:12.5px;color:#93c5fd;margin:12px 0 5px}
+    .report-content strong{color:#e2e8f0;font-weight:700}
+    .report-content em{color:#7a8fa8;font-style:italic}
+    .report-content p{color:#c4d4e8;margin:4px 0;font-family:'Source Sans 3',sans-serif;font-size:11.5px;line-height:1.65}
+    .report-content ul{margin:5px 0 8px 18px}
+    .report-content li{color:#c8d9eb;margin:4px 0;font-family:'Source Sans 3',sans-serif;font-size:11.5px;line-height:1.65}
+    .error-box{background:rgba(220,38,38,0.1);border:1px solid #dc2626;border-radius:9px;padding:12px 15px;margin-top:11px;color:#fca5a5;font-family:'Source Sans 3',sans-serif;font-size:12.5px}
+    .stepbar{display:flex;align-items:center;margin-bottom:22px;font-family:'Source Sans 3',sans-serif;font-size:12px}
+    .step-item{display:flex;align-items:center;gap:6px;padding:5px 14px 5px 8px;border-radius:20px;border:1px solid #192f4a}
+    .step-item.active{background:linear-gradient(135deg,#1d4ed8,#2563eb);border-color:#60a5fa}
+    .step-item.done{background:rgba(30,58,95,0.6);border-color:#234d7a}
+    .step-num{width:18px;height:18px;border-radius:50%;background:#192f4a;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#4d6070}
+    .step-item.active .step-num{background:#fff;color:#1d4ed8}
+    .step-item.done .step-num{background:#3b82f6;color:#fff}
+    .step-label{color:#4d6070;font-weight:400}
+    .step-item.active .step-label{color:#fff;font-weight:700}
+    .step-item.done .step-label{color:#7dd3fc}
+    .step-connector{width:20px;height:1px;background:#192f4a;margin:0 2px}
+    .step-connector.done{background:#3b82f6}
+    .mode-header{background:rgba(9,20,42,0.93);border-radius:11px;padding:13px 16px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between}
+    .mode-header-left{display:flex;align-items:center;gap:9px}
+    .mode-header-title{font-size:13px;font-weight:bold;color:#dde9ff}
+    .mode-header-desc{font-size:11px;color:#7a94a8;font-family:'Source Sans 3',sans-serif}
   </style>
 </head>
 <body>
-  <div id="root"></div>
-
-  <script>
-    const { useState, useRef, useCallback } = React;
-    // XLSX is available as global window.XLSX from CDN
-
-
-//---
-// DEĞERLENDİRME BOYUTLARI -- ÖLÇEK 1, ÖLÇEK 2 ve YANSITMA FORMU
-// İLE TAM UYUMLU YENİ YAPI
-//---
-
-const DIMS = [
-  {
-    id: "d1", icon: "🔐",
-    label: "YZ Etik Farkındalığı",
-    full: "Yapay Zekâ Etik Farkındalığı ve Eleştirel Tutum",
-    source: "Ölçek 1",
-    pts: 10,
-    color: "#dc2626",
-    items: [
-      "Gizlilik & veri güvenliği kaygısı (Ö1-M1,2,3,4)",
-      "Önyargı & algoritmik adalet farkındalığı (Ö1-M5,6,7,21)",
-      "Şeffaflık & açıklanabilirlik talebi (Ö1-M14,15,16,17,18)",
-      "Özerklik & manipülasyon kaygısı (Ö1-M8,13)",
-      "Eğitimde fırsat eşitliği & rehberlik (Ö1-M9,10,11,12)",
-    ],
-  },
-  {
-    id: "d2", icon: "🧠",
-    label: "YZ Öğrenme Becerileri",
-    full: "Yapay Zekâ Destekli Öğrenme ve Öz-Düzenleme Becerileri",
-    source: "Ölçek 2",
-    pts: 10,
-    color: "#7c3aed",
-    items: [
-      "Araç kullanım yetkinliği & uyum (Ö2-M1,4,5)",
-      "AI geri bildirimini yorumlama & entegrasyon (Ö2-M6,7,8,9)",
-      "Öz-düzenleme & bağımlılık farkındalığı (Ö2-M10,11,12,19)",
-      "Eleştirel düşünme & problem çözme için AI (Ö2-M13,14)",
-      "Öğrenme kalıcılığı, katılım & motivasyon (Ö2-M15,16,17,18)",
-    ],
-  },
-  {
-    id: "d3", icon: "⚙️",
-    label: "Materyal Geliştirme Süreci",
-    full: "Dijital Materyal Geliştirme Süreci ve Doğrulama Kalitesi",
-    source: "Yansıtma Formu S.8–14,17–18",
-    pts: 10,
-    color: "#0891b2",
-    items: [
-      "Dijital & AI araç seçimi ve çeşitliliği (Form S.8,9)",
-      "AI kullanım aşamalarının kapsamlılığı (Form S.10)",
-      "Doğrulama adımlarının niteliği (Form S.12)",
-      "Gizlilik & önyargı kontrolü (Form S.13,14)",
-      "AI katkı oranı & özgünlük dengesi (Form S.17,18)",
-    ],
-  },
-  {
-    id: "d4", icon: "📚",
-    label: "Pedagojik Tasarım",
-    full: "Pedagojik Tasarım ve Öğretimsel Karar Kalitesi",
-    source: "Yansıtma Formu S.11,15,16",
-    pts: 10,
-    color: "#16a34a",
-    items: [
-      "Pedagojik gerekçenin derinliği & çeşitliliği (Form S.11)",
-      "Hedef kitleye (sınıf düzeyine) uygunluk (Form S.3)",
-      "Öğrenciye beklenen beceri kazandırımı (Form S.15)",
-      "Öğretmen adayının öz gelişimine katkı (Form S.16)",
-      "Yapılandırmacı öğrenme ilkeleri & farklılaştırma",
-    ],
-  },
-  {
-    id: "d5", icon: "🗺️",
-    label: "Kazanım & İçerik Uyumu",
-    full: "Sosyal Bilgiler Kazanımları ve İçerik Uyumu",
-    source: "Yansıtma Formu S.2–7",
-    pts: 10,
-    color: "#d97706",
-    items: [
-      "Ders, ünite & konu uyumu (Form S.2,4,5)",
-      "Kazanım ifadesiyle örtüşme kalitesi (Form S.6)",
-      "Hafta/tema ile içerik bütünlüğü (Form S.7)",
-      "Sosyal bilgiler becerileri entegrasyonu",
-      "Değerler eğitimi & disiplinlerarası yaklaşım",
-    ],
-  },
-  {
-    id: "d6", icon: "✍️",
-    label: "Prompt Mühendisliği",
-    full: "Prompt Kalitesi ve Yapay Zekâ ile İş Birliği Becerisi",
-    source: "Yansıtma Formu S.18 + Genel",
-    pts: null,
-    color: "#6366f1",
-    items: [
-      "Paylaşılan prompt(lar)ın kalitesi & netliği",
-      "Bağlam, kısıt & örnek kullanımı",
-      "Prompt'un amaca & kazanıma bağlılığı",
-      "Çıktı sorgulama ve yeniden yönlendirme",
-    ],
-  },
-  {
-    id: "d7", icon: "📝",
-    label: "Form Yapısal Analizi",
-    full: "Kullanılan Formların Yapısal ve Psikometrik Analizi",
-    source: "Her iki form",
-    pts: null,
-    color: "#64748b",
-    items: [
-      "Ölçek 1 & 2 boyutsal geçerlilik analizi",
-      "Soru ifadelerinin açıklığı & ölçülebilirliği",
-      "Haftalık yansıtma formunun kapsam yeterliliği",
-      "Araçlar arası tutarlılık ve örtüşen boyutlar",
-      "İyileştirme önerileri",
-    ],
-  },
+<div class="header">
+  <div class="header-left">
+    <div class="header-icon" id="headerIcon">🎓</div>
+    <div>
+      <div class="header-tag">Bilişim Teknolojileri Dersi</div>
+      <div class="header-title">Form Analiz Aracı</div>
+      <div class="header-sub">Ölçek 1 · Ölçek 2 · Yansıtma Formu — 7 Boyutlu Değerlendirme</div>
+    </div>
+  </div>
+  <div class="header-badge" id="headerBadge">10 Haftalık Program</div>
+</div>
+<div class="container"><div id="app"></div></div>
+<input type="file" id="fileInput" accept=".pdf,.xlsx,.xls,.csv,.txt" />
+<script>
+const DIMS=[
+  {id:"d1",icon:"🔐",label:"YZ Etik Farkındalığı",full:"Yapay Zekâ Etik Farkındalığı ve Eleştirel Tutum",source:"Ölçek 1",pts:10,color:"#dc2626"},
+  {id:"d2",icon:"🧠",label:"YZ Öğrenme Becerileri",full:"YZ Destekli Öğrenme ve Öz-Düzenleme Becerileri",source:"Ölçek 2",pts:10,color:"#7c3aed"},
+  {id:"d3",icon:"⚙️",label:"Materyal Geliştirme Süreci",full:"Dijital Materyal Geliştirme Süreci ve Doğrulama",source:"Yansıtma Formu S.8-14, S.17-18",pts:10,color:"#0891b2"},
+  {id:"d4",icon:"📚",label:"Pedagojik Tasarım",full:"Pedagojik Tasarım ve Öğretimsel Karar Kalitesi",source:"Yansıtma Formu S.3, S.11, S.15-16",pts:10,color:"#16a34a"},
+  {id:"d5",icon:"🗺️",label:"Kazanım & İçerik Uyumu",full:"Sosyal Bilgiler Kazanımları ve İçerik Uyumu",source:"Yansıtma Formu S.2-7",pts:10,color:"#d97706"},
+  {id:"d6",icon:"✍️",label:"Prompt Mühendisliği",full:"Prompt Kalitesi ve YZ İş Birliği Becerisi",source:"Yansıtma Formu S.18",pts:null,color:"#6366f1"},
+  {id:"d7",icon:"📝",label:"Form Yapısal Analizi",full:"Formların Yapısal ve Psikometrik Analizi",source:"Her iki ölçek + form",pts:null,color:"#64748b"},
 ];
-
-//---
-// RAPOR MODLARI
-//---
-const REPORT_MODES = {
-  weekly: {
-    id: "weekly", label: "Haftalık Form Raporu",
-    sub: "Tek öğrenci · Tek hafta", icon: "📋", color: "#2563eb",
-    desc: "Bir öğretmen adayının tek haftaya ait yansıtma formu verilerini 5 puanlı boyut + 2 nitel boyutta değerlendirir.",
-    scoreMax: 50,
-    activeDims: ["d1","d2","d3","d4","d5","d6","d7"],
-  },
-  individual: {
-    id: "individual", label: "Bireysel Gelişim Raporu",
-    sub: "Tek öğrenci · 10 hafta", icon: "📈", color: "#7c3aed",
-    desc: "Bir öğretmen adayının 10 haftalık tüm form verilerini her boyutta trend analizi ile değerlendirir.",
-    scoreMax: 50,
-    activeDims: ["d1","d2","d3","d4","d5","d6","d7"],
-  },
-  class: {
-    id: "class", label: "Sınıf Gelişim Raporu",
-    sub: "Tüm öğrenciler · 10 hafta", icon: "👥", color: "#0891b2",
-    desc: "Tüm öğretmen adaylarının 10 haftalık sürecini karşılaştırmalı ve bütüncül biçimde analiz eder.",
-    scoreMax: null,
-    activeDims: ["d1","d2","d3","d4","d5","d6","d7"],
-  },
+const MODES={
+  weekly:{id:"weekly",label:"Haftalık Form Raporu",sub:"Tek öğrenci · Tek hafta",icon:"📋",color:"#2563eb",desc:"Bir öğretmen adayının tek haftaya ait form verilerini 7 boyutta değerlendirir.",scoreMax:50},
+  individual:{id:"individual",label:"Bireysel Gelişim Raporu",sub:"Tek öğrenci · 10 hafta",icon:"📈",color:"#7c3aed",desc:"10 haftalık tüm form verilerini trend analizi ile değerlendirir.",scoreMax:50},
+  class:{id:"class",label:"Sınıf Gelişim Raporu",sub:"Tüm öğrenciler · 10 hafta",icon:"👥",color:"#0891b2",desc:"Tüm öğretmen adaylarının 10 haftalık sürecini karşılaştırmalı analiz eder.",scoreMax:null},
 };
+const STEPS=[{id:"mode",label:"Tür Seç"},{id:"upload",label:"Dosya"},{id:"analyzing",label:"Analiz"},{id:"done",label:"Rapor"}];
+let state={step:"mode",mode:null,file:null,fileContent:null,report:null,error:null,loadingMsg:"",pdfGenerating:false};
+function setState(p){Object.assign(state,p);render();}
 
-//---
-// SİSTEM PROMPTLARI
-//---
-const PROMPTS = {
+const WEEKLY_PROMPT=`Sen, sosyal bilgiler öğretmen adaylarinin Bilisim Teknolojileri dersi kapsaminda hazirliklari haftalik Dijital Ogrenme Urunu Hazirlama ve Yansitma Formu ile iki olcekten (Olcek 1: YZ Etik Tutumlari; Olcek 2: YZ Ogrenme Becerileri) elde edilen verileri butuncel bicimde analiz eden uzman bir egitimci-arastirmacisin.
 
-weekly: `Sen, sosyal bilgiler öğretmen adaylarının Bilişim Teknolojileri dersi kapsamında hazırladıkları haftalık "Dijital Öğrenme Ürünü Hazırlama ve Yansıtma Formu" ile iki ölçekten (Ölçek 1: YZ Etik Tutumları; Ölçek 2: YZ Öğrenme Becerileri) elde edilen verileri bütüncül biçimde analiz eden uzman bir eğitimci-araştırmacısın.
+7 BOYUTLU HAFTALIK DEGERLENDIRME:
 
-HAFTALIK DEĞERLENDİRME BOYUTLARI:
+BOYUT 1 - YZ Etik Farkindarligi (10 puan) [Olcek 1]
+- Gizlilik ve veri guvenligi (M.1-4)
+- Onyargi ve algoritmik adalet (M.5-6,21)
+- Seffaflik ve aciklanabilirlik (M.14-18)
+- Ozerklik ve manipulasyon kaygisi (M.8,13)
+- Ogrenme destegi perspektifi (M.7,9-12)
+Puan: 1-2=Farkındalık yok; 5-6=Farkında ama uygulamasız; 9-10=Tutarli uygulama
 
---- BOYUT 1 -- Yapay Zekâ Etik Farkındalığı ve Eleştirel Tutum (10 puan)---
-[Ölçek 1 -- 18 madde: Gizlilik & veri güvenliği / Önyargı & adalet / Şeffaflık / Özerklik & manipülasyon / Öğrenme desteği]
+BOYUT 2 - YZ Ogrenme Becerileri (10 puan) [Olcek 2]
+- Arac yetkinligi ve uyum (M.1,4,5)
+- Geri bildirim entegrasyonu (M.6,7,8)
+- Oz-duzenleme ve bagimlilik bilinci (M.9-11,19)
+- Elestirel dusunme ve problem cozme (M.13,14)
+- Ogrenme kaliciligi ve motivasyon (M.15-18)
 
-Değerlendirme kriterleri:
-- Gizlilik & veri güvenliği: YZ araçlarına veri girerken bilinç düzeyi; Ölçek 1 M.1-4 örüntüsü (yüksek kaygı + proaktif önlem = güçlü)
-- Önyargı & algoritmik adalet: M.5-6 önyargı farkındalığı + Form S.14 önyargı/kapsayıcılık kontrolü tutarlılığı
-- Şeffaflık & açıklanabilirlik: M.14-18 şeffaflık talebi; "kara kutu" farkındalığı söylemi
-- Özerklik & manipülasyon: M.8,13 kontrol & manipülasyon kaygısı; kendi kararını AI'ye bırakmama farkındalığı
-- Öğrenme desteği & fırsat eşitliği: M.7,9,10,11,12 yapıcı AI kullanımı perspektifi
+BOYUT 3 - Materyal Gelistirme Sureci (10 puan) [Form S.8-14,S.17-18]
+- Arac secimi kalitesi (S.8,9)
+- YZ kullanim asamalari (S.10): cok asamali = iyi
+- Dogrulama kalitesi (S.12): kaynak cesitliligi
+- Gizlilik ve etik kontrol (S.13,14)
+- YZ orani ve ozgunluk dengesi (S.17): %26-75 ideal
 
-Puan rehberi: 1-2=Farkındalık yok; 3-4=Yüzeysel; 5-6=Farkında ama uygulamasız; 7-8=Farkında+kısmen uygulayan; 9-10=Derinlemesine farkında+tutarlı uygulama
+BOYUT 4 - Pedagojik Tasarim (10 puan) [Form S.3,S.11,S.15,S.16]
+- Pedagojik gerekcenin derinligi (S.11)
+- Sinif duzeyine uyum (S.3)
+- Ogrenciye beklenen kazanim (S.15)
+- Ogretmen adayi oz gelisimi (S.16)
 
---- BOYUT 2 -- YZ Destekli Öğrenme ve Öz-Düzenleme Becerileri (10 puan)---
-[Ölçek 2 -- 22 madde: Araç kullanımı / Geri bildirim yorumlama / Öz-düzenleme / Eleştirel düşünme / Katılım]
+BOYUT 5 - Kazanim ve Icerik Uyumu (10 puan) [Form S.2-7]
+- Kazanim ifadesinin kalitesi (S.6): MEB kodlu olmali
+- Ders-unite-konu-kazanim zinciri tutarliligi
+- SB becerileri ve degerler entegrasyonu
 
-Değerlendirme kriterleri:
-- Araç yetkinliği: M.1,4,5 farklı arayüzlere uyum + Form S.8,9 araç çeşitliliğiyle karşılaştırma
-- Geri bildirim entegrasyonu: M.6,7,8 AI çıktısını anlamlandırma & güçlü/zayıf yön tespiti
-- Öz-düzenleme & bağımlılık bilinci: M.9,10,11 hedef değerlendirme + Form S.19 sorumluluk farkındalığı; M.10 bağımlılık üzerine eleştirel düşünme kritik
-- Eleştirel düşünme & problem çözme: M.13,14 farklı bakış açıları & problem çözme için AI
-- Öğrenme kalıcılığı: M.15,16,17,18 katılım, kalıcılık, öğrenme tarzı uyumu
+BOYUT 6 - Prompt Muhendisligi Kalitesi (Nitel) [Form S.18]
+- Prompt acikligi, baglamlari, kisit ifadeleri
+- Ileri teknikler: zincir dusunme, rol atama
 
---- BOYUT 3 -- Dijital Materyal Geliştirme Süreci (10 puan)---
-[Yansıtma Formu S.8-14, S.17-18]
+BOYUT 7 - Form Sorularinin Yapisal Analizi (Nitel)
+- Olcek 1 ve 2 madde gecerliligi
+- Yansitma formu kapsam yeterliligi
+- Iyilestirme onerileri
 
-Değerlendirme kriterleri:
-- Araç seçimi kalitesi (S.8 dijital araç + S.9 YZ aracı): Amaca uygunluk, çeşitlilik, gerekçe
-- AI kullanım aşamaları (S.10): Tek aşama (yüzeysel) → Çok aşamalı entegrasyon (derinlemesine); planlama+içerik+değerlendirme = ideal
-- Doğrulama kalitesi (S.12): En az 2 kaynak şartı + kaynak türü çeşitliliği (ders kitabı, kurum sitesi, atlas vb.) + bölüm/sayfa/URL detayı
-- Gizlilik kontrolü (S.13): Sadece "kontrol etmedim" seçimi → ciddi zayıflık; anonimleştirme+telif kontrolü = güçlü
-- Önyargı/kapsayıcılık kontrolü (S.14): Kontrol etmeme → risk; düzeltme yaptığını belirtme → olgunluk işareti
-- AI oranı & özgünlük dengesi (S.17): %0 veya %76-100 uç değerler sorgulanmalı; %26-75 arası + prompt paylaşımı = iyi denge
-
---- BOYUT 4 -- Pedagojik Tasarım Kalitesi (10 puan)---
-[Yansıtma Formu S.3, S.11, S.15, S.16]
-
-Değerlendirme kriterleri:
-- Pedagojik gerekçe derinliği (S.11): Tek gerekçe (yüzeysel) → Çok boyutlu gerekçe (somutlaştırma+öğrenci merkezlilik+farklılaştırma+eleştirel düşünme = 4+ boyut)
-- Sınıf düzeyi uyumu (S.3): Seçilen sınıf seviyesine dil/kavram/soyutluk uygunluğu değerlendir
-- Öğrenciye beklenen kazanım (S.15): Genel ifadelerden spesifik beceri/çıktılara uzanan yelpaze; 21. yy becerileri, SB'ye özgü beceriler
-- Öğretmen adayı öz gelişimi (S.16): Farkındalık derinliği; öğretim tasarımı + dijital yeterlik + etik farkındalık üçlüsü
-
---- BOYUT 5 -- Sosyal Bilgiler Kazanım & İçerik Uyumu (10 puan)---
-[Yansıtma Formu S.2, S.4, S.5, S.6, S.7]
-
-Değerlendirme kriterleri:
-- Kazanım ifadesinin kalitesi (S.6): "SB.X.X.X." kodlu & MEB ifadesine yakın = güçlü; belirsiz/genel ifade = zayıf
-- Ders-ünite-konu-kazanım zinciri (S.2,4,5,6): İç tutarlılık; konu, kazanımı gerçekten karşılıyor mu?
-- Hafta/tema uyumu (S.7): Ders planıyla örtüşme
-- Sosyal bilgiler becerileri: Empati, tarihsel düşünme, coğrafi sorgulama, vatandaşlık; içeriğe yansıması
-- Değerler & disiplinlerarası: İnsan hakları, çevre, adalet; yerel-küresel bağ
-
---- BOYUT 6 -- Prompt Mühendisliği ve YZ İş Birliği Kalitesi (Nitel)---
-[Yansıtma Formu S.18 + genel form verisi]
-
-Değerlendirme kriterleri: (puan verilmez; derinlemesine nitel analiz)
-- Paylaşılan prompt(lar)ın açıklığı, bağlamı ve kısıt ifadeleri
-- Kazanım & pedagojik hedefe bağlılık
-- Zincir düşünme, rol atama, format belirleme gibi ileri teknikler
-- AI'yi pasif araç mı yoksa düşünce ortağı mı olarak konumlandırma
-
---- BOYUT 7 -- Form Sorularının Yapısal ve Psikometrik Analizi (Nitel)---
-[Her iki ölçek + yansıtma formu]
-
-Değerlendirme kriterleri: (puan verilmez; form geliştirmeye katkı)
-- Ölçek 1 alt boyutları (Gizlilik / Önyargı & Adalet / Şeffaflık / Özerklik / Öğrenme Desteği): Madde dağılım dengesi
-- Ölçek 2 alt boyutları (Araç Kullanımı / Geri Bildirim / Öz-Düzenleme / Eleştirel Düşünme / Katılım): Madde içerik geçerliliği
-- Yansıtma formu: S.10-14 doğrulama & etik soruları yeterince ölçüyor mu?
-- İki ölçek & form arasında örtüşen/tamamlayıcı boyutlar
-- Eksik boyutlar ve iyileştirme önerileri
-
---- RAPOR FORMATI (Türkçe, akademik, yapıcı)---
+RAPOR FORMATI (Turkce, akademik):
 
 ## GENEL DEGERLENDIRME OZETI
-(4-5 cümle: Ölçek 1+2 tutarlılığı, form doldurum kalitesi, en güçlü boyut, en kritik gelişim alanı)
+(4-5 cumle)
 
-## BOYUT 1 -- YZ Etik Farkindarligi (Olcek 1)
+## BOYUT 1 - YZ Etik Farkindarligi (Olcek 1)
 **Puan: X/10**
-**Alt Boyut Profili:**
-- Gizlilik & Veri Guvenligi: [guclu/orta/zayif + gerekce]
-- Onyargi & Algoritmik Adalet: ...
-- Seffaflik & Aciklanabilirlik: ...
-- Ozerklik & Manipulasyon: ...
-- Ogrenme Destegi Perspektifi: ...
+**Alt Boyut Profili:** Gizlilik: ... | Onyargi: ... | Seffaflik: ... | Ozerklik: ...
 **Guclu Yonler:** ...
 **Gelisim Alanlari:** ...
 **Oneri:** ...
 
-## BOYUT 2 -- YZ Ogrenme Becerileri (Olcek 2)
+## BOYUT 2 - YZ Ogrenme Becerileri (Olcek 2)
 **Puan: X/10**
-**Alt Boyut Profili:**
-- Arac Yetkinligi: ...
-- Geri Bildirim Entegrasyonu: ...
-- Oz-Duzenleme & Bagimlilik Bilinci: ...
-- Elestire Dusunme & Problem Cozme: ...
-- Ogrenme Kaliciligi & Motivasyon: ...
+**Alt Boyut Profili:** Arac: ... | Geri bildirim: ... | Oz-duzenleme: ... | Elestirel: ...
 **Guclu Yonler:** ...
 **Gelisim Alanlari:** ...
 **Oneri:** ...
 
-## BOYUT 3 -- Materyal Gelistirme Sureci (Yansitma Formu)
+## BOYUT 3 - Materyal Gelistirme Sureci
 **Puan: X/10**
-**Surec Analizi:**
-- Arac Secimi: ...
-- AI Kullanim Asamalari: ...
-- Dogrulama Kalitesi: ...
-- Gizlilik Kontrolu: ...
-- Onyargi Kontrolu: ...
-- AI Oran & Ozgunluk Dengesi: ...
+**Surec Analizi:** Arac: ... | Asamalar: ... | Dogrulama: ... | Etik: ... | YZ orani: ...
 **Guclu Yonler:** ...
 **Gelisim Alanlari:** ...
 **Oneri:** ...
 
-## BOYUT 4 -- Pedagojik Tasarim (Yansitma Formu)
+## BOYUT 4 - Pedagojik Tasarim
 **Puan: X/10**
-**Pedagojik Gerekcenin Boyutlari:** [kac boyut? hangileri?]
 **Guclu Yonler:** ...
 **Gelisim Alanlari:** ...
 **Oneri:** ...
 
-## BOYUT 5 -- Kazanim & Icerik Uyumu (Yansitma Formu)
+## BOYUT 5 - Kazanim ve Icerik Uyumu
 **Puan: X/10**
-**Kazanim Zinciri Degerlendirmesi:** [ders→unite→konu→kazanim tutarliligi]
+**Kazanim Zinciri:** ...
 **Guclu Yonler:** ...
-**Gelisim Alanlari:** ...
 **Oneri:** ...
 
-## BOYUT 6 -- Prompt Muhendisligi (Nitel)
-**Prompt Kalite Duzeyi:** [Basit / Orta / Gelismis / Uzman]
+## BOYUT 6 - Prompt Muhendisligi (Nitel)
+**Kalite Duzeyi:** [Basit/Orta/Gelismis/Uzman]
 **Analiz:** ...
-**Gelistirme Onerileri:** ...
+**Oneri:** ...
 
-## BOYUT 7 -- Form Soruları Yapisal Analizi (Nitel)
-**Olcek 1 Degerlendirmesi:** ...
-**Olcek 2 Degerlendirmesi:** ...
-**Yansitma Formu Degerlendirmesi:** ...
-**Iyilestirme Onerileri:** ...
+## BOYUT 7 - Form Yapisal Analizi (Nitel)
+**Olcek 1:** ...
+**Olcek 2:** ...
+**Yansitma Formu:** ...
+**Iyilestirme:** ...
 
 ## ONCELIKLI 3 ADIM
 - 1. ...
 - 2. ...
 - 3. ...
 
-## GENEL PUAN: X/50`,
+## GENEL PUAN: X/50`;
 
-// ─────────────────────────────────────────────
-individual: `Sen, sosyal bilgiler öğretmen adaylarının 10 haftalık süreçte doldurdukları yansıtma formları ile iki ölçekten (Ölçek 1: YZ Etik Tutumları; Ölçek 2: YZ Öğrenme Becerileri) elde edilen tüm verileri bütüncül biçimde analiz eden uzman bir eğitimci-araştırmacısın.
+const INDIVIDUAL_PROMPT=`Sen, bir sosyal bilgiler ogretmen adayinin 10 haftalik yansitma formu ve olcek verilerini butuncel bicimde analiz eden uzman bir egitimci-arastirmacisin. Her boyutu trend acisindan degerlendir.
 
-10 haftalık verilerde her boyutu hem haftalık performans örüntüsü hem de genel trend açısından değerlendir.
-
-BİREYSEL GELİŞİM BOYUTLARI (7 boyut):
-
-BOYUT 1 -- YZ Etik Farkındalığı Gelişimi [Ölçek 1]
-- Gizlilik, önyargı, şeffaflık, özerklik alt boyutlarında haftalık değişim
-- Form S.13 (gizlilik) ve S.14 (önyargı) kontrollerinin 10 haftada gelişimi
-- Etik tutumların pratiğe yansımasındaki evrim
-- Trend: [Gerileme / Durağan / Yavaş İlerleme / Belirgin İlerleme / Dönüşüm]
-
-BOYUT 2 -- YZ Öğrenme Becerileri Gelişimi [Ölçek 2]
-- Araç çeşitliliği, geri bildirim yorumlama, öz-düzenleme becerilerindeki artış
-- Bağımlılık farkındalığının haftalara göre derinleşmesi
-- Eleştirel düşünme için AI kullanımının olgunlaşması
-- Trend değerlendirmesi
-
-BOYUT 3 -- Materyal Geliştirme Süreci Olgunlaşması [Form S.8-14, S.17-18]
-- Araç seçimindeki çeşitlenme (tek araç → çoklu ekosistem)
-- Doğrulama adımlarının nitelik artışı
-- Gizlilik & önyargı kontrolünün tutarlılığı
-- Prompt kalitesinin haftalara göre evrimi
-- AI oranı tercihlerindeki değişim (özgünlük bilincinin gelişimi)
-- Trend değerlendirmesi
-
-BOYUT 4 -- Pedagojik Tasarım Yeterliliğinin Gelişimi [Form S.11,15,16]
-- Pedagojik gerekçe derinliğinin artışı (tek boyutlu → çok boyutlu)
-- Öğrenciye yönelik çıktı beklentilerinin özgünleşmesi
-- Öz gelişim farkındalığının derinleşmesi
-- Trend değerlendirmesi
-
-BOYUT 5 -- Kazanım Uyumunun Gelişimi [Form S.2-7]
-- Kazanım ifadesi kalitesinin haftalara göre iyileşmesi
-- Ders-ünite-konu-kazanım zincirinin tutarlılığının artışı
-- SB beceri entegrasyonunun zenginleşmesi
-- Trend değerlendirmesi
-
-BOYUT 6 -- Prompt Mühendisliği Olgunlaşması [Form S.18]
-- Basit prompt'tan karmaşık yapılandırılmış prompt'a geçiş
-- Pedagojik hedefi prompt'a yansıtma becerisinin gelişimi
-- Trend değerlendirmesi
-
-BOYUT 7 -- Form Kalitesinin Gelişimi [Her iki form]
-- Formlara verilen yanıtların kalitesi ve derinliğinin 10 haftada artışı
-- Yansıtıcı düşüncenin (reflective practice) görünürlük gelişimi
+Trend seçenekleri: Gerileme / Duragan / Yavas ilerleme / Belirgin ilerleme / Donusum
 
 RAPOR FORMATI:
 
-## BIREYSEL GELISIM RAPORU -- OZET PROFIL
-(Öğretmen adayının 10 haftalık genel gelişim portföyü, 5-6 cümle; Ölçek 1+2 ile form tutarlılığı vurgulanmalı)
+## BIREYSEL GELISIM RAPORU OZET PROFIL
+(5-6 cumle genel degerlendirme)
 
-## BOYUT 1 -- YZ Etik Farkindarligi Gelisimi
-**Trend: [...]**
-**Alt Boyut Trendleri:**
-- Gizlilik: ... | Onyargi: ... | Seffaflik: ... | Ozerklik: ...
-**Kritik Gelisim Anları:** (kaçıncı haftalarda sıçrama/düşüş)
-**En Guclu Alt Boyut:** ...
-**Destek Gerektiren Alan:** ...
+## BOYUT 1 - YZ Etik Farkindarligi Gelisimi [Olcek 1]
+**Trend:** ...
+**Alt Boyut Trendleri:** Gizlilik: ... | Onyargi: ... | Seffaflik: ... | Ozerklik: ...
+**Kritik Gelisim Anlari:** ...
+**En Guclu Alan:** ...
 
-## BOYUT 2 -- YZ Ogrenme Becerileri Gelisimi
-**Trend: [...]**
+## BOYUT 2 - YZ Ogrenme Becerileri Gelisimi [Olcek 2]
+**Trend:** ...
 **Alt Boyut Trendleri:** ...
-**Kritik Gelisim Anları:** ...
+**Kritik Haftalara Odaklan:** ...
 
-## BOYUT 3 -- Materyal Gelistirme Surecinin Olgunlasmasi
-**Trend: [...]**
+## BOYUT 3 - Materyal Gelistirme Sureci Olgunlasmasi
+**Trend:** ...
 **Arac Secimi Evrimi:** ...
 **Dogrulama Kalitesi Evrimi:** ...
 **Prompt Olgunlasmasi:** ...
-**AI Oran Tercihleri:** ...
 
-## BOYUT 4 -- Pedagojik Tasarim Gelisimi
-**Trend: [...]**
-**Pedagojik Gerekcenin Derinlesmesi:** ...
+## BOYUT 4 - Pedagojik Tasarim Gelisimi
+**Trend:** ...
+**Gerekcenin Derinlesmesi:** ...
 
-## BOYUT 5 -- Kazanim Uyumunun Gelisimi
-**Trend: [...]**
+## BOYUT 5 - Kazanim Uyumunun Gelisimi
+**Trend:** ...
 **Kazanim Zinciri Kalitesi:** ...
 
-## BOYUT 6 -- Prompt Muhendisligi Gelisimi
-**Trend: [...]**
-**Olgunlasma Kanıtları:** ...
+## BOYUT 6 - Prompt Muhendisligi Gelisimi
+**Trend:** ...
+**Olgunlasma Kanitlari:** ...
 
-## BOYUT 7 -- Yansıtıcı Dusunce Gelisimi
-**Trend: [...]**
+## BOYUT 7 - Yansitici Dusunce Gelisimi
+**Trend:** ...
 **Gozlem:** ...
 
-## GELISIM PROFİLİ
+## GELISIM PROFILI
 **Istikrarli Guclu Boyutlar:** ...
-**En Fazla Gelisim Kaydedilen Boyut:** ...
-**En Cok Destege Ihtiyac Duyulan Boyut:** ...
-**Dikkat Ceken Haftalik Oruntu:** ...
+**En Fazla Gelisim Kaydedilen:** ...
+**En Cok Destek Gerektiren:** ...
 
 ## SUREC SONU 5 HEDEF
 - 1. ...
 - 2. ...
 - 3. ...
 - 4. ...
-- 5. ...`,
+- 5. ...`;
 
-// ─────────────────────────────────────────────
-class: `Sen, sosyal bilgiler öğretmen adaylarından oluşan bir sınıfın 10 haftalık tüm form verilerini (Yansıtma Formu + Ölçek 1 + Ölçek 2) bütüncül, karşılaştırmalı ve istatistiksel-yorumsal biçimde analiz eden uzman bir eğitimci-araştırmacısın.
-
-SINIF GELİŞİM BOYUTLARI (7 boyut):
-
-BOYUT 1 -- YZ Etik Farkındalığı -- Sınıf Profili [Ölçek 1]
-- Her alt boyut (gizlilik, önyargı, şeffaflık, özerklik) için sınıf ortalaması ve dağılım örüntüsü
-- Form S.13-14 ile Ölçek 1 tutarlılığı (söylem-pratik boşluğu)
-- 10 haftalık etik farkındalık trendi (sınıf geneli)
-- Etik boyutta öne çıkan ve geride kalan öğrenci profilleri (anonim)
-
-BOYUT 2 -- YZ Öğrenme Becerileri -- Sınıf Profili [Ölçek 2]
-- 5 alt boyut için sınıf profili (araç yetkinliği / geri bildirim / öz-düzenleme / eleştirel düşünme / katılım)
-- Bağımlılık farkındalığı (M.10) sınıf genelinde nasıl dağılıyor?
-- Ölçek 2 ile Form S.19 (sorumluluk farkındalığı) tutarlılığı
-
-BOYUT 3 -- Materyal Geliştirme Süreci -- Sınıf Profili [Form S.8-14, S.17-18]
-- En çok kullanılan dijital araçlar ve AI araçları (sıklık analizi)
-- AI kullanım aşaması çeşitliliği sınıf genelinde nasıl?
-- Doğrulama kalitesi sınıf ortalaması; "kontrol etmedim" seçimi oranı (gizlilik & önyargı)
-- AI katkı oranı dağılımı (% bazlı sınıf profili)
-- Prompt paylaşım kalitesi genel değerlendirmesi
-
-BOYUT 4 -- Pedagojik Tasarım -- Sınıf Profili [Form S.11, S.15, S.16]
-- Pedagojik gerekçe derinliği sınıf geneli (kaç boyut kullanan kaç öğrenci)
-- Öğrenci çıktı beklentilerinde en çok hangi beceriler öne çıkıyor?
-- Öz gelişim farkındalığı yelpazesi
-
-BOYUT 5 -- Kazanım Uyumu -- Sınıf Profili [Form S.2-7]
-- Kazanım ifadesi kalitesi sınıf genelinde nasıl?
-- En çok seçilen ders, sınıf düzeyi, öğrenme alanı ve içerik türü
-- Kazanım-içerik uyumu genel görünümü
-
-BOYUT 6 -- Prompt Mühendisliği -- Sınıf Profili [Form S.18]
-- Sınıf genelinde prompt olgunluk dağılımı
-- Örnek iyi prompt'ların genel özellikleri
-- Sınıfın ortak prompt zayıflıkları
-
-BOYUT 7 -- 10 Haftalık Sınıf Gelişim Trendi
-- Her boyut için hafta bazlı sınıf trendi
-- En hızlı gelişim gösteren boyut & hafta
-- En durağan veya gerileyen boyut
-- Kritik dönüm noktaları
-
-BOYUT 8 -- Karşılaştırmalı Öğrenci Profilleri (Anonim)
-- Tutarlı yüksek performans profili (hangi boyutlarda güçlü?)
-- Hızlı dönüşüm profili (hangi boyutlarda sıçrama?)
-- Ek desteğe ihtiyaç profili (hangi boyutlar öncelikli?)
+const CLASS_PROMPT=`Sen, sosyal bilgiler ogretmen adaylarindan olusan bir sinifin 10 haftalik form ve olcek verilerini karsilastirmali bicimde analiz eden uzman bir egitimci-arastirmacisin.
 
 RAPOR FORMATI:
 
-## SINIF GELISIM RAPORU -- YONETICI OZETI
-(Sınıfın 10 haftalık genel profili, en kritik 3 bulgu ve acil müdahale alanları, 6-7 cümle)
+## SINIF GELISIM RAPORU - YONETICI OZETI
+(6-7 cumle, en kritik 3 bulgu ve mudahale alanlari)
 
-## BOYUT 1 -- YZ Etik Farkindarligi Sinif Profili
-**Genel Duzey:** [Baslangic / Gelismekte / Yeterli / Ileri]
-**Alt Boyut Dagilimi:** (Gizlilik / Onyargi / Seffaflik / Ozerklik)
+## BOYUT 1 - YZ Etik Farkindarligi Sinif Profili
+**Genel Duzey:** [Baslangic/Gelismekte/Yeterli/Ileri]
+**Alt Boyut Dagilimi:** Gizlilik: ... | Onyargi: ... | Seffaflik: ... | Ozerklik: ...
 **Soylem-Pratik Boslugu:** ...
-**10 Haftalik Trend:** ...
 **Mudahale Onerileri:** ...
 
-## BOYUT 2 -- YZ Ogrenme Becerileri Sinif Profili
+## BOYUT 2 - YZ Ogrenme Becerileri Sinif Profili
 **Genel Duzey:** ...
-**Alt Boyut Ozeti:** ...
-**Kritik Bulgu (Bagimlilik Boyutu):** ...
+**Kritik Bulgu (Bagimlilik):** ...
 **Mudahale Onerileri:** ...
 
-## BOYUT 3 -- Materyal Gelistirme Surecinin Sinif Profili
+## BOYUT 3 - Materyal Gelistirme Sinif Profili
 **En Cok Kullanilan Araclar:** ...
-**AI Kullanim Asama Cesitliligi:** ...
-**Dogrulama & Etik Kontrol Profili:** ...
-**AI Oran Dagilimi:** ...
+**Dogrulama ve Etik Kontrol Profili:** ...
 **Mudahale Onerileri:** ...
 
-## BOYUT 4 -- Pedagojik Tasarim Sinif Profili
+## BOYUT 4 - Pedagojik Tasarim Sinif Profili
 **Gerekcenin Derinligi Dagilimi:** ...
-**One Cikan Beceriler:** ...
 **Mudahale Onerileri:** ...
 
-## BOYUT 5 -- Kazanim Uyumu Sinif Profili
+## BOYUT 5 - Kazanim Uyumu Sinif Profili
 **Kazanim Kalite Dagilimi:** ...
 **En Cok Tercih Edilen Icerikler:** ...
-**Mudahale Onerileri:** ...
 
-## BOYUT 6 -- Prompt Muhendisligi Sinif Profili
+## BOYUT 6 - Prompt Muhendisligi Sinif Profili
 **Olgunluk Dagilimi:** ...
 **Ortak Gucluk:** ...
-**Ornek Iyi Pratikler:** ...
 
-## BOYUT 7 -- 10 Haftalik Sinif Trendi
+## BOYUT 7 - 10 Haftalik Sinif Trendi
 **En Hizli Gelisim:** ...
 **En Duragan/Gerileyen:** ...
 **Kritik Donum Noktalari:** ...
 
-## BOYUT 8 -- Karsilastirmali Ogrenci Profilleri
+## BOYUT 8 - Karsilastirmali Ogrenci Profilleri (Anonim)
 **Yuksek Performans Profili:** ...
 **Hizli Donusum Profili:** ...
 **Ek Destek Profili:** ...
@@ -525,426 +333,310 @@ RAPOR FORMATI:
 - 2. ...
 - 3. ...
 - 4. ...
-- 5. ...`,
-};
+- 5. ...`;
 
-//---
-// YARDIMCI FONKSİYONLAR
-//---
-const formatMarkdown = (text) => {
-  if (!text) return "";
-  return text
-    .replace(/^## (.+)$/gm, '<h2>$1</h2>')
-    .replace(/^### (.+)$/gm, '<h3>$1</h3>')
-    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-    .replace(/\*(.+?)\*/g, '<em>$1</em>')
-    .replace(/^- (.+)$/gm, '<li>$1</li>')
-    .replace(/(<li>.*<\/li>\n?)+/g, (m) => `<ul>${m}</ul>`)
-    .replace(/\n\n/g, '</p><p>')
-    .replace(/^(?!<[hul]|<\/[hul]|<p>)(.+)$/gm, '<p>$1</p>')
-    .replace(/<p><\/p>/g, '');
-};
+const PROMPTS={weekly:WEEKLY_PROMPT,individual:INDIVIDUAL_PROMPT,class:CLASS_PROMPT};
 
-const mdToHtmlForPDF = (text) => {
-  if (!text) return "";
-  const lines = text.split("\n");
-  let html = "", inList = false;
-  for (const line of lines) {
-    const t = line.trim();
-    if (!t) { if (inList) { html += "</ul>"; inList = false; } continue; }
-    const esc = (s) => s.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>").replace(/\*(.+?)\*/g, "<em>$1</em>");
-    if (/^## (.+)$/.test(t)) { if (inList) { html += "</ul>"; inList = false; } html += `<h2>${esc(t.slice(3))}</h2>`; }
-    else if (/^### (.+)$/.test(t)) { if (inList) { html += "</ul>"; inList = false; } html += `<h3>${esc(t.slice(4))}</h3>`; }
-    else if (/^- (.+)$/.test(t)) { if (!inList) { html += "<ul>"; inList = true; } html += `<li>${esc(t.slice(2))}</li>`; }
-    else { if (inList) { html += "</ul>"; inList = false; } html += `<p>${esc(t)}</p>`; }
+function mdToHtml(text){
+  if(!text)return"";
+  const lines=text.split("\n");let html="",inList=false;
+  const esc=s=>s.replace(/\*\*(.+?)\*\*/g,"<strong>$1</strong>").replace(/\*(.+?)\*/g,"<em>$1</em>");
+  for(const line of lines){
+    const t=line.trim();
+    if(!t){if(inList){html+="</ul>";inList=false;}continue;}
+    if(/^## (.+)$/.test(t)){if(inList){html+="</ul>";inList=false;}html+="<h2>"+esc(t.slice(3))+"</h2>";}
+    else if(/^### (.+)$/.test(t)){if(inList){html+="</ul>";inList=false;}html+="<h3>"+esc(t.slice(4))+"</h3>";}
+    else if(/^- (.+)$/.test(t)){if(!inList){html+="<ul>";inList=true;}html+="<li>"+esc(t.slice(2))+"</li>";}
+    else{if(inList){html+="</ul>";inList=false;}html+="<p>"+esc(t)+"</p>";}
   }
-  if (inList) html += "</ul>";
+  if(inList)html+="</ul>";
   return html;
-};
-
-const generatePDF = (reportText, fileName, dateStr, mode) => {
-  const m = REPORT_MODES[mode];
-  const modeColors = { weekly: "#1d4ed8", individual: "#7c3aed", class: "#0891b2" };
-  const ac = modeColors[mode];
-  const html = mdToHtmlForPDF(reportText);
-  const win = window.open("", "_blank");
-  if (!win) { alert("Lütfen açılır pencere engelleyicisini kapatın."); return; }
-
-  const dimRows = DIMS.filter(d => m.activeDims.includes(d.id)).map(d =>
-    `<div class="dim-row"><div class="dim-dot" style="background:${d.color}"></div><span>${d.icon} ${d.full}</span><span class="dim-pts">${d.pts ? d.pts + " puan" : "Nitel"}</span></div>`
-  ).join("");
-
-  win.document.write(`<!DOCTYPE html><html lang="tr"><head><meta charset="UTF-8"/>
-<title>${m.label}</title>
-<style>
-@import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@400;600;700&family=Source+Sans+3:wght@300;400;600;700&display=swap');
-*{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Source Sans 3','Segoe UI',Arial,sans-serif;font-size:10.5pt;color:#1a1a2e;background:#fff;line-height:1.75}
-.cover{width:100%;min-height:100vh;display:flex;flex-direction:column;page-break-after:always}
-.hero{background:linear-gradient(140deg,#0a1e3d 0%,#0f2744 45%,${ac} 100%);padding:48px 56px 40px;color:#fff;flex:1}
-.mode-badge{display:inline-flex;align-items:center;gap:7px;padding:5px 16px;border-radius:20px;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);font-size:8pt;color:#dbeafe;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:24px;font-family:'Source Sans 3',sans-serif}
-.cover-title{font-family:'Source Serif 4',Georgia,serif;font-size:32pt;font-weight:700;line-height:1.1;color:#fff;margin-bottom:8px}
-.cover-title span{color:rgba(255,255,255,0.6)}
-.cover-sub{font-size:12pt;color:rgba(255,255,255,0.7);font-weight:300;margin-bottom:12px}
-.cover-proj{font-size:8pt;color:rgba(255,255,255,0.45);letter-spacing:2px;text-transform:uppercase;font-family:'Source Sans 3',sans-serif}
-.meta{padding:28px 56px;background:#f8fafc}
-.meta-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}
-.meta-item{padding:11px 15px;border:1.5px solid #e2e8f0;border-radius:8px;background:#fff}
-.meta-label{font-size:7.5pt;text-transform:uppercase;letter-spacing:2px;color:#64748b;font-weight:700;margin-bottom:3px;font-family:'Source Sans 3',sans-serif}
-.meta-value{font-size:10.5pt;font-weight:700;color:#0f172a}
-.dims-title{font-size:8pt;text-transform:uppercase;letter-spacing:2px;color:#475569;font-weight:700;margin-bottom:10px;font-family:'Source Sans 3',sans-serif}
-.dim-row{display:flex;align-items:center;gap:9px;font-size:9.5pt;color:#334155;margin-bottom:7px;font-family:'Source Sans 3',sans-serif}
-.dim-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
-.dim-pts{margin-left:auto;font-size:8.5pt;font-weight:700;color:${ac}}
-.foot{padding:13px 56px;border-top:1px solid #e2e8f0;display:flex;justify-content:space-between;align-items:center;font-size:8pt;color:#94a3b8;font-family:'Source Sans 3',sans-serif}
-.logo{font-family:'Source Serif 4',Georgia,serif;font-size:11pt;font-weight:700;color:${ac}}
-.page-header{background:#0f2744;padding:10px 56px;display:flex;justify-content:space-between;color:#7dd3fc;font-size:7.5pt;letter-spacing:1px;font-family:'Source Sans 3',sans-serif}
-.dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:${ac};margin-right:6px}
-.content{padding:32px 56px 65px}
-h2{font-family:'Source Serif 4',Georgia,serif;font-size:13pt;font-weight:700;color:#0f2744;margin:30px 0 8px;padding-bottom:6px;border-bottom:2px solid ${ac};page-break-after:avoid}
-h2:first-child{margin-top:0}
-h3{font-family:'Source Serif 4',Georgia,serif;font-size:10.5pt;font-weight:600;color:#1e3a5f;margin:14px 0 5px;page-break-after:avoid}
-p{margin:5px 0;color:#1e293b;font-size:10pt}
-strong{font-weight:700;color:#0f172a}
-em{color:#475569;font-style:italic}
-ul{margin:6px 0 10px 20px}
-li{margin:4px 0;color:#334155;font-size:9.5pt}
-li::marker{color:${ac}}
-.pfooter{position:fixed;bottom:0;left:0;right:0;padding:8px 56px;border-top:1px solid #e2e8f0;display:flex;justify-content:space-between;font-size:7.5pt;color:#94a3b8;background:#fff;font-family:'Source Sans 3',sans-serif}
-@media print{@page{size:A4;margin:0}body{-webkit-print-color-adjust:exact;print-color-adjust:exact}.cover{page-break-after:always}}
-</style></head><body>
-<div class="cover">
-  <div class="hero">
-    <div class="mode-badge">${m.icon} ${m.label}</div>
-    <div class="cover-title">Geri Dönüt<br><span>Raporu</span></div>
-    <div class="cover-sub">${m.sub}</div>
-    <div class="cover-proj">Bilişim Teknolojileri Dersi · SB Öğretmen Adayı Değerlendirme Projesi</div>
-  </div>
-  <div class="meta">
-    <div class="meta-grid">
-      <div class="meta-item"><div class="meta-label">Dosya</div><div class="meta-value">${fileName}</div></div>
-      <div class="meta-item"><div class="meta-label">Tarih</div><div class="meta-value">${dateStr}</div></div>
-      <div class="meta-item"><div class="meta-label">Rapor Türü</div><div class="meta-value">${m.label}</div></div>
-      <div class="meta-item"><div class="meta-label">Puanlama</div><div class="meta-value">${m.scoreMax ? m.scoreMax + " üzerinden" : "Nitel + Puanlı"}</div></div>
-    </div>
-    <div class="dims-title">Değerlendirme Boyutları</div>
-    ${dimRows}
-  </div>
-  <div class="foot"><div class="logo">Form Analiz Aracı</div><div>Claude AI tarafından oluşturulmuştur</div></div>
-</div>
-<div>
-  <div class="page-header"><span><span class="dot"></span>${m.label.toUpperCase()} · ${fileName}</span><span>${dateStr}</span></div>
-  <div class="content">${html}</div>
-  <div class="pfooter"><span>SB Öğretmen Adayı Değerlendirme Projesi -- ${m.label}</span><span>Claude AI · Form Analiz Aracı</span></div>
-</div>
-<scr"+"ipt>window.onload=function(){setTimeout(function(){window.print();},900);}</scr"+"ipt>
-</body></html>`);
-  win.document.close();
-};
-
-//---
-// ANA BİLEŞEN
-//---
-  </script>
-
-  <script type="text/babel" data-presets="react">
-function FormAnalizAraci() {
-  const [mode, setMode] = useState(null);
-  const [file, setFile] = useState(null);
-  const [fileContent, setFileContent] = useState(null);
-  const [report, setReport] = useState(null);
-  const [error, setError] = useState(null);
-  const [dragOver, setDragOver] = useState(false);
-  const [step, setStep] = useState("mode");
-  const [loadingMsg, setLoadingMsg] = useState("");
-  const [pdfGenerating, setPdfGenerating] = useState(false);
-  const fileInputRef = useRef();
-
-  const LOADING_MSGS = [
-    "Form verileri işleniyor...",
-    "Ölçek 1 (Etik Tutumlar) analiz ediliyor...",
-    "Ölçek 2 (Öğrenme Becerileri) değerlendiriliyor...",
-    "Materyal geliştirme süreci inceleniyor...",
-    "Pedagojik tasarım analiz ediliyor...",
-    "Kazanım & içerik uyumu kontrol ediliyor...",
-    "Prompt kalitesi değerlendiriliyor...",
-    "Rapor yapılandırılıyor...",
-  ];
-
-  const readFile = async (f) => {
-    const ext = f.name.split(".").pop().toLowerCase();
-    if (["xlsx","xls","csv"].includes(ext)) {
-      return new Promise((res, rej) => {
-        const r = new FileReader();
-        r.onload = (e) => {
-          try {
-            const wb = window.XLSX.read(e.target.result, { type:"binary" });
-            let t = `DOSYA: ${f.name}\n\n`;
-            wb.SheetNames.forEach((s) => {
-              const ws = wb.Sheets[s];
-              const d = window.XLSX.utils.sheet_to_json(ws, { header:1 });
-              t += `=== ${s} ===\n`;
-              d.forEach((row) => { if (row.some((c) => c != null && c !== "")) t += row.join(" | ") + "\n"; });
-              t += "\n";
-            });
-            res(t);
-          } catch(e) { rej(e); }
-        };
-        r.onerror = rej; r.readAsBinaryString(f);
-      });
-    } else if (ext === "pdf") {
-      return new Promise((res, rej) => {
-        const r = new FileReader();
-        r.onload = (e) => res({ type:"pdf", base64: e.target.result.split(",")[1] });
-        r.onerror = rej; r.readAsDataURL(f);
-      });
-    } else if (["txt","md"].includes(ext)) {
-      return new Promise((res, rej) => {
-        const r = new FileReader();
-        r.onload = (e) => res(e.target.result);
-        r.onerror = rej; r.readAsText(f, "UTF-8");
-      });
-    } else throw new Error("Desteklenmeyen dosya türü.");
-  };
-
-  const handleFile = async (f) => {
-    setFile(f); setError(null); setReport(null);
-    try { const c = await readFile(f); setFileContent(c); setStep("ready"); }
-    catch(e) { setError("Dosya okunamadı: " + e.message); }
-  };
-  const handleDrop = useCallback((e) => {
-    e.preventDefault(); setDragOver(false);
-    const f = e.dataTransfer.files[0]; if (f) handleFile(f);
-  }, [mode]);
-
-  const analyzeForm = async () => {
-    if (!fileContent || !mode) return;
-    setStep("analyzing"); setError(null); setReport(null);
-    let idx = 0; setLoadingMsg(LOADING_MSGS[0]);
-    const iv = setInterval(() => { idx = (idx+1)%LOADING_MSGS.length; setLoadingMsg(LOADING_MSGS[idx]); }, 2500);
-    const labels = { weekly:"tek haftaya ait yansıtma formu & ölçek verileri", individual:"10 haftalık tüm yansıtma formu & ölçek verileri", class:"tüm öğretmen adaylarının 10 haftalık yansıtma formu & ölçek verileri" };
-    const prompt = `Bu dosya, sosyal bilgiler öğretmen adaylarının ${labels[mode]} içermektedir. Sistem talimatlarındaki 7 boyutlu değerlendirme çerçevesine göre kapsamlı bir rapor hazırla.`;
-    try {
-      let messages;
-      if (typeof fileContent === "object" && fileContent.type === "pdf") {
-        messages = [{ role:"user", content:[{ type:"document", source:{ type:"base64", media_type:"application/pdf", data:fileContent.base64 }},{ type:"text", text:prompt }] }];
-      } else {
-        messages = [{ role:"user", content:`${prompt}\n\n---\n${fileContent}\n---` }];
-      }
-      const res = await fetch("https://api.anthropic.com/v1/messages", {
-        method:"POST", headers:{ "Content-Type":"application/json" },
-        body: JSON.stringify({ model:"claude-sonnet-4-20250514", max_tokens:1000, system:PROMPTS[mode], messages }),
-      });
-      const data = await res.json();
-      if (data.error) throw new Error(data.error.message);
-      setReport(data.content?.map((b) => b.text||"").join("\n")||"");
-      setStep("done");
-    } catch(e) { setError("Analiz hatası: " + e.message); setStep("ready"); }
-    finally { clearInterval(iv); }
-  };
-
-  const handlePDF = () => {
-    if (!report || !mode) return;
-    setPdfGenerating(true);
-    const d = new Date().toLocaleDateString("tr-TR",{ day:"2-digit", month:"long", year:"numeric" });
-    generatePDF(report, file?.name||"form", d, mode);
-    setTimeout(() => setPdfGenerating(false), 2000);
-  };
-
-  const reset = () => { setFile(null); setFileContent(null); setReport(null); setError(null); setStep("mode"); setMode(null); };
-  const backToUpload = () => { setFile(null); setFileContent(null); setReport(null); setError(null); setStep("upload"); };
-
-  const mc = mode ? { weekly:"#2563eb", individual:"#7c3aed", class:"#0891b2" }[mode] : "#2563eb";
-  const C = { bg:"#07101f", panel:"rgba(9,20,42,0.93)", border:"#192f4a", bright:"#1e4270", sky:"#7dd3fc", text:"#dde9ff", muted:"#4d6070", soft:"#7a94a8" };
-
-  return (
-    <div style={{ minHeight:"100vh", background:`linear-gradient(160deg,${C.bg} 0%,#0a1a30 55%,#080f20 100%)`, fontFamily:"Georgia,'Times New Roman',serif", color:C.text }}>
-
-      {/* HEADER */}
-      <div style={{ background:"linear-gradient(90deg,#060d1a,#09182e)", borderBottom:`2px solid ${C.bright}`, padding:"15px 26px", display:"flex", alignItems:"center", justifyContent:"space-between", boxShadow:"0 4px 28px rgba(0,0,0,0.6)" }}>
-        <div style={{ display:"flex", alignItems:"center", gap:"12px" }}>
-          <div style={{ width:"38px", height:"38px", background:`linear-gradient(135deg,${mc},${mc}cc)`, borderRadius:"9px", display:"flex", alignItems:"center", justifyContent:"center", fontSize:"18px", boxShadow:`0 4px 12px ${mc}50`, transition:"background 0.4s" }}>🎓</div>
-          <div>
-            <div style={{ fontSize:"8.5px", textTransform:"uppercase", letterSpacing:"3px", color:C.sky, fontFamily:"system-ui", fontWeight:700 }}>Bilişim Teknolojileri Dersi</div>
-            <div style={{ fontSize:"16px", fontWeight:"bold", color:"#eef5ff" }}>Form Analiz Aracı</div>
-            <div style={{ fontSize:"10px", color:C.soft, fontFamily:"system-ui" }}>Ölçek 1 · Ölçek 2 · Yansıtma Formu -- 7 Boyutlu Değerlendirme</div>
-          </div>
-        </div>
-        {mode && <div style={{ padding:"5px 12px", background:`${mc}18`, border:`1px solid ${mc}40`, borderRadius:"7px", fontSize:"11px", fontFamily:"system-ui", color:C.sky }}>{REPORT_MODES[mode].icon} {REPORT_MODES[mode].label}</div>}
-      </div>
-
-      <div style={{ maxWidth:"960px", margin:"0 auto", padding:"22px 18px" }}>
-
-        {}/* MOD SECIMI */
-        {step === "mode" && (
-          <div>
-            <div style={{ textAlign:"center", marginBottom:"24px" }}>
-              <div style={{ fontSize:"21px", fontWeight:"bold", color:"#dde9ff", marginBottom:"5px" }}>Rapor Türünü Seçin</div>
-              <div style={{ fontSize:"12px", color:C.muted, fontFamily:"system-ui" }}>Hangi analizi oluşturmak istiyorsunuz?</div>
-            </div>
-            <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:"13px", marginBottom:"28px" }}>
-              {Object.values(REPORT_MODES).map((m) => (
-                <div key={m.id} onClick={() => { setMode(m.id); setStep("upload"); }}
-                  style={{ background:C.panel, border:`1.5px solid ${C.border}`, borderRadius:"14px", padding:"22px 18px", cursor:"pointer", transition:"all 0.25s" }}
-                  onMouseOver={(e) => { const el = e.currentTarget; el.style.borderColor=m.color; el.style.background=`${m.color}10`; el.style.transform="translateY(-3px)"; el.style.boxShadow=`0 10px 28px ${m.color}28`; }}
-                  onMouseOut={(e) => { const el = e.currentTarget; el.style.borderColor=C.border; el.style.background=C.panel; el.style.transform="translateY(0)"; el.style.boxShadow="none"; }}
-                >
-                  <div style={{ fontSize:"30px", marginBottom:"10px" }}>{m.icon}</div>
-                  <div style={{ fontSize:"14px", fontWeight:"bold", color:"#dde9ff", marginBottom:"3px" }}>{m.label}</div>
-                  <div style={{ fontSize:"10px", color:m.color, fontFamily:"system-ui", fontWeight:600, marginBottom:"9px" }}>{m.sub}</div>
-                  <div style={{ fontSize:"11px", color:C.soft, fontFamily:"system-ui", lineHeight:1.6 }}>{m.desc}</div>
-                </div>
-              ))}
-            </div>
-
-            {/* 7 Boyut özet tablosu */}
-            <div style={{ background:C.panel, border:`1px solid ${C.bright}`, borderRadius:"14px", padding:"20px 22px" }}>
-              <div style={{ fontSize:"9px", textTransform:"uppercase", letterSpacing:"2px", color:C.sky, fontWeight:700, marginBottom:"14px", fontFamily:"system-ui" }}>7 Değerlendirme Boyutu -- Ölçek 1, Ölçek 2 ve Yansıtma Formu Entegrasyonu</div>
-              <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"8px" }}>
-                {DIMS.map((d) => (
-                  <div key={d.id} style={{ padding:"10px 13px", background:"#050c18", borderRadius:"8px", border:`1px solid ${C.border}`, display:"flex", gap:"9px", alignItems:"flex-start" }}>
-                    <span style={{ fontSize:"17px", flexShrink:0, marginTop:"1px" }}>{d.icon}</span>
-                    <div style={{ flex:1 }}>
-                      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center" }}>
-                        <div style={{ fontSize:"12px", color:"#cbd5e1", fontFamily:"system-ui", fontWeight:600 }}>{d.label}</div>
-                        <div style={{ fontSize:"10px", color:d.color, fontFamily:"system-ui", fontWeight:700, flexShrink:0, marginLeft:"6px" }}>{d.pts ? `${d.pts}p` : "Nitel"}</div>
-                      </div>
-                      <div style={{ fontSize:"9.5px", color:d.color, fontFamily:"system-ui", opacity:0.85 }}>{d.source}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {}/* DOSYA YUKLEME */
-        {(step === "upload" || step === "ready") && mode && (
-          <div>
-            <div style={{ background:C.panel, border:`1px solid ${mc}35`, borderRadius:"11px", padding:"13px 16px", marginBottom:"16px", display:"flex", alignItems:"center", justifyContent:"space-between" }}>
-              <div style={{ display:"flex", alignItems:"center", gap:"9px" }}>
-                <span style={{ fontSize:"20px" }}>{REPORT_MODES[mode].icon}</span>
-                <div>
-                  <div style={{ fontSize:"13px", fontWeight:"bold", color:"#dde9ff" }}>{REPORT_MODES[mode].label}</div>
-                  <div style={{ fontSize:"11px", color:C.soft, fontFamily:"system-ui" }}>{REPORT_MODES[mode].desc}</div>
-                </div>
-              </div>
-              <button onClick={reset} style={{ padding:"5px 11px", background:"transparent", border:`1px solid ${C.border}`, borderRadius:"7px", color:C.muted, cursor:"pointer", fontFamily:"system-ui", fontSize:"11px" }}>← Değiştir</button>
-            </div>
-
-            <div onDragOver={(e) => { e.preventDefault(); setDragOver(true); }} onDragLeave={() => setDragOver(false)} onDrop={handleDrop}
-              onClick={() => !file && fileInputRef.current?.click()}
-              style={{ border:`2px dashed ${dragOver?mc:file?"#22c55e":C.border}`, borderRadius:"13px", padding:"36px 22px", textAlign:"center", cursor:file?"default":"pointer", background:dragOver?`${mc}09`:file?"rgba(34,197,94,0.04)":C.panel, transition:"all 0.3s", marginBottom:"14px" }}
-            >
-              <input ref={fileInputRef} type="file" accept=".pdf,.xlsx,.xls,.csv,.txt" style={{ display:"none" }} onChange={(e) => e.target.files[0] && handleFile(e.target.files[0])} />
-              {file ? (
-                <div>
-                  <div style={{ fontSize:"36px", marginBottom:"7px" }}>{file.name.endsWith(".pdf")?"📄":"📊"}</div>
-                  <div style={{ fontSize:"14px", color:"#86efac", fontWeight:"bold", marginBottom:"3px" }}>{file.name}</div>
-                  <div style={{ fontSize:"11px", color:"#4ade80", fontFamily:"system-ui" }}>✓ Yüklendi -- {(file.size/1024).toFixed(1)} KB</div>
-                  <button onClick={(e) => { e.stopPropagation(); backToUpload(); }} style={{ marginTop:"9px", padding:"3px 10px", background:"transparent", border:`1px solid ${C.border}`, borderRadius:"5px", color:C.soft, cursor:"pointer", fontFamily:"system-ui", fontSize:"11px" }}>Farklı dosya</button>
-                </div>
-              ) : (
-                <div>
-                  <div style={{ fontSize:"44px", marginBottom:"10px" }}>📂</div>
-                  <div style={{ fontSize:"15px", color:"#cbd5e1", marginBottom:"5px" }}>Form verilerini sürükleyin veya seçin</div>
-                  <div style={{ fontSize:"11px", color:C.muted, fontFamily:"system-ui", marginBottom:"13px" }}>
-                    {mode==="weekly"&&"Bir öğrenciye ait tek haftanın Yansıtma Formu + Ölçek verileri"}
-                    {mode==="individual"&&"Bir öğrencinin 10 haftalık Yansıtma Formu + Ölçek verileri"}
-                    {mode==="class"&&"Tüm öğrencilerin 10 haftalık Yansıtma Formu + Ölçek verileri"}
-                  </div>
-                  <div style={{ display:"flex", gap:"6px", justifyContent:"center", flexWrap:"wrap", fontFamily:"system-ui", fontSize:"10px" }}>
-                    {["PDF","Excel (.xlsx)","CSV","Metin (.txt)"].map((f) => (
-                      <span key={f} style={{ padding:"3px 10px", borderRadius:"20px", background:"#050c18", border:`1px solid ${C.border}`, color:C.sky }}>{f}</span>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {step === "ready" && (
-              <>
-                {/* 7 Boyut mini özeti */}
-                <div style={{ background:C.panel, border:`1px solid ${C.bright}`, borderRadius:"9px", padding:"13px 16px", marginBottom:"13px", fontFamily:"system-ui" }}>
-                  <div style={{ fontSize:"8.5px", color:C.sky, fontWeight:700, marginBottom:"9px", letterSpacing:"2px", textTransform:"uppercase" }}>Bu raporda değerlendirilecek 7 boyut</div>
-                  <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"5px" }}>
-                    {DIMS.map((d) => (
-                      <div key={d.id} style={{ padding:"7px 10px", background:"#050c18", borderRadius:"6px", border:`1px solid ${C.border}`, display:"flex", gap:"6px", alignItems:"center", justifyContent:"space-between" }}>
-                        <div style={{ display:"flex", gap:"6px", alignItems:"center", fontSize:"11px", color:"#cbd5e1" }}><span>{d.icon}</span>{d.label}</div>
-                        <span style={{ color:d.color, fontWeight:700, fontSize:"9.5px", flexShrink:0 }}>{d.pts ? `${d.pts}p` : "Nitel"}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                <button onClick={analyzeForm}
-                  style={{ width:"100%", padding:"14px", background:`linear-gradient(135deg,${mc},${mc}cc)`, border:"none", borderRadius:"11px", color:"#fff", fontSize:"15px", fontWeight:"bold", cursor:"pointer", fontFamily:"Georgia,serif", boxShadow:`0 5px 24px ${mc}40`, transition:"transform 0.2s,box-shadow 0.2s" }}
-                  onMouseOver={(e) => { e.currentTarget.style.transform="translateY(-2px)"; e.currentTarget.style.boxShadow=`0 9px 32px ${mc}60`; }}
-                  onMouseOut={(e) => { e.currentTarget.style.transform="translateY(0)"; e.currentTarget.style.boxShadow=`0 5px 24px ${mc}40`; }}
-                >
-                  {REPORT_MODES[mode].icon} 7 Boyutlu Analiz Başlat -- PDF Rapor Oluştur
-                </button>
-              </>
-            )}
-          </div>
-        )}
-
-        {}/* LOADING */
-        {step === "analyzing" && (
-          <div style={{ textAlign:"center", padding:"58px 28px", background:C.panel, border:`1px solid ${C.bright}`, borderRadius:"16px" }}>
-            <style>{`@keyframes spin{to{transform:rotate(360deg)}} @keyframes dp{0%,100%{opacity:.2}50%{opacity:1}}`}</style>
-            <div style={{ width:"52px", height:"52px", margin:"0 auto 18px", border:`4px solid ${C.border}`, borderTopColor:mc, borderRadius:"50%", animation:"spin 1s linear infinite" }} />
-            <div style={{ fontSize:"17px", color:"#93c5fd", marginBottom:"5px", fontWeight:"bold" }}>7 Boyutlu Analiz Yapılıyor…</div>
-            <div style={{ fontSize:"12px", color:C.muted, fontFamily:"system-ui", marginBottom:"3px" }}>{REPORT_MODES[mode].label}</div>
-            <div style={{ fontSize:"11.5px", color:C.muted, fontFamily:"system-ui" }}>{loadingMsg}</div>
-            <div style={{ marginTop:"15px", display:"flex", gap:"5px", justifyContent:"center" }}>
-              {[0,1,2].map((i) => <div key={i} style={{ width:"7px", height:"7px", borderRadius:"50%", background:mc, animation:`dp ${1+i*0.25}s ease-in-out infinite` }} />)}
-            </div>
-          </div>
-        )}
-
-        {error && <div style={{ background:"rgba(220,38,38,0.1)", border:"1px solid #dc2626", borderRadius:"9px", padding:"12px 15px", marginTop:"11px", color:"#fca5a5", fontFamily:"system-ui", fontSize:"12.5px" }}>⚠️ {error}</div>}
-
-        {}/* RAPOR */
-        {step === "done" && report && (
-          <div>
-            <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:"12px", background:C.panel, border:`1px solid ${mc}30`, borderRadius:"11px", padding:"11px 15px" }}>
-              <div style={{ display:"flex", alignItems:"center", gap:"9px" }}>
-                <div style={{ width:"28px", height:"28px", background:`linear-gradient(135deg,${mc},${mc}bb)`, borderRadius:"7px", display:"flex", alignItems:"center", justifyContent:"center", fontSize:"14px" }}>{REPORT_MODES[mode].icon}</div>
-                <div>
-                  <div style={{ fontSize:"12px", fontWeight:"bold", color:C.sky }}>{REPORT_MODES[mode].label}</div>
-                  <div style={{ fontSize:"9.5px", color:C.muted, fontFamily:"system-ui" }}>{file?.name}</div>
-                </div>
-              </div>
-              <div style={{ display:"flex", gap:"7px" }}>
-                <button onClick={handlePDF} disabled={pdfGenerating}
-                  style={{ padding:"7px 15px", background:pdfGenerating?"rgba(220,38,38,0.3)":"linear-gradient(135deg,#dc2626,#b91c1c)", border:"none", borderRadius:"7px", color:"#fff", cursor:pdfGenerating?"wait":"pointer", fontFamily:"system-ui", fontSize:"12px", fontWeight:700, display:"flex", alignItems:"center", gap:"5px", boxShadow:"0 3px 10px rgba(220,38,38,0.3)" }}
-                  onMouseOver={(e) => !pdfGenerating && (e.currentTarget.style.opacity="0.85")}
-                  onMouseOut={(e) => e.currentTarget.style.opacity="1"}
-                >
-                  {pdfGenerating ? "⏳ Hazırlanıyor…" : "⬇️ PDF İndir"}
-                </button>
-                <button onClick={backToUpload} style={{ padding:"7px 12px", background:"transparent", border:`1px solid ${C.border}`, borderRadius:"7px", color:C.soft, cursor:"pointer", fontFamily:"system-ui", fontSize:"12px" }}>🔄 Yeni Dosya</button>
-                <button onClick={reset} style={{ padding:"7px 12px", background:"transparent", border:`1px solid ${C.border}`, borderRadius:"7px", color:C.muted, cursor:"pointer", fontFamily:"system-ui", fontSize:"12px" }}>⬅️ Mod Seç</button>
-              </div>
-            </div>
-            <div style={{ background:"rgba(37,99,235,0.07)", border:"1px solid rgba(59,130,246,0.18)", borderRadius:"7px", padding:"7px 13px", marginBottom:"12px", fontFamily:"system-ui", fontSize:"11px", color:"#93c5fd", display:"flex", gap:"6px", alignItems:"flex-start" }}>
-              <span>💡</span>
-              <span>Tarayıcının yazdırma penceresinde <strong style={{ color:"#bfdbfe" }}>"PDF olarak kaydet"</strong> seçeneğiyle kapak sayfası dahil tüm raporu indirebilirsiniz.</span>
-            </div>
-            <div style={{ background:"rgba(4,9,20,0.96)", border:`1px solid ${C.bright}`, borderRadius:"14px", padding:"26px" }}>
-              <style>{`.rc h2{font-size:14.5px;color:${C.sky};border-bottom:1px solid #192f4a;padding-bottom:6px;margin:22px 0 8px;font-family:Georgia,serif} .rc h2:first-child{margin-top:0} .rc h3{font-size:12.5px;color:#93c5fd;margin:12px 0 5px;font-family:Georgia,serif} .rc strong{color:#e2e8f0} .rc ul{margin:5px 0 8px 18px} .rc li{color:#c8d9eb;margin:4px 0;font-family:system-ui;font-size:11.5px;line-height:1.65} .rc p{color:#c4d4e8;margin:4px 0;font-family:system-ui;font-size:11.5px;line-height:1.65} .rc em{color:#7a8fa8}`}</style>
-              <div className="rc" dangerouslySetInnerHTML={{ __html: formatMarkdown(report) }} />
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-  );
 }
 
-    const rootEl = document.getElementById('root');
-    const root = ReactDOM.createRoot(rootEl);
-    root.render(React.createElement(FormAnalizAraci));
-  </script>
+function generatePDF(reportText,fileName,dateStr,modeId){
+  const m=MODES[modeId];
+  const colors={weekly:"#1d4ed8",individual:"#7c3aed",class:"#0891b2"};
+  const ac=colors[modeId];
+  const htmlContent=mdToHtml(reportText);
+  const dimRows=DIMS.map(d=>'<div class="dim-row"><div class="dim-dot" style="background:'+d.color+'"></div><span>'+d.icon+' '+d.full+'</span><span class="dim-pts">'+(d.pts?d.pts+" puan":"Nitel")+'</span></div>').join("");
+  const win=window.open("","_blank");
+  if(!win){alert("Lütfen açılır pencere engelleyicisini kapatın.");return;}
+  const ps="<scr"+"ipt>window.onload=function(){setTimeout(function(){window.print();},900);}</"+"script>";
+  win.document.write('<!DOCTYPE html><html lang="tr"><head><meta charset="UTF-8"/><title>'+m.label+'</title><style>'
+  +"@import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@400;600;700&family=Source+Sans+3:wght@300;400;600;700&display=swap');"
+  +"*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Source Sans 3',Arial,sans-serif;font-size:10.5pt;color:#1a1a2e;background:#fff;line-height:1.75}"
+  +".cover{width:100%;min-height:100vh;display:flex;flex-direction:column;page-break-after:always}"
+  +".hero{background:linear-gradient(140deg,#0a1e3d 0%,#0f2744 45%,"+ac+" 100%);padding:48px 56px 40px;color:#fff;flex:1}"
+  +".mb{display:inline-flex;align-items:center;gap:7px;padding:5px 16px;border-radius:20px;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);font-size:8pt;color:#dbeafe;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:24px}"
+  +".ct{font-family:'Source Serif 4',Georgia,serif;font-size:32pt;font-weight:700;line-height:1.1;color:#fff;margin-bottom:8px}"
+  +".ct span{color:rgba(255,255,255,0.6)}.cs{font-size:12pt;color:rgba(255,255,255,0.7);font-weight:300;margin-bottom:12px}"
+  +".cp{font-size:8pt;color:rgba(255,255,255,0.45);letter-spacing:2px;text-transform:uppercase}"
+  +".meta{padding:28px 56px;background:#f8fafc}.mg{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}"
+  +".mi{padding:11px 15px;border:1.5px solid #e2e8f0;border-radius:8px;background:#fff}"
+  +".ml{font-size:7.5pt;text-transform:uppercase;letter-spacing:2px;color:#64748b;font-weight:700;margin-bottom:3px}"
+  +".mv{font-size:10.5pt;font-weight:700;color:#0f172a}"
+  +".dt{font-size:8pt;text-transform:uppercase;letter-spacing:2px;color:#475569;font-weight:700;margin-bottom:10px}"
+  +".dim-row{display:flex;align-items:center;gap:9px;font-size:9.5pt;color:#334155;margin-bottom:7px}"
+  +".dim-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}"
+  +".dim-pts{margin-left:auto;font-size:8.5pt;font-weight:700;color:"+ac+"}"
+  +".foot{padding:13px 56px;border-top:1px solid #e2e8f0;display:flex;justify-content:space-between;font-size:8pt;color:#94a3b8}"
+  +".logo{font-family:'Source Serif 4',Georgia,serif;font-size:11pt;font-weight:700;color:"+ac+"}"
+  +".ph{background:#0f2744;padding:10px 56px;display:flex;justify-content:space-between;color:#7dd3fc;font-size:7.5pt;letter-spacing:1px}"
+  +".dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:"+ac+";margin-right:6px}"
+  +".content{padding:32px 56px 65px}"
+  +"h2{font-family:'Source Serif 4',Georgia,serif;font-size:13pt;font-weight:700;color:#0f2744;margin:30px 0 8px;padding-bottom:6px;border-bottom:2px solid "+ac+";page-break-after:avoid}"
+  +"h2:first-child{margin-top:0}h3{font-family:'Source Serif 4',Georgia,serif;font-size:10.5pt;font-weight:600;color:#1e3a5f;margin:14px 0 5px}"
+  +"p{margin:5px 0;color:#1e293b;font-size:10pt}strong{font-weight:700;color:#0f172a}em{color:#475569;font-style:italic}"
+  +"ul{margin:6px 0 10px 20px}li{margin:4px 0;color:#334155;font-size:9.5pt}li::marker{color:"+ac+"}"
+  +".pf{position:fixed;bottom:0;left:0;right:0;padding:8px 56px;border-top:1px solid #e2e8f0;display:flex;justify-content:space-between;font-size:7.5pt;color:#94a3b8;background:#fff}"
+  +"@media print{@page{size:A4;margin:0}body{-webkit-print-color-adjust:exact;print-color-adjust:exact}.cover{page-break-after:always}}"
+  +"</style></head><body>"
+  +'<div class="cover"><div class="hero">'
+  +'<div class="mb">'+m.icon+' '+m.label+'</div>'
+  +'<div class="ct">Geri Dönüt<br><span>Raporu</span></div>'
+  +'<div class="cs">'+m.sub+'</div>'
+  +'<div class="cp">Bilişim Teknolojileri Dersi · SB Öğretmen Adayı Değerlendirme Projesi</div>'
+  +'</div><div class="meta"><div class="mg">'
+  +'<div class="mi"><div class="ml">Dosya</div><div class="mv">'+fileName+'</div></div>'
+  +'<div class="mi"><div class="ml">Tarih</div><div class="mv">'+dateStr+'</div></div>'
+  +'<div class="mi"><div class="ml">Rapor Türü</div><div class="mv">'+m.label+'</div></div>'
+  +'<div class="mi"><div class="ml">Puanlama</div><div class="mv">'+(m.scoreMax?m.scoreMax+" üzerinden":"Nitel+Puanlı")+'</div></div>'
+  +'</div><div class="dt">Değerlendirme Boyutları</div>'+dimRows+'</div>'
+  +'<div class="foot"><div class="logo">Form Analiz Aracı</div><div>Claude AI tarafından oluşturulmuştur</div></div>'
+  +'</div>'
+  +'<div><div class="ph"><span><span class="dot"></span>'+m.label.toUpperCase()+' · '+fileName+'</span><span>'+dateStr+'</span></div>'
+  +'<div class="content">'+htmlContent+'</div>'
+  +'<div class="pf"><span>SB Öğretmen Adayı Değerlendirme Projesi - '+m.label+'</span><span>Claude AI · Form Analiz Aracı</span></div>'
+  +'</div>'+ps+'</body></html>');
+  win.document.close();
+}
+
+function readFile(file){
+  return new Promise((resolve,reject)=>{
+    const ext=file.name.split(".").pop().toLowerCase();
+    if(["xlsx","xls","csv"].includes(ext)){
+      const r=new FileReader();
+      r.onload=e=>{try{
+        const wb=XLSX.read(e.target.result,{type:"binary"});
+        let t="DOSYA: "+file.name+"\n\n";
+        wb.SheetNames.forEach(s=>{const ws=wb.Sheets[s];const d=XLSX.utils.sheet_to_json(ws,{header:1});t+="=== "+s+" ===\n";d.forEach(row=>{if(row.some(c=>c!=null&&c!==""))t+=row.join(" | ")+"\n";});t+="\n";});
+        resolve(t);
+      }catch(e){reject(e);}};
+      r.onerror=reject;r.readAsBinaryString(file);
+    }else if(ext==="pdf"){
+      const r=new FileReader();
+      r.onload=e=>resolve({type:"pdf",base64:e.target.result.split(",")[1]});
+      r.onerror=reject;r.readAsDataURL(file);
+    }else if(["txt","md"].includes(ext)){
+      const r=new FileReader();
+      r.onload=e=>resolve(e.target.result);
+      r.onerror=reject;r.readAsText(file,"UTF-8");
+    }else reject(new Error("Desteklenmeyen dosya türü."));
+  });
+}
+
+async function analyzeForm(){
+  if(!state.fileContent||!state.mode)return;
+  const MSGS=["Form verileri işleniyor...","Ölçek 1 analiz ediliyor...","Ölçek 2 değerlendiriliyor...","Materyal süreci inceleniyor...","Pedagojik tasarım analiz ediliyor...","Kazanım uyumu kontrol ediliyor...","Prompt kalitesi değerlendiriliyor...","Rapor yapılandırılıyor..."];
+  let idx=0;
+  setState({step:"analyzing",error:null,report:null,loadingMsg:MSGS[0]});
+  const iv=setInterval(()=>{idx=(idx+1)%MSGS.length;const el=document.getElementById("loadingMsg");if(el)el.textContent=MSGS[idx];},2500);
+  const labels={weekly:"tek haftaya ait yansıtma formu ve ölçek verileri",individual:"10 haftalık tüm yansıtma formu ve ölçek verileri",class:"tüm öğretmen adaylarının 10 haftalık yansıtma formu ve ölçek verileri"};
+  const prompt="Bu dosya, sosyal bilgiler öğretmen adaylarının "+labels[state.mode]+" içermektedir. Sistem talimatlarındaki 7 boyutlu değerlendirme çerçevesine göre kapsamlı bir rapor hazırla.";
+  try{
+    let messages;
+    if(typeof state.fileContent==="object"&&state.fileContent.type==="pdf"){
+      messages=[{role:"user",content:[{type:"document",source:{type:"base64",media_type:"application/pdf",data:state.fileContent.base64}},{type:"text",text:prompt}]}];
+    }else{
+      messages=[{role:"user",content:prompt+"\n\n---\n"+state.fileContent+"\n---"}];
+    }
+    const res=await fetch("https://api.anthropic.com/v1/messages",{
+      method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,system:PROMPTS[state.mode],messages})
+    });
+    const data=await res.json();
+    if(data.error)throw new Error(data.error.message);
+    const text=(data.content||[]).map(b=>b.text||"").join("\n");
+    setState({report:text,step:"done"});
+  }catch(e){setState({error:"Analiz hatası: "+e.message,step:"ready"});}
+  finally{clearInterval(iv);}
+}
+
+function el(tag,attrs,...children){
+  const e=document.createElement(tag);
+  if(attrs)Object.entries(attrs).forEach(([k,v])=>{
+    if(k==="class")e.className=v;
+    else if(k==="style")Object.assign(e.style,v);
+    else if(k.startsWith("on"))e.addEventListener(k.slice(2).toLowerCase(),v);
+    else e.setAttribute(k,v);
+  });
+  children.forEach(c=>{if(c==null)return;if(typeof c==="string")e.appendChild(document.createTextNode(c));else if(c instanceof Node)e.appendChild(c);});
+  return e;
+}
+function div(a,...c){return el("div",a,...c);}
+function span(a,...c){return el("span",a,...c);}
+function btn(a,...c){return el("button",a,...c);}
+
+function renderStepBar(){
+  const order=["mode","upload","ready","analyzing","done"];
+  const cur=order.indexOf(state.step==="ready"?"upload":state.step);
+  const stepIds=["mode","upload","analyzing","done"];
+  const bar=div({class:"stepbar"});
+  stepIds.forEach((sid,i)=>{
+    const me=order.indexOf(sid);
+    const active=(sid==="upload"&&(state.step==="upload"||state.step==="ready"))||state.step===sid;
+    const done=me<cur;
+    const s=STEPS.find(x=>x.id===sid);
+    const item=div({class:"step-item"+(active?" active":"")+(done?" done":"")});
+    item.appendChild(div({class:"step-num"},done?"✓":String(i+1).padStart(2,"0")));
+    item.appendChild(span({class:"step-label"},s.label));
+    bar.appendChild(item);
+    if(i<stepIds.length-1)bar.appendChild(div({class:"step-connector"+(done?" done":"")}));
+  });
+  return bar;
+}
+
+function render(){
+  const app=document.getElementById("app");
+  app.innerHTML="";
+  const mc=state.mode?{weekly:"#2563eb",individual:"#7c3aed",class:"#0891b2"}[state.mode]:"#2563eb";
+  document.getElementById("headerIcon").style.background="linear-gradient(135deg,"+mc+","+mc+"cc)";
+  if(state.mode){
+    const hb=document.getElementById("headerBadge");
+    hb.textContent=MODES[state.mode].icon+" "+MODES[state.mode].label;
+    hb.style.borderColor=mc+"40";hb.style.background=mc+"18";
+  }
+
+  if(state.step!=="mode")app.appendChild(renderStepBar());
+
+  if(state.step==="mode"){
+    app.appendChild(div({style:{textAlign:"center",marginBottom:"24px"}},
+      el("div",{style:{fontSize:"21px",fontWeight:"bold",color:"#dde9ff",marginBottom:"5px"}},"Rapor Türünü Seçin"),
+      el("div",{style:{fontSize:"12px",color:"#4d6070",fontFamily:"'Source Sans 3',sans-serif"}},"Hangi analizi oluşturmak istiyorsunuz?")
+    ));
+    const grid=div({class:"mode-grid"});
+    Object.values(MODES).forEach(m=>{
+      const card=div({class:"mode-card",
+        onMouseover:e=>{e.currentTarget.style.borderColor=m.color;e.currentTarget.style.background=m.color+"10";e.currentTarget.style.boxShadow="0 10px 28px "+m.color+"28";},
+        onMouseout:e=>{e.currentTarget.style.borderColor="";e.currentTarget.style.background="";e.currentTarget.style.boxShadow="";},
+        onClick:()=>setState({mode:m.id,step:"upload"})
+      },
+        div({class:"mode-card-icon"},m.icon),
+        div({class:"mode-card-title"},m.label),
+        div({class:"mode-card-sub",style:{color:m.color}},m.sub),
+        div({class:"mode-card-desc"},m.desc)
+      );
+      grid.appendChild(card);
+    });
+    app.appendChild(grid);
+    const panel=div({class:"panel panel-bright"});
+    panel.appendChild(div({class:"section-label"},"7 Değerlendirme Boyutu"));
+    const dg=div({class:"dim-grid"});
+    DIMS.forEach(d=>{
+      const item=div({class:"dim-item"},
+        div({class:"dim-item-icon"},d.icon),
+        div({style:{flex:"1"}},div({class:"dim-item-label"},d.label),div({class:"dim-item-source",style:{color:d.color}},d.source)),
+        div({class:"dim-item-pts",style:{color:d.color}},d.pts?d.pts+"p":"Nitel")
+      );
+      dg.appendChild(item);
+    });
+    panel.appendChild(dg);
+    app.appendChild(panel);
+    return;
+  }
+
+  const m=MODES[state.mode];
+  app.appendChild(div({class:"mode-header",style:{borderColor:mc+"35"}},
+    div({class:"mode-header-left"},
+      span({style:{fontSize:"20px"}},m.icon),
+      div({},div({class:"mode-header-title"},m.label),div({class:"mode-header-desc"},m.desc))
+    ),
+    btn({class:"btn btn-ghost",style:{fontSize:"11px"},onClick:()=>setState({mode:null,step:"mode",file:null,fileContent:null,report:null,error:null})},"← Değiştir")
+  ));
+
+  if(state.step==="upload"||state.step==="ready"){
+    const fileInput=document.getElementById("fileInput");
+    const dropzone=div({class:"dropzone"+(state.file?" has-file":"")});
+    if(state.file){
+      dropzone.appendChild(div({class:"dropzone-icon"},state.file.name.endsWith(".pdf")?"📄":"📊"));
+      dropzone.appendChild(div({class:"file-name"},state.file.name));
+      dropzone.appendChild(div({class:"file-size"},"✓ Yüklendi — "+(state.file.size/1024).toFixed(1)+" KB"));
+      dropzone.appendChild(btn({class:"btn btn-ghost",style:{marginTop:"9px",fontSize:"11px"},onClick:e=>{e.stopPropagation();setState({file:null,fileContent:null,report:null,error:null,step:"upload"});}},"Farklı dosya"));
+    }else{
+      const lmap={weekly:"Tek haftanın Yansıtma Formu + Ölçek verileri",individual:"10 haftalık Yansıtma Formu + Ölçek verileri",class:"Tüm öğrencilerin 10 haftalık verileri"};
+      dropzone.appendChild(div({class:"dropzone-icon"},"📂"));
+      dropzone.appendChild(div({class:"dropzone-title"},"Dosyayı sürükleyin veya seçin"));
+      dropzone.appendChild(div({class:"dropzone-sub"},lmap[state.mode]));
+      const chips=div({class:"dropzone-chips"});
+      ["PDF","Excel (.xlsx)","CSV","Metin (.txt)"].forEach(f=>chips.appendChild(span({class:"chip"},f)));
+      dropzone.appendChild(chips);
+      dropzone.addEventListener("click",()=>fileInput.click());
+    }
+    dropzone.addEventListener("dragover",e=>{e.preventDefault();dropzone.classList.add("dragover");});
+    dropzone.addEventListener("dragleave",()=>dropzone.classList.remove("dragover"));
+    dropzone.addEventListener("drop",e=>{e.preventDefault();dropzone.classList.remove("dragover");const f=e.dataTransfer.files[0];if(f)handleFileSelect(f);});
+    fileInput.onchange=e=>{if(e.target.files[0])handleFileSelect(e.target.files[0]);fileInput.value="";};
+    app.appendChild(dropzone);
+
+    if(state.step==="ready"){
+      const dp=div({class:"panel panel-bright",style:{marginBottom:"13px"}});
+      dp.appendChild(div({class:"section-label",style:{marginBottom:"9px"}},"Bu raporda değerlendirilecek 7 boyut"));
+      const dg=div({class:"dim-grid"});
+      DIMS.forEach(d=>{const i=div({class:"dim-item"},div({class:"dim-item-icon"},d.icon),div({style:{flex:"1"}},div({class:"dim-item-label"},d.label)),div({class:"dim-item-pts",style:{color:d.color}},d.pts?d.pts+"p":"Nitel"));dg.appendChild(i);});
+      dp.appendChild(dg);app.appendChild(dp);
+      const ab=btn({class:"btn btn-primary",style:{background:"linear-gradient(135deg,"+mc+","+mc+"cc)",boxShadow:"0 5px 24px "+mc+"40"},
+        onMouseover:e=>{e.currentTarget.style.transform="translateY(-2px)";e.currentTarget.style.boxShadow="0 9px 32px "+mc+"60";},
+        onMouseout:e=>{e.currentTarget.style.transform="";e.currentTarget.style.boxShadow="0 5px 24px "+mc+"40";},
+        onClick:analyzeForm
+      },m.icon+" 7 Boyutlu Analiz Başlat — PDF Rapor Oluştur");
+      app.appendChild(ab);
+    }
+  }
+
+  if(state.step==="analyzing"){
+    const box=div({class:"loading-box"});
+    box.appendChild(div({class:"spinner",style:{borderTopColor:mc}}));
+    box.appendChild(div({style:{fontSize:"17px",color:"#93c5fd",marginBottom:"5px",fontWeight:"bold"}},"7 Boyutlu Analiz Yapılıyor…"));
+    box.appendChild(div({style:{fontSize:"12px",color:"#4d6070",fontFamily:"'Source Sans 3',sans-serif",marginBottom:"3px"}},m.label));
+    box.appendChild(div({style:{fontSize:"11.5px",color:"#4d6070",fontFamily:"'Source Sans 3',sans-serif"},id:"loadingMsg"},state.loadingMsg));
+    const dots=div({class:"dots"});
+    [0,1,2].forEach(i=>dots.appendChild(div({class:"dot-pulse",style:{background:mc,animation:"dp "+(1+i*0.25)+"s ease-in-out infinite"}})));
+    box.appendChild(dots);app.appendChild(box);
+  }
+
+  if(state.error)app.appendChild(div({class:"error-box"},"⚠️ "+state.error));
+
+  if(state.step==="done"&&state.report){
+    const toolbar=div({class:"report-toolbar",style:{borderColor:mc+"30"}});
+    const tl=div({class:"report-toolbar-left"});
+    tl.appendChild(div({class:"report-toolbar-icon",style:{background:"linear-gradient(135deg,"+mc+","+mc+"bb)"}},m.icon));
+    tl.appendChild(div({},div({class:"report-toolbar-title"},m.label),div({class:"report-toolbar-file"},state.file?state.file.name:"")));
+    toolbar.appendChild(tl);
+    const tb=div({class:"report-toolbar-btns"});
+    const pb=btn({class:"btn btn-danger",disabled:state.pdfGenerating,
+      onClick:()=>{setState({pdfGenerating:true});const d=new Date().toLocaleDateString("tr-TR",{day:"2-digit",month:"long",year:"numeric"});generatePDF(state.report,state.file?state.file.name:"form",d,state.mode);setTimeout(()=>setState({pdfGenerating:false}),2000);}
+    },state.pdfGenerating?"⏳ Hazırlanıyor…":"⬇️ PDF İndir");
+    tb.appendChild(pb);
+    tb.appendChild(btn({class:"btn btn-ghost",onClick:()=>setState({file:null,fileContent:null,report:null,error:null,step:"upload"})},"🔄 Yeni Dosya"));
+    tb.appendChild(btn({class:"btn btn-ghost",onClick:()=>setState({mode:null,step:"mode",file:null,fileContent:null,report:null,error:null})},"⬅️ Mod Seç"));
+    toolbar.appendChild(tb);app.appendChild(toolbar);
+    const tip=div({class:"tip-box"});
+    tip.innerHTML='💡 <span>Tarayıcının yazdırma penceresinde <strong>"PDF olarak kaydet"</strong> seçeneğiyle raporu indirebilirsiniz.</span>';
+    app.appendChild(tip);
+    const rb=div({class:"report-body"});
+    const rc=div({class:"report-content"});
+    rc.innerHTML=mdToHtml(state.report);
+    rb.appendChild(rc);app.appendChild(rb);
+  }
+}
+
+async function handleFileSelect(file){
+  setState({file,error:null,report:null,step:"upload"});
+  try{const content=await readFile(file);setState({fileContent:content,step:"ready"});}
+  catch(e){setState({error:"Dosya okunamadı: "+e.message});}
+}
+
+render();
+</script>
 </body>
 </html>
