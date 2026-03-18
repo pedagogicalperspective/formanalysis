@@ -1,639 +1,1149 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="tr">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>Form Analiz Aracı</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>SB Değerlendirme Sistemi</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/docx@8.5.0/build/index.js"></script>
 <style>
-*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
-html,body{min-height:100vh;background:#07101f;font-family:Georgia,serif;color:#dde9ff}
-button{cursor:pointer}
-input[type=file]{display:none}
-#fatal{display:none;position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#7f1d1d;color:#fecaca;padding:16px 24px;border-radius:10px;font-family:sans-serif;font-size:14px;z-index:999;max-width:600px;white-space:pre-wrap}
-.hdr{background:linear-gradient(90deg,#060d1a,#09182e);border-bottom:2px solid #1e4270;padding:14px 24px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 4px 24px rgba(0,0,0,.6)}
-.hdr-l{display:flex;align-items:center;gap:12px}
-.hdr-ic{width:38px;height:38px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px;transition:background .4s}
-.hdr-tt{font-size:16px;font-weight:bold;color:#eef5ff}
-.hdr-st{font-size:10px;color:#7a94a8;font-family:sans-serif}
-.hdr-tg{font-size:8px;text-transform:uppercase;letter-spacing:3px;color:#7dd3fc;font-family:sans-serif;font-weight:700}
-.hdr-badge{padding:5px 12px;border-radius:7px;font-size:11px;font-family:sans-serif;color:#bfdbfe;border:1px solid rgba(59,130,246,.3)}
-#apibar{background:#070e1c;border-bottom:1px solid #192f4a;padding:8px 24px;display:flex;align-items:center;gap:8px;min-height:36px;flex-wrap:wrap}
-.wrap{max-width:940px;margin:0 auto;padding:20px 16px}
-.panel{background:rgba(9,20,42,.93);border:1px solid #192f4a;border-radius:14px;padding:20px;margin-bottom:14px}
-.panel-hi{border-color:#1e4270}
-.lbl{font-size:9px;text-transform:uppercase;letter-spacing:2px;color:#7dd3fc;font-weight:700;margin-bottom:12px;font-family:sans-serif}
-.mgrid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:20px}
-.mcard{background:rgba(9,20,42,.93);border:1.5px solid #192f4a;border-radius:14px;padding:20px 16px;cursor:pointer;transition:all .2s;text-align:left}
-.mcard:hover{transform:translateY(-3px)}
-.dgrid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
-.ditem{padding:9px 12px;background:#050c18;border-radius:8px;border:1px solid #192f4a;display:flex;gap:8px;align-items:flex-start}
-.dropzone{border:2px dashed #192f4a;border-radius:13px;padding:34px 20px;text-align:center;cursor:pointer;background:rgba(9,20,42,.93);transition:all .3s;margin-bottom:12px}
-.dropzone:hover,.dropzone.dg{border-color:#2563eb;background:rgba(37,99,235,.07)}
-.dropzone.hf{border-color:#22c55e;background:rgba(34,197,94,.04);cursor:default}
-.chip{padding:3px 9px;border-radius:20px;background:#050c18;border:1px solid #192f4a;color:#7dd3fc;font-size:10px;font-family:sans-serif;display:inline-block;margin:2px}
-.btnp{width:100%;padding:13px;border:none;border-radius:11px;color:#fff;font-size:15px;font-weight:bold;font-family:Georgia,serif;transition:transform .2s,box-shadow .2s;margin-bottom:4px}
-.btnp:hover{transform:translateY(-2px)}
-.btng{background:transparent;border:1px solid #192f4a;color:#7a94a8;padding:7px 13px;border-radius:8px;font-size:12px;font-family:sans-serif;font-weight:700}
-.btnd{background:linear-gradient(135deg,#dc2626,#b91c1c);color:#fff;border:none;padding:7px 14px;border-radius:8px;font-size:12px;font-family:sans-serif;font-weight:700;box-shadow:0 3px 10px rgba(220,38,38,.3)}
-.lbox{text-align:center;padding:56px 28px;background:rgba(9,20,42,.93);border:1px solid #1e4270;border-radius:16px}
-@keyframes spin{to{transform:rotate(360deg)}}
-.spin{width:50px;height:50px;margin:0 auto 18px;border:4px solid #192f4a;border-radius:50%;animation:spin 1s linear infinite}
-@keyframes dp{0%,100%{opacity:.2}50%{opacity:1}}
-.rbar{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:rgba(9,20,42,.93);border-radius:11px;margin-bottom:12px;gap:8px;flex-wrap:wrap}
-.rbody{background:rgba(4,9,20,.96);border:1px solid #1e4270;border-radius:14px;padding:24px}
-.rbody h2{font-family:Georgia,serif;font-size:14px;color:#7dd3fc;border-bottom:1px solid #192f4a;padding-bottom:5px;margin:20px 0 8px}
-.rbody h2:first-child{margin-top:0}
-.rbody h3{font-family:Georgia,serif;font-size:12px;color:#93c5fd;margin:12px 0 5px}
-.rbody strong{color:#e2e8f0}
-.rbody em{color:#7a8fa8;font-style:italic}
-.rbody p{color:#c4d4e8;margin:4px 0;font-family:sans-serif;font-size:11.5px;line-height:1.65}
-.rbody ul{margin:5px 0 8px 18px}
-.rbody li{color:#c8d9eb;margin:4px 0;font-family:sans-serif;font-size:11.5px;line-height:1.65}
-.err{background:rgba(220,38,38,.1);border:1px solid #dc2626;border-radius:9px;padding:11px 14px;color:#fca5a5;font-family:sans-serif;font-size:12px;margin-top:10px}
-.tip{background:rgba(37,99,235,.07);border:1px solid rgba(59,130,246,.18);border-radius:7px;padding:7px 12px;margin-bottom:11px;font-family:sans-serif;font-size:11px;color:#93c5fd}
-.sbar{display:flex;align-items:center;margin-bottom:20px;font-family:sans-serif;font-size:12px;flex-wrap:wrap;gap:4px}
-.si{display:flex;align-items:center;gap:5px;padding:5px 13px 5px 7px;border-radius:20px;border:1px solid #192f4a}
-.si.a{background:linear-gradient(135deg,#1d4ed8,#2563eb);border-color:#60a5fa}
-.si.d{background:rgba(30,58,95,.6);border-color:#234d7a}
-.sn{width:17px;height:17px;border-radius:50%;background:#192f4a;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:#4d6070}
-.si.a .sn{background:#fff;color:#1d4ed8}
-.si.d .sn{background:#3b82f6;color:#fff}
-.sl{color:#4d6070}
-.si.a .sl{color:#fff;font-weight:700}
-.si.d .sl{color:#7dd3fc}
-.sc{width:18px;height:1px;background:#192f4a}
-.sc.d{background:#3b82f6}
+:root{
+  --navy:#0A1E44;--blue:#1D4ED8;--lblue:#DBEAFE;--mblue:#93C5FD;
+  --slate:#334155;--lt:#F1F5F9;--wh:#fff;
+  --gn:#166534;--gnbg:#DCFCE7;--am:#92400E;--ambg:#FEF3C7;
+  --rd:#991B1B;--rdbg:#FEE2E2;--pu:#5B21B6;--pubg:#EDE9FE;
+  --gray:#64748B;--bdr:#E2E8F0;--teal:#0F766E;--tealbg:#CCFBF1;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;background:#080F1E;color:#CBD5E1;min-height:100vh;
+  background-image:radial-gradient(ellipse at 10% 20%,rgba(29,78,216,.15) 0%,transparent 50%),
+  radial-gradient(ellipse at 90% 80%,rgba(91,33,182,.10) 0%,transparent 50%);}
+
+/* ── TOPBAR ── */
+.topbar{display:flex;align-items:center;gap:14px;padding:14px 28px;border-bottom:1px solid rgba(255,255,255,.06);background:rgba(8,15,30,.8);backdrop-filter:blur(20px);position:sticky;top:0;z-index:200;}
+.logo{font-family:'Playfair Display',serif;font-size:18px;color:var(--mblue);white-space:nowrap;}
+.logo-sub{font-size:10px;color:#2D4A7A;letter-spacing:.6px;text-transform:uppercase;margin-top:2px;}
+.topbar-sep{flex:1;}
+.api-wrap{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:9px;padding:7px 12px;}
+.api-wrap label{font-size:9px;color:var(--mblue);letter-spacing:.5px;text-transform:uppercase;white-space:nowrap;}
+.api-inp{background:transparent;border:none;color:#E2E8F0;font-size:11.5px;font-family:'DM Mono',monospace;width:200px;outline:none;}
+.api-inp::placeholder{color:#1E3358;}
+.db-btn{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:7px;color:#64748B;padding:6px 11px;font-size:10px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s;}
+.db-btn:hover{background:rgba(255,255,255,.09);color:#CBD5E1;}
+
+/* ── MAIN GRID ── */
+.body{display:grid;grid-template-columns:220px 1fr;min-height:calc(100vh - 56px);}
+
+/* ── SIDEBAR ── */
+.sidebar{border-right:1px solid rgba(255,255,255,.06);padding:20px 0;background:rgba(0,0,0,.25);}
+.sb-section{margin-bottom:4px;}
+.sb-label{font-size:9px;color:#1E3358;letter-spacing:.8px;text-transform:uppercase;padding:0 16px 6px;display:block;}
+.sb-btn{display:flex;align-items:center;gap:10px;width:100%;padding:10px 16px;background:transparent;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px;color:#475569;transition:all .15s;text-align:left;border-left:2px solid transparent;}
+.sb-btn:hover{background:rgba(255,255,255,.04);color:#CBD5E1;}
+.sb-btn.active{background:rgba(29,78,216,.12);color:var(--mblue);border-left-color:var(--blue);}
+.sb-icon{font-size:14px;width:18px;text-align:center;}
+.sb-badge{margin-left:auto;font-size:9px;background:rgba(29,78,216,.2);color:var(--mblue);border-radius:8px;padding:1px 6px;}
+
+.sb-div{height:1px;background:rgba(255,255,255,.05);margin:10px 16px;}
+
+/* ── MAIN PANEL ── */
+.panel{padding:28px;overflow-y:auto;max-height:calc(100vh - 56px);}
+
+/* ── CARDS ── */
+.card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:16px;overflow:hidden;margin-bottom:16px;}
+.card-hdr{padding:16px 20px;border-bottom:1px solid rgba(255,255,255,.05);display:flex;align-items:center;justify-content:space-between;gap:12px;}
+.card-title{font-size:13px;font-weight:600;color:#E2E8F0;}
+.card-sub{font-size:11px;color:#334155;margin-top:2px;}
+.card-body{padding:18px 20px;display:flex;flex-direction:column;gap:13px;}
+
+/* ── MODE SELECTOR ── */
+.mode-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.mode-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:18px 16px;cursor:pointer;transition:all .2s;position:relative;}
+.mode-card:hover{background:rgba(255,255,255,.06);border-color:rgba(147,197,253,.2);}
+.mode-card.selected{background:rgba(29,78,216,.12);border-color:rgba(29,78,216,.4);}
+.mode-icon{font-size:22px;margin-bottom:8px;}
+.mode-name{font-size:12px;font-weight:600;color:#CBD5E1;margin-bottom:3px;}
+.mode-desc{font-size:10px;color:#334155;line-height:1.5;}
+.mode-card.selected .mode-desc{color:#3D5A8A;}
+
+/* ── DROP ZONE ── */
+.drop{border:1.5px dashed rgba(255,255,255,.12);border-radius:12px;padding:28px;text-align:center;cursor:pointer;transition:all .2s;}
+.drop:hover,.drop.over{border-color:rgba(29,78,216,.5);background:rgba(29,78,216,.06);}
+.drop-icon{font-size:28px;margin-bottom:10px;}
+.drop-title{font-size:13px;font-weight:600;color:#94A3B8;margin-bottom:4px;}
+.drop-hint{font-size:11px;color:#1E3358;}
+
+/* ── FILE PILLS ── */
+.file-list{display:flex;flex-direction:column;gap:6px;}
+.fp{display:flex;align-items:center;gap:10px;background:rgba(22,101,52,.1);border:1px solid rgba(22,101,52,.2);border-radius:8px;padding:8px 12px;}
+.fp-name{font-size:11px;font-weight:600;color:#86EFAC;flex:1;}
+.fp-sz{font-size:10px;color:#1E4A2F;}
+.fp-rm{background:none;border:none;color:#4B5563;cursor:pointer;font-size:14px;padding:0 2px;line-height:1;}
+.fp-rm:hover{color:#FCA5A5;}
+
+/* ── INPUTS ── */
+.fld label{font-size:10px;color:#475569;letter-spacing:.3px;display:block;margin-bottom:4px;text-transform:uppercase;}
+.fld select,.fld input{width:100%;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);border-radius:7px;padding:8px 11px;font-family:'DM Sans',sans-serif;font-size:12px;color:#CBD5E1;outline:none;appearance:none;}
+.fld select:focus,.fld input:focus{border-color:rgba(29,78,216,.5);}
+.fld select option{background:#0F1A30;}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+
+/* ── BUTTONS ── */
+.btn-run{width:100%;padding:15px;background:linear-gradient(135deg,#1D4ED8,#5B21B6);color:white;border:none;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;box-shadow:0 4px 20px rgba(29,78,216,.3);}
+.btn-run:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 6px 28px rgba(29,78,216,.4);}
+.btn-run:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+
+.btn-dl{display:flex;align-items:center;justify-content:center;gap:9px;width:100%;padding:14px;background:linear-gradient(135deg,#166534,#14532D);color:white;border:none;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;box-shadow:0 4px 18px rgba(22,101,52,.3);}
+.btn-dl:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 6px 24px rgba(22,101,52,.4);}
+.btn-dl:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+
+.btn-sm{padding:6px 13px;border-radius:7px;border:1px solid rgba(255,255,255,.09);background:rgba(255,255,255,.04);color:#64748B;font-family:'DM Sans',sans-serif;font-size:11px;cursor:pointer;transition:all .15s;}
+.btn-sm:hover{background:rgba(255,255,255,.08);color:#CBD5E1;}
+.btn-sm.danger{border-color:rgba(252,165,165,.15);color:#FCA5A5;}
+.btn-sm.danger:hover{background:rgba(153,27,27,.15);}
+
+/* ── PROGRESS ── */
+.prog-wrap{display:flex;flex-direction:column;gap:8px;}
+.prog-lbl{font-size:11px;color:var(--mblue);}
+.prog-bar{height:2px;background:rgba(255,255,255,.06);border-radius:1px;overflow:hidden;}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--blue),#7C3AED);transition:width .4s ease;border-radius:1px;}
+.chips{display:flex;gap:6px;flex-wrap:wrap;}
+.chip{font-size:10px;padding:3px 10px;border-radius:12px;border:1px solid rgba(255,255,255,.07);color:#1E3358;transition:all .3s;}
+.chip.on{background:rgba(29,78,216,.18);border-color:rgba(147,197,253,.3);color:var(--mblue);}
+.chip.ok{background:rgba(22,101,52,.18);border-color:rgba(134,239,172,.2);color:#86EFAC;}
+
+/* ── RESULT PANEL ── */
+.result-hdr{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:16px;}
+.result-name{font-size:17px;font-weight:700;color:#F1F5F9;}
+.result-meta{font-size:11px;color:#334155;margin-top:4px;}
+.score-big{text-align:right;}
+.score-n{font-size:38px;font-weight:700;font-family:'Playfair Display',serif;color:#F1F5F9;line-height:1;}
+.score-d{font-size:10px;color:#334155;margin-top:4px;}
+.grade-pill{display:inline-block;padding:5px 14px;border-radius:14px;font-size:11px;font-weight:700;letter-spacing:.5px;margin-top:6px;}
+
+.dim-strip{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:14px;}
+.dim-b{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:12px 7px;text-align:center;}
+.dim-b .dl{font-size:8.5px;color:#334155;margin-bottom:6px;line-height:1.35;}
+.dim-b .ds{font-size:22px;font-weight:700;line-height:1;}
+.dim-b .dm{font-size:9px;color:#1E3358;margin-top:2px;}
+
+/* ── DATABASE PANEL ── */
+.student-table{width:100%;border-collapse:collapse;}
+.student-table th{font-size:9px;text-transform:uppercase;letter-spacing:.4px;color:#334155;border-bottom:1px solid rgba(255,255,255,.06);padding:6px 10px;text-align:left;font-weight:600;}
+.student-table td{font-size:11px;color:#94A3B8;border-bottom:1px solid rgba(255,255,255,.04);padding:7px 10px;vertical-align:middle;}
+.student-table tr:hover td{background:rgba(255,255,255,.02);}
+.week-dot{display:inline-block;width:20px;height:20px;border-radius:5px;font-size:9px;font-weight:700;text-align:center;line-height:20px;margin-right:3px;}
+.week-dot.filled{background:rgba(29,78,216,.3);color:var(--mblue);}
+.week-dot.empty{background:rgba(255,255,255,.04);color:#1E3358;}
+
+/* ── TREND TABLE ── */
+.trend-grid{overflow-x:auto;}
+.trend-tbl{width:100%;border-collapse:collapse;font-size:10px;}
+.trend-tbl th,.trend-tbl td{border:1px solid rgba(255,255,255,.07);padding:5px 8px;text-align:center;}
+.trend-tbl th{background:rgba(10,30,68,.8);color:#93C5FD;font-weight:600;}
+.trend-tbl td.lbl{text-align:left;color:#64748B;font-weight:500;font-size:9.5px;}
+.trend-tbl td.delta-up{color:#86EFAC;}
+.trend-tbl td.delta-dn{color:#FCA5A5;}
+.trend-tbl td.delta-eq{color:#64748B;}
+
+/* ── ERR ── */
+.err{background:rgba(153,27,27,.12);border:1px solid rgba(252,165,165,.12);border-radius:8px;padding:10px 13px;font-size:11px;color:#FCA5A5;}
+.info-box{background:rgba(29,78,216,.08);border:1px solid rgba(29,78,216,.2);border-radius:9px;padding:12px 15px;font-size:11px;color:#93C5FD;line-height:1.6;}
+
+/* ── SCREENS ── */
+.screen{display:none;}
+.screen.active{display:block;}
+
+/* ── SPINNER ── */
+@keyframes spin{to{transform:rotate(360deg);}}
+.sp{display:inline-block;width:10px;height:10px;border:2px solid currentColor;border-top-color:transparent;border-radius:50%;animation:spin .6s linear infinite;margin-right:5px;}
 </style>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
-<div id="fatal"></div>
-<div class="hdr">
-  <div class="hdr-l">
-    <div class="hdr-ic" id="hic" style="background:linear-gradient(135deg,#2563eb,#1d4ed8)">🎓</div>
-    <div>
-      <div class="hdr-tg">Bilişim Teknolojileri Dersi</div>
-      <div class="hdr-tt">Form Analiz Aracı</div>
-      <div class="hdr-st">Ölçek 1 · Ölçek 2 · Yansıtma Formu — 7 Boyutlu Değerlendirme</div>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div><div class="logo">SB Değerlendirme Sistemi</div><div class="logo-sub">Doç. Dr. Erhan Yaylak · Bilişim Teknolojileri Dersi</div></div>
+  <div class="topbar-sep"></div>
+  <div class="api-wrap">
+    <label>API Key</label>
+    <input class="api-inp" id="apiKey" type="password" placeholder="sk-ant-api03-..." autocomplete="off" spellcheck="false">
+  </div>
+  <button class="db-btn" onclick="showScreen('db')">🗄 Veri Tabanı</button>
+</div>
+
+<div class="body">
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="sb-section">
+    <span class="sb-label">Bireysel Raporlar</span>
+    <button class="sb-btn" onclick="showScreen('w1')" id="nav-w1">
+      <span class="sb-icon">📄</span>Haftalık Bireysel
+    </button>
+    <button class="sb-btn" onclick="showScreen('w10i')" id="nav-w10i">
+      <span class="sb-icon">📈</span>10 Haftalık Bireysel
+    </button>
+  </div>
+  <div class="sb-div"></div>
+  <div class="sb-section">
+    <span class="sb-label">Sınıf Raporları</span>
+    <button class="sb-btn" onclick="showScreen('wc')" id="nav-wc">
+      <span class="sb-icon">👥</span>Haftalık Sınıf
+    </button>
+    <button class="sb-btn" onclick="showScreen('w10c')" id="nav-w10c">
+      <span class="sb-icon">📊</span>10 Haftalık Sınıf
+    </button>
+  </div>
+  <div class="sb-div"></div>
+  <div class="sb-section">
+    <span class="sb-label">Yönetim</span>
+    <button class="sb-btn" onclick="showScreen('db')" id="nav-db">
+      <span class="sb-icon">🗄</span>Veri Tabanı
+    </button>
+  </div>
+</div>
+
+<!-- MAIN PANEL -->
+<div class="panel">
+
+<!-- ══ EKRAN 1: HAFTALIK BİREYSEL ══════════════════════════════════ -->
+<div class="screen active" id="scr-w1">
+  <div class="card">
+    <div class="card-hdr">
+      <div><div class="card-title">📄 Haftalık Bireysel Dönüt Raporu</div><div class="card-sub">Tek öğrenci formu → AI değerlendirme → Word raporu (tekrarlara düşmez)</div></div>
+    </div>
+    <div class="card-body">
+      <div class="two-col">
+        <div class="fld"><label>Hafta</label>
+          <select id="w1-week">
+            <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option>
+            <option>6</option><option>7</option><option>8</option><option>9</option><option>10</option>
+          </select>
+        </div>
+        <div class="fld"><label>Tema</label><input type="text" id="w1-tema" placeholder="1. Tema"></div>
+      </div>
+      <div class="drop" id="w1-drop" onclick="$('w1-fi').click()" ondrop="onDrop('w1',event)" ondragover="onOver(event,'w1-drop')" ondragleave="$('w1-drop').classList.remove('over')">
+        <div class="drop-icon">📑</div>
+        <div class="drop-title">Öğrenci Formunu Sürükleyin</div>
+        <div class="drop-hint">PDF yükleyin — AI otomatik okur ve değerlendirir</div>
+      </div>
+      <input type="file" id="w1-fi" accept=".pdf" style="display:none" onchange="addFile('w1',this.files[0])">
+      <div class="file-list" id="w1-files"></div>
+      <div class="prog-wrap" id="w1-prog" style="display:none">
+        <div class="prog-lbl" id="w1-lbl">Hazırlanıyor...</div>
+        <div class="prog-bar"><div class="prog-fill" id="w1-fill" style="width:0%"></div></div>
+        <div class="chips">
+          <span class="chip" id="w1-c1">📄 PDF Okunuyor</span>
+          <span class="chip" id="w1-c2">🔍 Önceki haftalar kontrol</span>
+          <span class="chip" id="w1-c3">🤖 Claude değerlendiriyor</span>
+          <span class="chip" id="w1-c4">📝 Word oluşturuluyor</span>
+        </div>
+      </div>
+      <div class="err" id="w1-err" style="display:none"></div>
+      <div id="w1-result" style="display:none"></div>
+      <button class="btn-run" id="w1-btn" onclick="runW1()">🤖 &nbsp; Değerlendir &amp; İndir</button>
     </div>
   </div>
-  <div class="hdr-badge" id="hbadge">10 Haftalık Program</div>
 </div>
-<div id="apibar"></div>
-<div class="wrap"><div id="app"></div></div>
-<input type="file" id="fi" accept=".pdf,.xlsx,.xls,.csv,.txt"/>
+
+<!-- ══ EKRAN 2: HAFTALIK SINIF ══════════════════════════════════════ -->
+<div class="screen" id="scr-wc">
+  <div class="card">
+    <div class="card-hdr">
+      <div><div class="card-title">👥 Haftalık Sınıf Dönüt Raporu</div><div class="card-sub">Tüm öğrenci formları → Sınıf geneli analiz → Word raporu</div></div>
+    </div>
+    <div class="card-body">
+      <div class="two-col">
+        <div class="fld"><label>Hafta</label>
+          <select id="wc-week">
+            <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option>
+            <option>6</option><option>7</option><option>8</option><option>9</option><option>10</option>
+          </select>
+        </div>
+        <div class="fld"><label>Tema</label><input type="text" id="wc-tema" placeholder="1. Tema"></div>
+      </div>
+      <div class="drop" id="wc-drop" onclick="$('wc-fi').click()" ondrop="onDrop('wc',event)" ondragover="onOver(event,'wc-drop')" ondragleave="$('wc-drop').classList.remove('over')">
+        <div class="drop-icon">📂</div>
+        <div class="drop-title">Sınıfın Tüm Formlarını Sürükleyin</div>
+        <div class="drop-hint">Birden fazla PDF'yi aynı anda seçebilir veya tek tek ekleyebilirsiniz</div>
+      </div>
+      <input type="file" id="wc-fi" accept=".pdf" multiple style="display:none" onchange="addFiles('wc',this.files)">
+      <div class="file-list" id="wc-files"></div>
+      <div class="prog-wrap" id="wc-prog" style="display:none">
+        <div class="prog-lbl" id="wc-lbl">Hazırlanıyor...</div>
+        <div class="prog-bar"><div class="prog-fill" id="wc-fill" style="width:0%"></div></div>
+        <div class="chips">
+          <span class="chip" id="wc-c1">📄 PDF'ler İşleniyor</span>
+          <span class="chip" id="wc-c2">🤖 Bireysel Analizler</span>
+          <span class="chip" id="wc-c3">📊 Sınıf Sentezi</span>
+          <span class="chip" id="wc-c4">📝 Word Oluşturuluyor</span>
+        </div>
+      </div>
+      <div class="err" id="wc-err" style="display:none"></div>
+      <div id="wc-result" style="display:none"></div>
+      <button class="btn-run" id="wc-btn" onclick="runWC()">🤖 &nbsp; Sınıfı Değerlendir &amp; İndir</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ EKRAN 3: 10 HAFTALIK BİREYSEL ════════════════════════════════ -->
+<div class="screen" id="scr-w10i">
+  <div class="card">
+    <div class="card-hdr">
+      <div><div class="card-title">📈 10 Haftalık Bireysel Gelişim Raporu</div><div class="card-sub">Kayıtlı haftalık verilerden uzun dönem bireysel analiz</div></div>
+    </div>
+    <div class="card-body">
+      <div class="fld">
+        <label>Öğrenci Seçin</label>
+        <select id="w10i-student"><option value="">— Öğrenci seçin —</option></select>
+      </div>
+      <div id="w10i-preview" style="display:none"></div>
+      <div class="prog-wrap" id="w10i-prog" style="display:none">
+        <div class="prog-lbl" id="w10i-lbl">Hazırlanıyor...</div>
+        <div class="prog-bar"><div class="prog-fill" id="w10i-fill" style="width:0%"></div></div>
+        <div class="chips">
+          <span class="chip" id="w10i-c1">📊 Trend analizi</span>
+          <span class="chip" id="w10i-c2">🤖 Uzun dönem sentezi</span>
+          <span class="chip" id="w10i-c3">📝 Word oluşturuluyor</span>
+        </div>
+      </div>
+      <div class="err" id="w10i-err" style="display:none"></div>
+      <button class="btn-run" id="w10i-btn" onclick="runW10I()" disabled>📈 &nbsp; 10 Haftalık Rapor Oluştur</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ EKRAN 4: 10 HAFTALIK SINIF ════════════════════════════════════ -->
+<div class="screen" id="scr-w10c">
+  <div class="card">
+    <div class="card-hdr">
+      <div><div class="card-title">📊 10 Haftalık Sınıf Gelişim Raporu</div><div class="card-sub">Tüm sınıf için uzun dönem analiz — örüntüler ve müdahale önerileri</div></div>
+    </div>
+    <div class="card-body">
+      <div id="w10c-preview"></div>
+      <div class="prog-wrap" id="w10c-prog" style="display:none">
+        <div class="prog-lbl" id="w10c-lbl">Hazırlanıyor...</div>
+        <div class="prog-bar"><div class="prog-fill" id="w10c-fill" style="width:0%"></div></div>
+        <div class="chips">
+          <span class="chip" id="w10c-c1">📊 Sınıf verileri derleniyor</span>
+          <span class="chip" id="w10c-c2">🤖 Sınıf sentezi</span>
+          <span class="chip" id="w10c-c3">📝 Word oluşturuluyor</span>
+        </div>
+      </div>
+      <div class="err" id="w10c-err" style="display:none"></div>
+      <button class="btn-run" id="w10c-btn" onclick="runW10C()">📊 &nbsp; Sınıf 10 Haftalık Raporunu Oluştur</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ EKRAN 5: VERİ TABANI ══════════════════════════════════════════ -->
+<div class="screen" id="scr-db">
+  <div class="card">
+    <div class="card-hdr">
+      <div><div class="card-title">🗄 Kayıtlı Veriler</div><div class="card-sub">Haftalık değerlendirmeler localStorage'da saklanır — 10 haftalık raporlar buradan üretilir</div></div>
+      <button class="btn-sm danger" onclick="clearAllData()">🗑 Tümünü Sil</button>
+    </div>
+    <div class="card-body" id="db-body">
+      <div class="info-box">Henüz kayıtlı veri yok. Haftalık bireysel değerlendirme yaptıktan sonra veriler burada görünür.</div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /panel -->
+</div><!-- /body -->
 
 <script>
-window.onerror = function(msg,src,line,col,err){
-  var f=document.getElementById('fatal');
-  f.style.display='block';
-  f.textContent='JS Hatası: '+msg+'\nSatır: '+line+'\nKaynak: '+src;
-  return false;
-};
-
-// ── CONSTANTS ──
-var DIMS=[
-  {id:'d1',icon:'🔐',label:'YZ Etik Farkındalığı',full:'Yapay Zekâ Etik Farkındalığı ve Eleştirel Tutum',src:'Ölçek 1',pts:10,c:'#dc2626'},
-  {id:'d2',icon:'🧠',label:'YZ Öğrenme Becerileri',full:'YZ Destekli Öğrenme ve Öz-Düzenleme Becerileri',src:'Ölçek 2',pts:10,c:'#7c3aed'},
-  {id:'d3',icon:'⚙️',label:'Materyal Geliştirme',full:'Dijital Materyal Geliştirme Süreci ve Doğrulama',src:'Yansıtma Formu S.8-14,17-18',pts:10,c:'#0891b2'},
-  {id:'d4',icon:'📚',label:'Pedagojik Tasarım',full:'Pedagojik Tasarım ve Öğretimsel Karar Kalitesi',src:'Yansıtma Formu S.3,11,15-16',pts:10,c:'#16a34a'},
-  {id:'d5',icon:'🗺️',label:'Kazanım & İçerik',full:'Sosyal Bilgiler Kazanımları ve İçerik Uyumu',src:'Yansıtma Formu S.2-7',pts:10,c:'#d97706'},
-  {id:'d6',icon:'✍️',label:'Prompt Mühendisliği',full:'Prompt Kalitesi ve YZ İş Birliği Becerisi',src:'Yansıtma Formu S.18',pts:null,c:'#6366f1'},
-  {id:'d7',icon:'📝',label:'Form Yapısal Analizi',full:'Formların Yapısal ve Psikometrik Analizi',src:'Her iki ölçek + form',pts:null,c:'#64748b'}
+// ── CONSTANTS ────────────────────────────────────────────────────────
+const DIMS=[
+  {id:'b1',label:'YZ Araç Kullanımı',     short:'YZ Araç',   color:'#F59E0B',tc:'#92400E',bg:'#FEF3C7'},
+  {id:'b2',label:'Materyal & Doğrulama',  short:'Materyal',  color:'#1D4ED8',tc:'#1D4ED8',bg:'#DBEAFE'},
+  {id:'b3',label:'Pedagojik Tasarım',     short:'Pedagoji',  color:'#F59E0B',tc:'#92400E',bg:'#FEF3C7'},
+  {id:'b4',label:'Kazanım & İçerik',      short:'Kazanım',   color:'#166534',tc:'#166534',bg:'#DCFCE7'},
+  {id:'b5',label:'Prompt Kalitesi',       short:'Prompt',    color:'#5B21B6',tc:'#5B21B6',bg:'#EDE9FE'},
 ];
-var MODES={
-  weekly:{id:'weekly',label:'Haftalık Form Raporu',sub:'Tek öğrenci · Tek hafta',icon:'📋',color:'#2563eb',desc:'Bir öğretmen adayının tek haftaya ait form verilerini 7 boyutta değerlendirir.',max:50},
-  individual:{id:'individual',label:'Bireysel Gelişim Raporu',sub:'Tek öğrenci · 10 hafta',icon:'📈',color:'#7c3aed',desc:'10 haftalık tüm form verilerini trend analizi ile değerlendirir.',max:50},
-  klass:{id:'klass',label:'Sınıf Gelişim Raporu',sub:'Tüm öğrenciler · 10 hafta',icon:'👥',color:'#0891b2',desc:'Tüm öğretmen adaylarının 10 haftalık sürecini karşılaştırmalı analiz eder.',max:null}
-};
-var PROMPTS={
-weekly:'Sen, sosyal bilgiler ogretmen adaylarinin Bilisim Teknolojileri dersi kapsaminda hazirliklari haftalik yansitma formu ve iki olcekten (Olcek 1: YZ Etik Tutumlari; Olcek 2: YZ Ogrenme Becerileri) elde edilen verileri analiz eden uzman bir egitimci-arastirmacisin.\n\n7 BOYUTLU DEGERLENDIRME:\n\nBOYUT 1 - YZ Etik Farkindarligi (10 puan) [Olcek 1]\n- Gizlilik ve veri guvenligi (M.1-4)\n- Onyargi ve algoritmik adalet (M.5-6,21)\n- Seffaflik ve aciklanabilirlik (M.14-18)\n- Ozerklik ve manipulasyon kaygisi (M.8,13)\n- Ogrenme destegi perspektifi (M.7,9-12)\n\nBOYUT 2 - YZ Ogrenme Becerileri (10 puan) [Olcek 2]\n- Arac yetkinligi (M.1,4,5)\n- Geri bildirim entegrasyonu (M.6,7,8)\n- Oz-duzenleme ve bagimlilik bilinci (M.9-11,19)\n- Elestirel dusunme (M.13,14)\n- Ogrenme kaliciligi (M.15-18)\n\nBOYUT 3 - Materyal Gelistirme Sureci (10 puan) [Form S.8-14,17-18]\n- Arac secimi (S.8,9), YZ kullanim asamalari (S.10)\n- Dogrulama kalitesi (S.12), Gizlilik/etik kontrol (S.13,14)\n- YZ orani ve ozgunluk dengesi (S.17): %26-75 ideal\n\nBOYUT 4 - Pedagojik Tasarim (10 puan) [Form S.3,11,15,16]\n- Pedagojik gerekcenin derinligi (S.11)\n- Sinif duzeyine uyum (S.3)\n- Ogrenciye beklenen kazanim (S.15)\n- Ogretmen adayi oz gelisimi (S.16)\n\nBOYUT 5 - Kazanim ve Icerik Uyumu (10 puan) [Form S.2-7]\n- Kazanim ifadesi kalitesi (S.6): MEB kodlu olmali\n- Ders-unite-konu-kazanim zinciri tutarliligi\n- SB becerileri ve degerler entegrasyonu\n\nBOYUT 6 - Prompt Muhendisligi (Nitel) [Form S.18]\n- Prompt acikligi, baglami, kisit ifadeleri\n- Ileri teknikler: zincir dusunme, rol atama\n\nBOYUT 7 - Form Yapisal Analizi (Nitel)\n- Olcek 1 ve 2 madde gecerliligi\n- Yansitma formu kapsam yeterliligi\n- Iyilestirme onerileri\n\nRAPOR FORMATI (Turkce, akademik):\n\n## GENEL DEGERLENDIRME OZETI\n(4-5 cumle)\n\n## BOYUT 1 - YZ Etik Farkindarligi (Olcek 1)\n**Puan: X/10**\n**Guclu Yonler:** ...\n**Gelisim Alanlari:** ...\n**Oneri:** ...\n\n## BOYUT 2 - YZ Ogrenme Becerileri (Olcek 2)\n**Puan: X/10**\n**Guclu Yonler:** ...\n**Gelisim Alanlari:** ...\n**Oneri:** ...\n\n## BOYUT 3 - Materyal Gelistirme\n**Puan: X/10**\n**Guclu Yonler:** ...\n**Gelisim Alanlari:** ...\n**Oneri:** ...\n\n## BOYUT 4 - Pedagojik Tasarim\n**Puan: X/10**\n**Guclu Yonler:** ...\n**Gelisim Alanlari:** ...\n**Oneri:** ...\n\n## BOYUT 5 - Kazanim ve Icerik Uyumu\n**Puan: X/10**\n**Guclu Yonler:** ...\n**Oneri:** ...\n\n## BOYUT 6 - Prompt Muhendisligi (Nitel)\n**Kalite:** [Basit/Orta/Gelismis/Uzman]\n**Analiz:** ...\n\n## BOYUT 7 - Form Yapisal Analizi (Nitel)\n**Degerler:** ...\n**Iyilestirme:** ...\n\n## ONCELIKLI 3 ADIM\n- 1. ...\n- 2. ...\n- 3. ...\n\n## GENEL PUAN: X/50',
-individual:'Sen, bir sosyal bilgiler ogretmen adayinin 10 haftalik yansitma formu ve olcek verilerini analiz eden uzman bir egitimci-arastirmacisin. Her boyutu trend acisindan degerlendir.\n\nTrend: Gerileme / Duragan / Yavas ilerleme / Belirgin ilerleme / Donusum\n\nRAPOR FORMATI:\n\n## BIREYSEL GELISIM RAPORU OZET PROFIL\n(5-6 cumle)\n\n## BOYUT 1 - YZ Etik Farkindarligi Gelisimi\n**Trend:** ...\n**Alt Boyutlar:** Gizlilik: ... | Onyargi: ... | Seffaflik: ... | Ozerklik: ...\n**Kritik Haftalara:** ...\n\n## BOYUT 2 - YZ Ogrenme Becerileri Gelisimi\n**Trend:** ...\n**Kritik Gelisim:** ...\n\n## BOYUT 3 - Materyal Sureci Olgunlasmasi\n**Trend:** ...\n**Arac/Dogrulama/Prompt Evrimi:** ...\n\n## BOYUT 4 - Pedagojik Tasarim Gelisimi\n**Trend:** ...\n**Gerekcenin Derinlesmesi:** ...\n\n## BOYUT 5 - Kazanim Uyumu Gelisimi\n**Trend:** ...\n**Kazanim Zinciri Kalitesi:** ...\n\n## BOYUT 6 - Prompt Muhendisligi Gelisimi\n**Trend:** ...\n**Olgunlasma:** ...\n\n## BOYUT 7 - Yansitici Dusunce Gelisimi\n**Trend:** ...\n**Gozlem:** ...\n\n## GELISIM PROFILI\n**Guclu Boyutlar:** ...\n**En Fazla Gelisim:** ...\n**En Cok Destek:** ...\n\n## SUREC SONU 5 HEDEF\n- 1. ...\n- 2. ...\n- 3. ...\n- 4. ...\n- 5. ...',
-klass:'Sen, bir sinifin 10 haftalik form ve olcek verilerini karsilastirmali analiz eden uzman bir egitimci-arastirmacisin.\n\nRAPOR FORMATI:\n\n## SINIF GELISIM RAPORU - YONETICI OZETI\n(6-7 cumle)\n\n## BOYUT 1 - YZ Etik Sinif Profili\n**Duzey:** [Baslangic/Gelismekte/Yeterli/Ileri]\n**Dagilim:** Gizlilik: ... | Onyargi: ... | Seffaflik: ... | Ozerklik: ...\n**Mudahale:** ...\n\n## BOYUT 2 - YZ Ogrenme Sinif Profili\n**Duzey:** ...\n**Kritik (Bagimlilik):** ...\n**Mudahale:** ...\n\n## BOYUT 3 - Materyal Sureci Sinif Profili\n**En Cok Kullanilan Araclar:** ...\n**Dogrulama Profili:** ...\n**Mudahale:** ...\n\n## BOYUT 4 - Pedagojik Tasarim Sinif Profili\n**Gerekcenin Dagilimi:** ...\n**Mudahale:** ...\n\n## BOYUT 5 - Kazanim Uyumu Sinif Profili\n**Kalite Dagilimi:** ...\n**En Cok Tercih:** ...\n\n## BOYUT 6 - Prompt Sinif Profili\n**Olgunluk Dagilimi:** ...\n**Ortak Gucluk:** ...\n\n## BOYUT 7 - 10 Haftalik Sinif Trendi\n**En Hizli:** ...\n**En Duragan:** ...\n**Kritik Noktalar:** ...\n\n## BOYUT 8 - Karsilastirmali Profiller (Anonim)\n**Yuksek Performans:** ...\n**Hizli Donusum:** ...\n**Ek Destek:** ...\n\n## 5 STRATEJIK MUDAHALE\n- 1. ...\n- 2. ...\n- 3. ...\n- 4. ...\n- 5. ...'
-};
+const GRADES=[
+  {label:'BAŞLANGIÇ', min:0,  max:15, fill:'475569',rgb:[71,85,105]},
+  {label:'TEMEL',     min:16, max:25, fill:'1D4ED8',rgb:[29,78,216]},
+  {label:'GELİŞMEKTE',min:26, max:35, fill:'1E4D8C',rgb:[30,77,140]},
+  {label:'İYİ',       min:36, max:43, fill:'166534',rgb:[22,101,52]},
+  {label:'PEKİYİ',   min:44, max:50, fill:'14532D',rgb:[20,83,45]},
+];
+function getGrade(t){return GRADES.find(g=>t>=g.min&&t<=g.max)||GRADES[0];}
+function total(sc){return Object.values(sc||{}).reduce((a,b)=>a+b,0);}
+function $(id){return document.getElementById(id);}
+function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
 
-// ── STATE ──
-var S={step:'mode',mode:null,file:null,fc:null,report:null,err:null,msg:'',pdfBusy:false};
-function set(p){Object.assign(S,p);render();}
+// ── FILE STATE ────────────────────────────────────────────────────────
+const files={w1:[],wc:[]};  // {name,size,b64}
 
-// ── HELPERS ──
-function h(tag,attrs,children){
-  var e=document.createElement(tag);
-  if(attrs){
-    Object.keys(attrs).forEach(function(k){
-      var v=attrs[k];
-      if(k==='cls')e.className=v;
-      else if(k==='html')e.innerHTML=v;
-      else if(k==='style')Object.assign(e.style,v);
-      else if(k.charAt(0)==='$')e.addEventListener(k.slice(1),v);
-      else e.setAttribute(k,v);
-    });
-  }
-  if(children){
-    (Array.isArray(children)?children:[children]).forEach(function(c){
-      if(c==null)return;
-      if(typeof c==='string')e.appendChild(document.createTextNode(c));
-      else if(c instanceof Node)e.appendChild(c);
-    });
-  }
-  return e;
+function addFile(mode,f){
+  if(!f||f.type!=='application/pdf')return;
+  if(mode==='w1')files.w1=[];  // single file for individual
+  const rd=new FileReader();
+  rd.onload=e=>{
+    const b64=e.target.result.split(',')[1];
+    if(mode==='w1')files.w1=[{name:f.name,size:f.size,b64}];
+    else files.wc.push({name:f.name,size:f.size,b64});
+    renderFiles(mode);
+  };
+  rd.readAsDataURL(f);
 }
-function d(a,c){return h('div',a,c);}
-function mc(){return S.mode?{weekly:'#2563eb',individual:'#7c3aed',klass:'#0891b2'}[S.mode]:'#2563eb';}
+function addFiles(mode,flist){Array.from(flist).forEach(f=>addFile(mode,f));}
+function rmFile(mode,idx){files[mode].splice(idx,1);renderFiles(mode);}
+function renderFiles(mode){
+  $(mode+'-files').innerHTML=files[mode].map((f,i)=>`
+    <div class="fp">
+      <span style="font-size:18px">📑</span>
+      <div><div class="fp-name">${f.name}</div><div class="fp-sz">${(f.size/1024).toFixed(1)} KB</div></div>
+      <button class="fp-rm" onclick="rmFile('${mode}',${i})">✕</button>
+    </div>`).join('');
+}
+function onDrop(mode,e){e.preventDefault();$(`${mode}-drop`).classList.remove('over');const f=e.dataTransfer.files;if(mode==='w1')addFile(mode,f[0]);else addFiles(mode,f);}
+function onOver(e,id){e.preventDefault();$(id).classList.add('over');}
 
-// ── PDF ──
-function makePDF(text, fname, dt) {
-  try {
-    var m = MODES[S.mode];
-    var ac = mc();
-    var doc = new window.jspdf.jsPDF({ orientation:'portrait', unit:'mm', format:'a4' });
-    var pw = doc.internal.pageSize.getWidth();
-    var ph = doc.internal.pageSize.getHeight();
-    var mg = 20; var cw = pw - mg*2; var y = 0;
-
-    // ── KAPAK SAYFASI ──
-    // Koyu arka plan
-    doc.setFillColor(10, 30, 68);
-    doc.rect(0, 0, pw, ph, 'F');
-    // Accent şeridi
-    doc.setFillColor(hexToRgb(ac)[0], hexToRgb(ac)[1], hexToRgb(ac)[2]);
-    doc.rect(0, ph-8, pw, 8, 'F');
-
-    y = 40;
-    // Mode badge
-    doc.setFontSize(8); doc.setTextColor(147, 197, 253);
-    doc.text((m.icon + ' ' + m.label).toUpperCase(), mg, y);
-    y += 18;
-    // Başlık
-    doc.setFontSize(32); doc.setTextColor(255, 255, 255); doc.setFont('helvetica','bold');
-    doc.text('Geri Donut Raporu', mg, y);
-    y += 12;
-    doc.setFontSize(13); doc.setFont('helvetica','normal'); doc.setTextColor(191, 219, 254);
-    doc.text(m.sub, mg, y);
-    y += 8;
-    doc.setFontSize(8); doc.setTextColor(148, 163, 184);
-    doc.text('Bilisim Teknolojileri Dersi - SB Ogretmen Adayi Degerlendirme', mg, y);
-
-    y += 24;
-    // Meta bilgiler - 2 kolon
-    var metaItems = [
-      ['DOSYA', fname.substring(0,35)],
-      ['TARIH', dt],
-      ['RAPOR TURU', m.label],
-      ['PUANLAMA', m.max ? m.max+' uzerinden' : 'Nitel + Puanli']
-    ];
-    var col = 0;
-    metaItems.forEach(function(item) {
-      var x = col===0 ? mg : pw/2+5;
-      doc.setFillColor(30, 41, 59);
-      doc.roundedRect(x, y, cw/2-5, 18, 2, 2, 'F');
-      doc.setFontSize(7); doc.setTextColor(100, 116, 139); doc.setFont('helvetica','bold');
-      doc.text(item[0], x+4, y+6);
-      doc.setFontSize(9); doc.setTextColor(226, 232, 240); doc.setFont('helvetica','normal');
-      doc.text(item[1], x+4, y+13);
-      col = col===0 ? 1 : 0;
-      if(col===0) y += 22;
-    });
-    y += 22;
-
-    // Boyutlar
-    doc.setFontSize(7); doc.setTextColor(100, 116, 139); doc.setFont('helvetica','bold');
-    doc.text('DEGERLENDIRME BOYUTLARI', mg, y); y+=6;
-    DIMS.forEach(function(di) {
-      doc.setFillColor(15, 23, 42);
-      doc.rect(mg, y-3, cw, 8, 'F');
-      var rgb = hexToRgb(di.c);
-      doc.setFillColor(rgb[0], rgb[1], rgb[2]);
-      doc.rect(mg, y-3, 2, 8, 'F');
-      doc.setFontSize(8); doc.setTextColor(203, 213, 225); doc.setFont('helvetica','normal');
-      doc.text(di.label, mg+6, y+2);
-      doc.setTextColor(rgb[0], rgb[1], rgb[2]); doc.setFont('helvetica','bold');
-      doc.text(di.pts ? di.pts+'p' : 'Nitel', pw-mg-2, y+2, {align:'right'});
-      y += 9;
-    });
-
-    // Footer kapak
-    doc.setFontSize(8); doc.setTextColor(148, 163, 184); doc.setFont('helvetica','normal');
-    doc.text('Form Analiz Araci  |  Claude AI tarafindan olusturulmustur', pw/2, ph-12, {align:'center'});
-
-    // ── RAPOR SAYFASI ──
-    doc.addPage();
-    // Header
-    doc.setFillColor(15, 39, 68);
-    doc.rect(0, 0, pw, 12, 'F');
-    doc.setFontSize(7); doc.setTextColor(125, 211, 252); doc.setFont('helvetica','bold');
-    doc.text(m.label.toUpperCase() + '  |  ' + fname.substring(0,30), mg, 8);
-    doc.text(dt, pw-mg, 8, {align:'right'});
-
-    y = 22;
-    // Rapor içeriği parse et
-    var lines = text.split('\n');
-    lines.forEach(function(line) {
-      var l = line.trim();
-      if(!l) { y += 3; return; }
-
-      // Sayfa kontrolü
-      if(y > ph-20) {
-        doc.addPage();
-        doc.setFillColor(15, 39, 68); doc.rect(0, 0, pw, 12, 'F');
-        doc.setFontSize(7); doc.setTextColor(125, 211, 252); doc.setFont('helvetica','bold');
-        doc.text(m.label.toUpperCase(), mg, 8);
-        doc.text(dt, pw-mg, 8, {align:'right'});
-        y = 22;
-      }
-
-      if(/^## (.+)$/.test(l)) {
-        var title = l.slice(3);
-        if(y > 25) { doc.setFillColor(20, 31, 50); doc.rect(mg, y-1, cw, 0.3, 'F'); y+=3; }
-        var acRgb = hexToRgb(ac);
-        doc.setFillColor(acRgb[0], acRgb[1], acRgb[2]);
-        doc.rect(mg, y, 2.5, 7, 'F');
-        doc.setFontSize(11); doc.setTextColor(15, 39, 68); doc.setFont('helvetica','bold');
-        doc.text(cleanTr(title), mg+5, y+5.5);
-        y += 12;
-      } else if(/^### (.+)$/.test(l)) {
-        doc.setFontSize(9.5); doc.setTextColor(30, 58, 95); doc.setFont('helvetica','bold');
-        doc.text(cleanTr(l.slice(4)), mg, y+4);
-        y += 8;
-      } else if(/^\*\*(.+)\*\*$/.test(l)) {
-        var bold = l.replace(/^\*\*|\*\*$/g,'');
-        doc.setFontSize(9); doc.setTextColor(51, 65, 85); doc.setFont('helvetica','bold');
-        var wrapped = doc.splitTextToSize(cleanTr(bold), cw);
-        doc.text(wrapped, mg, y+4);
-        y += wrapped.length * 5 + 2;
-      } else if(/^- (.+)$/.test(l)) {
-        var item = l.slice(2).replace(/\*\*(.+?)\*\*/g,'$1');
-        doc.setFontSize(8.5); doc.setTextColor(71, 85, 105); doc.setFont('helvetica','normal');
-        var acRgb2 = hexToRgb(ac);
-        doc.setFillColor(acRgb2[0], acRgb2[1], acRgb2[2]);
-        doc.circle(mg+2, y+3, 1, 'F');
-        var wrapped2 = doc.splitTextToSize(cleanTr(item), cw-8);
-        doc.text(wrapped2, mg+6, y+4);
-        y += wrapped2.length * 5 + 1;
-      } else {
-        var plain = l.replace(/\*\*(.+?)\*\*/g,'$1').replace(/\*(.+?)\*/g,'$1');
-        doc.setFontSize(8.5); doc.setTextColor(30, 41, 59); doc.setFont('helvetica','normal');
-        var wrapped3 = doc.splitTextToSize(cleanTr(plain), cw);
-        doc.text(wrapped3, mg, y+4);
-        y += wrapped3.length * 5 + 2;
-      }
-    });
-
-    // Page footer
-    var pageCount = doc.internal.getNumberOfPages();
-    for(var i=1; i<=pageCount; i++) {
-      doc.setPage(i);
-      if(i > 1) {
-        doc.setFillColor(248, 250, 252); doc.rect(0, ph-10, pw, 10, 'F');
-        doc.setDrawColor(226, 232, 240); doc.line(0, ph-10, pw, ph-10);
-        doc.setFontSize(7); doc.setTextColor(148, 163, 184); doc.setFont('helvetica','normal');
-        doc.text('SB Ogretmen Adayi Degerlendirme - ' + m.label, mg, ph-4);
-        doc.text('Sayfa ' + (i-1) + ' / ' + (pageCount-1), pw-mg, ph-4, {align:'right'});
-      }
-    }
-
-    doc.save('geri-donut-raporu-' + fname.replace(/\.[^.]+$/,'') + '.pdf');
-  } catch(e) {
-    alert('PDF hatasi: ' + e.message);
-    console.error(e);
-  }
+// ── SCREEN NAV ────────────────────────────────────────────────────────
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.sb-btn').forEach(b=>b.classList.remove('active'));
+  $('scr-'+id).classList.add('active');
+  const nb=$('nav-'+id);
+  if(nb)nb.classList.add('active');
+  if(id==='w10i')loadStudentSelect();
+  if(id==='w10c')renderW10CPreview();
+  if(id==='db')renderDB();
 }
 
-function hexToRgb(hex) {
-  var r = parseInt(hex.slice(1,3),16);
-  var g = parseInt(hex.slice(3,5),16);
-  var b = parseInt(hex.slice(5,7),16);
-  return [r,g,b];
-}
-
-function cleanTr(s) {
-  // jsPDF built-in fonts don't support Turkish chars well — transliterate
-  return s
-    .replace(/ğ/g,'g').replace(/Ğ/g,'G')
-    .replace(/ş/g,'s').replace(/Ş/g,'S')
-    .replace(/ı/g,'i').replace(/İ/g,'I')
-    .replace(/ö/g,'o').replace(/Ö/g,'O')
-    .replace(/ü/g,'u').replace(/Ü/g,'U')
-    .replace(/ç/g,'c').replace(/Ç/g,'C')
-    .replace(/â/g,'a').replace(/Â/g,'A')
-    .replace(/î/g,'i').replace(/û/g,'u');
-}
-
-// ── MARKDOWN ──
-function mdHtml(t){
-  if(!t)return'';
-  var lines=t.split('\n'),html='',inL=false;
-  function esc(s){return s.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\*(.+?)\*/g,'<em>$1</em>');}
-  lines.forEach(function(line){
-    var l=line.trim();
-    if(!l){if(inL){html+='</ul>';inL=false;}return;}
-    if(/^## (.+)$/.test(l)){if(inL){html+='</ul>';inL=false;}html+='<h2>'+esc(l.slice(3))+'</h2>';}
-    else if(/^### (.+)$/.test(l)){if(inL){html+='</ul>';inL=false;}html+='<h3>'+esc(l.slice(4))+'</h3>';}
-    else if(/^- (.+)$/.test(l)){if(!inL){html+='<ul>';inL=true;}html+='<li>'+esc(l.slice(2))+'</li>';}
-    else{if(inL){html+='</ul>';inL=false;}html+='<p>'+esc(l)+'</p>';}
+// ── PROGRESS HELPERS ──────────────────────────────────────────────────
+function prog(mode,pct,lbl,step){
+  $(mode+'-fill').style.width=pct+'%';
+  $(mode+'-lbl').textContent=lbl;
+  const n=parseInt(mode.match(/\d+/)?.[0]||'4');
+  [1,2,3,4].forEach(i=>{
+    const c=$(mode+'-c'+i);
+    if(!c)return;
+    c.className=i<step?'chip ok':i===step?'chip on':'chip';
   });
-  if(inL)html+='</ul>';
-  return html;
 }
+function showProg(mode,show){$(mode+'-prog').style.display=show?'block':'none';}
+function showErr(mode,msg){const e=$(mode+'-err');if(msg){e.textContent=msg;e.style.display='block';}else e.style.display='none';}
 
-// ── FILE READ ──
-function readFile(file,cb){
-  var ext=file.name.split('.').pop().toLowerCase();
-  if(['xlsx','xls','csv'].indexOf(ext)>=0){
-    if(typeof XLSX==='undefined'){cb('XLSX kütüphanesi yüklenemedi. Lütfen sayfayı yenileyin.',null);return;}
-    var r=new FileReader();
-    r.onload=function(e){
-      try{
-        var wb=XLSX.read(e.target.result,{type:'binary'});
-        var t='DOSYA: '+file.name+'\n\n';
-        wb.SheetNames.forEach(function(s){
-          var ws=wb.Sheets[s];
-          var data=XLSX.utils.sheet_to_json(ws,{header:1});
-          t+='=== '+s+' ===\n';
-          data.forEach(function(row){if(row.some(function(c){return c!=null&&c!=='';})){ t+=row.join(' | ')+'\n';}});
-          t+='\n';
-        });
-        cb(null,t);
-      }catch(e){cb(e.message,null);}
-    };
-    r.onerror=function(){cb('Dosya okunamadı',null);};
-    r.readAsBinaryString(file);
-  } else if(ext==='pdf'){
-    var r2=new FileReader();
-    r2.onload=function(e){cb(null,{type:'pdf',b64:e.target.result.split(',')[1]});};
-    r2.onerror=function(){cb('PDF okunamadı',null);};
-    r2.readAsDataURL(file);
-  } else if(ext==='txt'||ext==='md'){
-    var r3=new FileReader();
-    r3.onload=function(e){cb(null,e.target.result);};
-    r3.onerror=function(){cb('Dosya okunamadı',null);};
-    r3.readAsText(file,'UTF-8');
-  } else {
-    cb('Desteklenmeyen dosya türü. PDF, Excel veya CSV yükleyin.',null);
-  }
+// ── LOCAL STORAGE ─────────────────────────────────────────────────────
+function loadDB(){try{return JSON.parse(localStorage.getItem('sb_eval')||'{}');}catch{return{};}}
+function saveDB(db){localStorage.setItem('sb_eval',JSON.stringify(db));}
+function saveWeek(studentName,week,data){
+  const db=loadDB();
+  if(!db[studentName])db[studentName]={};
+  db[studentName][String(week)]=data;
+  saveDB(db);
 }
+function clearAllData(){if(confirm('Tüm kayıtlı veriler silinecek. Emin misiniz?')){localStorage.removeItem('sb_eval');renderDB();}}
 
-// ── API ──
-function runAnalysis(){
-  var key=localStorage.getItem('ak')||'';
-  if(!key){set({err:'Lütfen önce API anahtarınızı girin (üstteki sarı bant).',step:'ready'});return;}
-  if(!S.fc||!S.mode)return;
-  var msgs=['Form verileri işleniyor...','Ölçek 1 analiz ediliyor...','Ölçek 2 değerlendiriliyor...','Materyal süreci inceleniyor...','Pedagojik tasarım analiz ediliyor...','Kazanım uyumu kontrol ediliyor...','Prompt kalitesi değerlendiriliyor...','Rapor yapılandırılıyor...'];
-  var i=0;
-  set({step:'analyzing',err:null,report:null,msg:msgs[0]});
-  var iv=setInterval(function(){
-    i=(i+1)%msgs.length;
-    var el=document.getElementById('lmsg');
-    if(el)el.textContent=msgs[i];
-  },2500);
-  var labels={weekly:'tek haftaya ait yansıtma formu ve ölçek verileri',individual:'10 haftalık tüm yansıtma formu ve ölçek verileri',klass:'tüm öğretmen adaylarının 10 haftalık verileri'};
-  var prompt='Bu dosya, sosyal bilgiler öğretmen adaylarının '+labels[S.mode]+' içermektedir. Sistem talimatlarındaki 7 boyutlu değerlendirme çerçevesine göre kapsamlı bir rapor hazırla.';
-  var messages;
-  if(S.fc&&typeof S.fc==='object'&&S.fc.type==='pdf'){
-    messages=[{role:'user',content:[{type:'document',source:{type:'base64',media_type:'application/pdf',data:S.fc.b64}},{type:'text',text:prompt}]}];
-  } else {
-    messages=[{role:'user',content:prompt+'\n\n---\n'+S.fc+'\n---'}];
-  }
-  fetch('https://api.anthropic.com/v1/messages',{
+// ── AI CALL ───────────────────────────────────────────────────────────
+async function callClaude(messages,maxTokens=5000){
+  const key=$('apiKey').value.trim();
+  if(!key)throw new Error('API anahtarı eksik — sağ üstten girin.');
+  const res=await fetch('https://api.anthropic.com/v1/messages',{
     method:'POST',
-    headers:{
-      'Content-Type':'application/json',
-      'x-api-key':key,
-      'anthropic-version':'2023-06-01',
-      'anthropic-dangerous-direct-browser-access':'true'
-    },
-    body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1500,system:PROMPTS[S.mode],messages:messages})
-  }).then(function(r){return r.json();}).then(function(data){
-    clearInterval(iv);
-    if(data.error)throw new Error(data.error.message);
-    var text=(data.content||[]).map(function(b){return b.text||'';}).join('\n');
-    set({report:text,step:'done'});
-  }).catch(function(e){
-    clearInterval(iv);
-    set({err:'Analiz hatası: '+e.message,step:'ready'});
+    headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+    body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:maxTokens,messages})
   });
+  const d=await res.json();
+  if(d.error)throw new Error(d.error.message);
+  return d.content[0].text;
 }
 
-// ── STEPBAR ──
-function stepBar(){
-  var order=['mode','upload','ready','analyzing','done'];
-  var cur=order.indexOf(S.step==='ready'?'upload':S.step);
-  var ids=[{id:'mode',l:'Tür Seç'},{id:'upload',l:'Dosya'},{id:'analyzing',l:'Analiz'},{id:'done',l:'Rapor'}];
-  var bar=d({cls:'sbar'});
-  ids.forEach(function(s,idx){
-    var me=order.indexOf(s.id);
-    var act=(s.id==='upload'&&(S.step==='upload'||S.step==='ready'))||S.step===s.id;
-    var dn=me<cur;
-    var item=d({cls:'si'+(act?' a':'')+(dn?' d':'')});
-    item.appendChild(d({cls:'sn'},dn?'✓':String(idx+1)));
-    item.appendChild(h('span',{cls:'sl'},s.l));
-    bar.appendChild(item);
-    if(idx<ids.length-1)bar.appendChild(d({cls:'sc'+(dn?' d':'')}));
-  });
-  return bar;
+// ── INDIVIDUAL WEEKLY PROMPT ──────────────────────────────────────────
+function buildW1Prompt(week,prevWeeks){
+  const prevContext=prevWeeks.length>0?`
+== ÖNCEKİ HAFTALAR ==
+Bu öğrenci için daha önce verilen dönütler:
+${prevWeeks.map(pw=>`Hafta ${pw.week} (${pw.tema||'?'}): Toplam ${total(pw.scores)}/50, ${getGrade(total(pw.scores)).label}
+  Verilen öneriler: ${(pw.steps||[]).map(s=>s.title).join('; ')}
+  Kritik bulgular: ${pw.keyFindings||'—'}`).join('\n')}
+
+TEKRAR UYARISI: Yukarıdaki önerileri TEKRARLAMA. Yeni, ilerleyici, önceki haftalarda verilmiş tavsiyeler üzerine inşa eden öneriler yaz.
+Öğrencinin gelişim yolculuğunu göz önünde bulundur — ilerlediyse bunu tanı, takılı kaldığı noktaları tespit et.`:'== İLK HAFTA DEĞERLENDİRMESİ — genel profil oluştur ==';
+
+  return`Bu PDF ${week}. hafta öğretmen adayı değerlendirme formudur.
+
+${prevContext}
+
+5 BOYUTLU DEĞERLENDIRME ÇERÇEVESİ (0-10):
+B1 YZ Araç Kullanımı: kaç aşamada kullanıldı, katkı oranı, pedagojik entegrasyon
+B2 Materyal & Doğrulama: kaynak kalitesi, referanslar, gizlilik/önyargı kontrolü
+B3 Pedagojik Tasarım: gerekçe derinliği, öğrenci faydası, öz gelişim
+B4 Kazanım & İçerik: kazanım kodu+ifade tam mı, ürün linki, format uyumu
+B5 Prompt Mühendisliği: prompt paylaşıldı mı, sınıf/kapsam/format kısıtı var mı
+
+YALNIZCA geçerli JSON döndür:
+{"studentName":"AD SOYAD","sinif":"X. Sınıf","ders":"Sosyal Bilgiler","tema":"tema","tarih":"tarih","unite":"ünite","konu":"konu","kazanim":"SB.X.X.X — ifade","dijitalArac":"araç","yzArac":"YZ","icerikTuru":"tür","yzKatki":"%26-50","urunLink":"link veya boş","scores":{"b1":6,"b2":7,"b3":5,"b4":8,"b5":3},"genelOzet":"3-4 cümle. Bu haftanın gelişimi/takılı kalınan noktalar (önceki haftaya göre) belirtilmeli.","keyFindings":"Bu haftanın en kritik 2-3 bulgusu, virgülle ayrılmış","dims":{"b1":{"status":"ORTA DÜZEY — kısa açıklama","good":["güçlü 1","güçlü 2","güçlü 3"],"weak":["gelişim 1","gelişim 2","gelişim 3"],"rec":"Somut öneri — önceki önerilerden FARKLI"},"b2":{"status":"","good":[],"weak":[],"rec":""},"b3":{"status":"","good":[],"weak":[],"rec":""},"b4":{"status":"","good":[],"weak":[],"rec":""},"b5":{"status":"","good":[],"weak":[],"rec":""}},"steps":[{"title":"En kritik — önceki haftalardan farklı","desc":"Somut, uygulanabilir, ilerleyici öneri"},{"title":"İkinci öncelik","desc":"..."},{"title":"Üçüncü öncelik","desc":"..."}]}`;
 }
 
-// ── RENDER ──
-function render(){
-  var app=document.getElementById('app');
-  if(!app)return;
-  app.innerHTML='';
-  var color=mc();
-  var ic=document.getElementById('hic');
-  if(ic)ic.style.background='linear-gradient(135deg,'+color+','+color+'cc)';
-  var hb=document.getElementById('hbadge');
-  if(hb&&S.mode){hb.textContent=MODES[S.mode].icon+' '+MODES[S.mode].label;hb.style.background=color+'18';hb.style.borderColor=color+'40';}
+// ── CLASS PROMPT ──────────────────────────────────────────────────────
+function buildClassPrompt(week,studentResults,prevWeeksSummary){
+  const prev=prevWeeksSummary?`== ÖNCEKİ HAFTA SINIF ÖZETİ ==\n${prevWeeksSummary}\nBu bulguları TEKRARLAMA — yeni gelişmelere odaklan.`:'';
+  return`Bu ${week}. hafta sınıf değerlendirmesidir. Aşağıda ${studentResults.length} öğrencinin bireysel analiz sonuçları verilmiştir.
 
-  if(S.step!=='mode')app.appendChild(stepBar());
+${studentResults.map((s,i)=>`${i+1}. ${s.studentName}: Toplam ${total(s.scores)}/50 (${getGrade(total(s.scores)).label}) | B1:${s.scores.b1} B2:${s.scores.b2} B3:${s.scores.b3} B4:${s.scores.b4} B5:${s.scores.b5}`).join('\n')}
 
-  // MODE SELECT
-  if(S.step==='mode'){
-    app.appendChild(d({style:{textAlign:'center',marginBottom:'20px'}},[
-      d({style:{fontSize:'21px',fontWeight:'bold',color:'#dde9ff',marginBottom:'5px'}},'Rapor Türünü Seçin'),
-      d({style:{fontSize:'12px',color:'#4d6070',fontFamily:'sans-serif'}},'Hangi analizi oluşturmak istiyorsunuz?')
-    ]));
-    var g=d({cls:'mgrid'});
-    Object.values(MODES).forEach(function(m){
-      var card=d({cls:'mcard',
-        $mouseover:function(e){var t=e.currentTarget;t.style.borderColor=m.color;t.style.background=m.color+'10';t.style.boxShadow='0 10px 28px '+m.color+'28';},
-        $mouseout:function(e){var t=e.currentTarget;t.style.borderColor='';t.style.background='';t.style.boxShadow='';},
-        $click:function(){set({mode:m.id,step:'upload'});}
-      },[
-        d({style:{fontSize:'28px',marginBottom:'9px'}},m.icon),
-        d({style:{fontSize:'13px',fontWeight:'bold',color:'#dde9ff',marginBottom:'3px'}},m.label),
-        d({style:{fontSize:'10px',color:m.color,fontFamily:'sans-serif',fontWeight:'600',marginBottom:'8px'}},m.sub),
-        d({style:{fontSize:'11px',color:'#7a94a8',fontFamily:'sans-serif',lineHeight:'1.6'}},m.desc)
+${prev}
+
+Bu verilerden sınıf geneli için derin bir analiz yap. YALNIZCA JSON döndür:
+{"hafta":${week},"ogrenciSayisi":${studentResults.length},"sinifOrtalaması":0,"sinifDerece":"TEMEL","genelOzet":"4-5 cümle sınıf performans özeti","gucluPattern":"Sınıfın genel güçlü yönü","kritikPattern":"Sınıfın genel kritik sorunu","dikkatGereken":["Müdahale gerektiren öğrenci 1","öğrenci 2"],"kazananlar":["En çok gelişen öğrenci 1","öğrenci 2"],"boyutAnaliz":{"b1":"Bu boyuttaki sınıf trendi","b2":"","b3":"","b4":"","b5":""},"sinifOnerileri":["Tüm sınıfa öneri 1","öneri 2","öneri 3"],"bireyselNotlar":[{"ad":"ÖĞRENCI ADI","not":"Bu öğrenciye özel kısa not"}]}`;
+}
+
+// ── 10-WEEK INDIVIDUAL PROMPT ─────────────────────────────────────────
+function buildW10IPrompt(studentName,weeks){
+  const sorted=Object.entries(weeks).sort((a,b)=>parseInt(a[0])-parseInt(b[0]));
+  return`${studentName} adlı öğretmen adayının ${sorted.length} haftalık gelişim verisi:
+
+${sorted.map(([w,d])=>`Hafta ${w} (${d.tema||'?'}): ${total(d.scores)}/50 ${getGrade(total(d.scores)).label}
+  Boyutlar: B1:${d.scores?.b1||0} B2:${d.scores?.b2||0} B3:${d.scores?.b3||0} B4:${d.scores?.b4||0} B5:${d.scores?.b5||0}
+  Özet: ${d.genelOzet||d.keyFindings||'—'}
+  Verilen öneriler: ${(d.steps||[]).map(s=>s.title).join('; ')}`).join('\n\n')}
+
+Bu veriden 10 haftalık longitudinal analiz yap. Örüntüleri, gelişim/gerileme noktalarını, ısrarcı zayıflıkları, kırılan kalıpları analiz et. YALNIZCA JSON döndür:
+{"studentName":"${studentName}","haftaSayisi":${sorted.length},"baslangiçToplam":0,"sonToplam":0,"netDegisim":0,"genelTrend":"YUKSELİŞ/DÜŞÜŞ/STABIL","kapsamliOzet":"5-6 cümle — öğrencinin tüm süreçteki hikayesi, büyüme noktaları ve kalan zorluklar","boyutTrendleri":{"b1":{"trend":"yükseliş/düşüş/stabil","aciklama":"bu boyuttaki örüntü","kritikHafta":"en önemli değişim haftası"},"b2":{"trend":"","aciklama":"","kritikHafta":""},"b3":{"trend":"","aciklama":"","kritikHafta":""},"b4":{"trend":"","aciklama":"","kritikHafta":""},"b5":{"trend":"","aciklama":"","kritikHafta":""}},"kaliciZayifliklar":["Haftalara rağmen aşılamayan sorun 1","sorun 2"],"kirılanKaliplar":["Olumlu yönde kırılan sorun 1"],"gelecekOnerileri":["Sonraki dönem için stratejik öneri 1","öneri 2","öneri 3"]}`;
+}
+
+// ── 10-WEEK CLASS PROMPT ──────────────────────────────────────────────
+function buildW10CPrompt(allData){
+  const students=Object.entries(allData);
+  return`Sınıfın ${students.length} öğrencisinin tüm haftalık verisi:
+
+${students.map(([name,weeks])=>{
+  const sorted=Object.entries(weeks).sort((a,b)=>+a[0]-+b[0]);
+  const totals=sorted.map(([w,d])=>total(d.scores||{}));
+  return `${name}: ${sorted.length} hafta | Başlangıç:${totals[0]||0} Son:${totals[totals.length-1]||0} Ort:${Math.round(totals.reduce((a,b)=>a+b,0)/totals.length)||0}`;
+}).join('\n')}
+
+10 haftalık sınıf gelişim analizi yap. YALNIZCA JSON döndür:
+{"ogrenciSayisi":${students.length},"kapsamliOzet":"5-6 cümle sınıf hikayesi","sinifGenelTrend":"YUKSELİŞ/DÜŞÜŞ/STABIL","enCokGelisen":["öğrenci 1","öğrenci 2"],"enCokGerileyen":["öğrenci 1"],"stabil":["öğrenci 1"],"sinifGucluYonler":["Sınıfın kalıcı güçlü yönü 1","yön 2"],"sinifZayifYonler":["Sınıfın kalıcı sorunu 1","sorun 2"],"boyutSinifAnaliz":{"b1":"Tüm sınıfın bu boyuttaki 10 haftalık örüntüsü","b2":"","b3":"","b4":"","b5":""},"mudahaleOnerileri":["Öğretim üyesi için sınıf geneli öneri 1","öneri 2","öneri 3"],"bireyselMudahale":[{"ad":"öğrenci","neden":"neden müdahale?","oneri":"ne yapılmalı?"}]}`;
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// RUN W1 — HAFTALIK BİREYSEL
+// ══════════════════════════════════════════════════════════════════════
+async function runW1(){
+  if(!files.w1.length){showErr('w1','Lütfen bir PDF yükleyin.');return;}
+  showErr('w1',null);showProg('w1',true);
+  $('w1-btn').disabled=true;$('w1-result').style.display='none';
+  const week=$('w1-week').value;
+  const tema=$('w1-tema').value||week+'. Tema';
+
+  try{
+    prog('w1',20,'PDF hazırlanıyor...',1);await sleep(200);
+
+    // Önceki hafta verileri
+    prog('w1',35,'Önceki haftalar kontrol ediliyor...',2);
+    const db=loadDB();
+    // studentName henüz bilinmiyor — sonra kaydedilecek
+    // Geçici: tüm öğrencilerin bu PDF'ini göndermeden önce kontrol edemeyiz
+    // Önce PDF'i analiz et, öğrenci adını al, sonra geçmiş verileri kullan
+    prog('w1',50,'Claude analiz ediyor...',3);
+
+    // İlk analiz (öğrenci adını öğrenmek için)
+    const firstPrompt=buildW1Prompt(week,[]);
+    const rawFirst=await callClaude([
+      {role:'user',content:[
+        {type:'document',source:{type:'base64',media_type:'application/pdf',data:files.w1[0].b64}},
+        {type:'text',text:firstPrompt}
+      ]}
+    ]);
+    let rep=JSON.parse(rawFirst.replace(/```json|```/g,'').trim());
+
+    // Öğrenci adı belirlendi — şimdi gerçek geçmişi çek
+    const sName=rep.studentName;
+    const prevWeeks=db[sName]?Object.entries(db[sName]).sort((a,b)=>+a[0]-+b[0]).filter(([w])=>parseInt(w)<parseInt(week)).map(([w,d])=>({week:parseInt(w),...d})):[];
+
+    // Eğer önceki haftalar varsa ve sayı >0, yeniden değerlendir
+    if(prevWeeks.length>0){
+      prog('w1',68,'Önceki haftalar dikkate alınarak yeniden değerlendiriliyor...',3);
+      const secondPrompt=buildW1Prompt(week,prevWeeks);
+      const rawSecond=await callClaude([
+        {role:'user',content:[
+          {type:'document',source:{type:'base64',media_type:'application/pdf',data:files.w1[0].b64}},
+          {type:'text',text:secondPrompt}
+        ]}
       ]);
-      g.appendChild(card);
-    });
-    app.appendChild(g);
-    var pnl=d({cls:'panel panel-hi'});
-    pnl.appendChild(d({cls:'lbl'},'7 Değerlendirme Boyutu'));
-    var dg=d({cls:'dgrid'});
-    DIMS.forEach(function(di){
-      var item=d({cls:'ditem'},[
-        d({style:{fontSize:'16px',flexShrink:'0'}},di.icon),
-        d({style:{flex:'1'}},[
-          d({style:{fontSize:'11.5px',color:'#cbd5e1',fontFamily:'sans-serif',fontWeight:'600'}},di.label),
-          d({style:{fontSize:'9px',color:di.c,fontFamily:'sans-serif'}},di.src)
-        ]),
-        d({style:{fontSize:'10px',color:di.c,fontWeight:'700',fontFamily:'sans-serif',marginLeft:'auto',flexShrink:'0'}},di.pts?di.pts+'p':'Nitel')
+      rep=JSON.parse(rawSecond.replace(/```json|```/g,'').trim());
+    }
+
+    rep.tema=tema;rep.hafta=parseInt(week);
+
+    // Kaydet
+    saveWeek(rep.studentName,week,rep);
+
+    prog('w1',85,'Word raporu oluşturuluyor...',4);
+    await sleep(100);
+    await buildWordIndividual(rep,prevWeeks,'haftalik');
+    prog('w1',100,'Tamamlandı ✓',5);
+
+    // Sonuç göster
+    const tot=total(rep.scores);const gr=getGrade(tot);
+    $('w1-result').innerHTML=buildResultHtml(rep,tot,gr);
+    $('w1-result').style.display='block';
+  }catch(e){
+    showErr('w1','Hata: '+e.message);
+  }finally{
+    $('w1-btn').disabled=false;
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// RUN WC — HAFTALIK SINIF
+// ══════════════════════════════════════════════════════════════════════
+async function runWC(){
+  if(!files.wc.length){showErr('wc','En az 1 PDF yükleyin.');return;}
+  showErr('wc',null);showProg('wc',true);
+  $('wc-btn').disabled=true;$('wc-result').style.display='none';
+  const week=$('wc-week').value;
+  const tema=$('wc-tema').value||week+'. Tema';
+
+  try{
+    const db=loadDB();
+    const results=[];
+    const totalFiles=files.wc.length;
+
+    // Her öğrenciyi tek tek analiz et
+    for(let i=0;i<totalFiles;i++){
+      const f=files.wc[i];
+      prog('wc',Math.round(10+(i/totalFiles)*55),'Analiz ediliyor: '+(i+1)+'/'+totalFiles+' öğrenci...',2);
+      const prevWeeks=[];  // Sınıf değerlendirmesinde önceki hafta bağlamı bireysel kayıtlardan
+      const prompt=buildW1Prompt(week,prevWeeks);
+      const raw=await callClaude([
+        {role:'user',content:[
+          {type:'document',source:{type:'base64',media_type:'application/pdf',data:f.b64}},
+          {type:'text',text:prompt}
+        ]}
       ]);
-      dg.appendChild(item);
+      let rep;
+      try{rep=JSON.parse(raw.replace(/```json|```/g,'').trim());}
+      catch{rep={studentName:f.name.replace('.pdf',''),scores:{b1:5,b2:5,b3:5,b4:5,b5:5},genelOzet:'—',steps:[],dims:{},keyFindings:'—'};}
+      rep.tema=tema;rep.hafta=parseInt(week);
+      saveWeek(rep.studentName,week,rep);
+      results.push(rep);
+    }
+
+    // Önceki hafta sınıf özeti (varsa)
+    prog('wc',70,'Sınıf sentezi yapılıyor...',3);
+    const classPromptTxt=buildClassPrompt(week,results,null);
+    const classRaw=await callClaude([{role:'user',content:classPromptTxt}],3000);
+    let classRep;
+    try{classRep=JSON.parse(classRaw.replace(/```json|```/g,'').trim());}
+    catch{classRep={hafta:parseInt(week),genelOzet:'Sınıf sentezi yapılamadı.',sinifOnerileri:[],dikkatGereken:[],boyutAnaliz:{}};}
+    classRep.students=results;
+    classRep.hafta=parseInt(week);
+    classRep.tema=tema;
+
+    // Sınıf ortalaması hesapla
+    const tots=results.map(r=>total(r.scores));
+    classRep.sinifOrtalaması=Math.round(tots.reduce((a,b)=>a+b,0)/tots.length);
+
+    prog('wc',88,'Word raporu oluşturuluyor...',4);
+    await buildWordClass(classRep,'haftalik');
+    prog('wc',100,'Tamamlandı ✓',5);
+
+    // Sonuç
+    $('wc-result').innerHTML=`
+      <div style="background:rgba(22,101,52,.1);border:1px solid rgba(22,101,52,.2);border-radius:10px;padding:14px 16px;">
+        <div style="font-size:13px;font-weight:600;color:#86EFAC;margin-bottom:6px;">✓ Sınıf raporu hazır — ${results.length} öğrenci</div>
+        <div style="font-size:11px;color:#134E26;">Sınıf ortalaması: ${classRep.sinifOrtalaması}/50 · ${getGrade(classRep.sinifOrtalaması).label}</div>
+      </div>`;
+    $('wc-result').style.display='block';
+  }catch(e){
+    showErr('wc','Hata: '+e.message);
+  }finally{
+    $('wc-btn').disabled=false;
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// RUN W10I — 10 HAFTALIK BİREYSEL
+// ══════════════════════════════════════════════════════════════════════
+async function runW10I(){
+  const sName=$('w10i-student').value;
+  if(!sName){showErr('w10i','Öğrenci seçin.');return;}
+  const db=loadDB();
+  const weeks=db[sName];
+  if(!weeks||Object.keys(weeks).length<2){showErr('w10i','En az 2 haftalık veri gerekli.');return;}
+  showErr('w10i',null);showProg('w10i',true);
+  $('w10i-btn').disabled=true;
+  try{
+    prog('w10i',25,'Trend analizi yapılıyor...',1);await sleep(200);
+    prog('w10i',45,'Claude uzun dönem sentezi...',2);
+    const prompt=buildW10IPrompt(sName,weeks);
+    const raw=await callClaude([{role:'user',content:prompt}],3000);
+    let rep;
+    try{rep=JSON.parse(raw.replace(/```json|```/g,'').trim());}
+    catch{rep={studentName:sName,kapsamliOzet:'Uzun dönem analiz yapılamadı.',gelecekOnerileri:[],boyutTrendleri:{},kaliciZayifliklar:[],kirılanKaliplar:[],genelTrend:'STABIL'};}
+    // Hesapla
+    const sorted=Object.entries(weeks).sort((a,b)=>+a[0]-+b[0]);
+    rep.baslangiçToplam=total(sorted[0][1].scores||{});
+    rep.sonToplam=total(sorted[sorted.length-1][1].scores||{});
+    rep.netDegisim=rep.sonToplam-rep.baslangiçToplam;
+    rep.haftaSayisi=sorted.length;
+    rep.weekData=sorted.map(([w,d])=>({week:w,...d}));
+    prog('w10i',80,'Word raporu oluşturuluyor...',3);
+    await buildWordIndividual10(rep,weeks);
+    prog('w10i',100,'Tamamlandı ✓',4);
+  }catch(e){
+    showErr('w10i','Hata: '+e.message);
+  }finally{
+    $('w10i-btn').disabled=false;
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// RUN W10C — 10 HAFTALIK SINIF
+// ══════════════════════════════════════════════════════════════════════
+async function runW10C(){
+  const db=loadDB();
+  if(!Object.keys(db).length){showErr('w10c','Kayıtlı veri yok.');return;}
+  showErr('w10c',null);showProg('w10c',true);
+  $('w10c-btn').disabled=true;
+  try{
+    prog('w10c',30,'Sınıf verileri derleniyor...',1);await sleep(200);
+    prog('w10c',55,'Claude sınıf sentezi...',2);
+    const prompt=buildW10CPrompt(db);
+    const raw=await callClaude([{role:'user',content:prompt}],3500);
+    let rep;
+    try{rep=JSON.parse(raw.replace(/```json|```/g,'').trim());}
+    catch{rep={kapsamliOzet:'Sınıf analizi yapılamadı.',enCokGelisen:[],enCokGerileyen:[],sinifGucluYonler:[],sinifZayifYonler:[],mudahaleOnerileri:[],boyutSinifAnaliz:{}};}
+    rep.allData=db;
+    prog('w10c',80,'Word raporu oluşturuluyor...',3);
+    await buildWordClass10(rep,db);
+    prog('w10c',100,'Tamamlandı ✓',4);
+  }catch(e){
+    showErr('w10c','Hata: '+e.message);
+  }finally{
+    $('w10c-btn').disabled=false;
+  }
+}
+
+// ── RESULT HTML ────────────────────────────────────────────────────────
+function buildResultHtml(rep,tot,gr){
+  return`<div style="background:rgba(22,101,52,.08);border:1px solid rgba(22,101,52,.18);border-radius:11px;padding:14px 16px;margin-bottom:8px;">
+    <div class="result-hdr">
+      <div><div class="result-name">${rep.studentName||'—'}</div><div class="result-meta">${rep.ders||'SB'} · ${rep.sinif||'—'} · ${rep.tema||'—'}</div></div>
+      <div class="score-big"><div class="score-n">${tot}</div><div class="score-d">/ 50 puan</div><div class="grade-pill" style="background:#${gr.fill}">${gr.label}</div></div>
+    </div>
+    <div class="dim-strip">${DIMS.map(d=>`<div class="dim-b" style="border-top:3px solid ${d.color}"><div class="dl">${d.short}</div><div class="ds" style="color:${d.color}">${rep.scores?.[d.id]||0}</div><div class="dm">/10</div></div>`).join('')}</div>
+  </div>`;
+}
+
+// ── DB PANEL ────────────────────────────────────────────────────────────
+function renderDB(){
+  const db=loadDB();
+  const students=Object.entries(db);
+  if(!students.length){
+    $('db-body').innerHTML='<div class="info-box">Henüz kayıtlı veri yok.</div>';return;
+  }
+  $('db-body').innerHTML=`
+  <div class="trend-grid"><table class="student-table">
+    <thead><tr><th>Öğrenci</th><th>Haftalar</th><th>Son Puan</th><th>Trend</th><th></th></tr></thead>
+    <tbody>${students.map(([name,weeks])=>{
+      const sorted=Object.entries(weeks).sort((a,b)=>+a[0]-+b[0]);
+      const tots=sorted.map(([,d])=>total(d.scores||{}));
+      const last=tots[tots.length-1]||0;
+      const delta=tots.length>1?last-tots[tots.length-2]:0;
+      const gr=getGrade(last);
+      const dots=[1,2,3,4,5,6,7,8,9,10].map(w=>`<span class="week-dot ${weeks[w]?'filled':'empty'}">${w}</span>`).join('');
+      return`<tr>
+        <td style="font-weight:600;color:#CBD5E1">${name}</td>
+        <td>${dots}</td>
+        <td><span style="color:#${gr.fill};font-weight:700">${last}/50</span> <span style="font-size:9px;color:#334155">${gr.label}</span></td>
+        <td class="${delta>0?'delta-up':delta<0?'delta-dn':'delta-eq'}">${delta>0?'▲ +'+delta:delta<0?'▼ '+delta:'— 0'}</td>
+        <td><button class="btn-sm danger" onclick="deleteStudent('${name}')">Sil</button></td>
+      </tr>`;
+    }).join('')}</tbody>
+  </table></div>`;
+}
+
+function deleteStudent(name){
+  if(!confirm(`"${name}" silinsin mi?`))return;
+  const db=loadDB();delete db[name];saveDB(db);renderDB();
+}
+
+function loadStudentSelect(){
+  const db=loadDB();const sel=$('w10i-student');
+  sel.innerHTML='<option value="">— Öğrenci seçin —</option>'+Object.keys(db).map(n=>`<option>${n}</option>`).join('');
+  sel.onchange=()=>{
+    const name=sel.value;
+    if(!name){$('w10i-preview').style.display='none';$('w10i-btn').disabled=true;return;}
+    const db2=loadDB();const weeks=db2[name]||{};
+    const cnt=Object.keys(weeks).length;
+    const sorted=Object.entries(weeks).sort((a,b)=>+a[0]-+b[0]);
+    const tots=sorted.map(([,d])=>total(d.scores||{}));
+    $('w10i-preview').innerHTML=`<div class="info-box">
+      ${cnt} hafta kayıtlı: ${sorted.map(([w,d])=>`Hafta ${w} → ${total(d.scores||{})}/50`).join(' · ')}
+      ${cnt<2?'<br><strong style="color:#FCA5A5">En az 2 hafta gerekli</strong>':''}
+    </div>`;
+    $('w10i-preview').style.display='block';
+    $('w10i-btn').disabled=cnt<2;
+  };
+}
+
+function renderW10CPreview(){
+  const db=loadDB();const cnt=Object.keys(db).length;
+  $('w10c-preview').innerHTML=cnt?`<div class="info-box">${cnt} öğrenci kayıtlı. Mevcut tüm haftalık verilerden sınıf gelişim raporu oluşturulacak.</div>`:
+  `<div class="err">Kayıtlı veri yok. Önce haftalık bireysel değerlendirme yapın.</div>`;
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// WORD: HAFTALIK BİREYSEL
+// ══════════════════════════════════════════════════════════════════════
+async function buildWordIndividual(r,prevWeeks,type){
+  const{Document,Packer,Paragraph,TextRun,Table,TableRow,TableCell,Header,Footer,
+    AlignmentType,BorderStyle,WidthType,ShadingType,VerticalAlign,PageNumberElement,PageBreak,LevelFormat}=docx;
+  const N='0A1E44',BL='1D4ED8',LBL='DBEAFE',MBL='93C5FD',SL='334155',LT='F1F5F9',WH='FFFFFF',
+        GN='166534',GNBG='DCFCE7',AM='92400E',AMBG='FEF3C7',RD='991B1B',RDBG='FEE2E2',
+        GR='64748B',PU='5B21B6',PUBG='EDE9FE',TEAL='0F766E',TEALBG='CCFBF1';
+  const Bn=(c,s=4)=>({style:BorderStyle.SINGLE,size:s,color:c});
+  const Nb=()=>({style:BorderStyle.NONE,size:0,color:WH});
+  function p(runs,o={}){const ch=Array.isArray(runs)?runs:[new TextRun({text:String(runs||''),font:'Arial',size:o.size||20,color:o.color||SL,bold:!!o.bold,italics:!!o.italic})];return new Paragraph({children:ch,spacing:{before:o.before!==undefined?o.before:24,after:o.after!==undefined?o.after:24},alignment:o.align||AlignmentType.LEFT});}
+  function bl(t){return new Paragraph({numbering:{reference:'b',level:0},children:[new TextRun({text:String(t||''),font:'Arial',size:18,color:SL})],spacing:{before:18,after:18}});}
+  function gap(n=1){return new Paragraph({children:[new TextRun('')],spacing:{before:0,after:n*60}});}
+  function mRow(lbl,val,bg){return new TableRow({children:[
+    new TableCell({width:{size:2600,type:WidthType.DXA},shading:{fill:N,type:ShadingType.CLEAR},margins:{top:60,bottom:60,left:140,right:140},borders:{top:Bn(WH,2),bottom:Bn(WH,2),left:Bn(WH,2),right:Bn(WH,2)},children:[p(lbl,{size:16,bold:true,color:WH,before:0,after:0})]}),
+    new TableCell({width:{size:7280,type:WidthType.DXA},shading:{fill:bg||LT,type:ShadingType.CLEAR},margins:{top:60,bottom:60,left:140,right:140},borders:{top:Bn(WH,2),bottom:Bn(WH,2),left:Bn(WH,2),right:Bn(WH,2)},children:[p(String(val||'—'),{size:16,before:0,after:0})]})
+  ]});}
+
+  const sc=r.scores||{b1:5,b2:5,b3:5,b4:5,b5:5};
+  const tot=total(sc);const gr=getGrade(tot);
+  const DHC=[AM,BL,AM,GN,PU];
+
+  function dimCard(i){
+    const d=DIMS[i],s=sc['b'+(i+1)]||0,hc=DHC[i];
+    const dim=r.dims?.['b'+(i+1)]||{};
+    const good=Array.isArray(dim.good)?dim.good:[];const weak=Array.isArray(dim.weak)?dim.weak:[];
+    return new Table({width:{size:9880,type:WidthType.DXA},columnWidths:[4940,4940],
+      borders:{top:Bn(hc,8),bottom:Bn(hc,4),left:Bn(hc,8),right:Bn(hc,4),insideH:Bn('E2E8F0',2),insideV:Bn('E2E8F0',2)},
+      rows:[
+        new TableRow({children:[new TableCell({columnSpan:2,shading:{fill:hc,type:ShadingType.CLEAR},margins:{top:80,bottom:80,left:160,right:160},borders:{top:Nb(),bottom:Nb(),left:Bn(N,12),right:Nb()},children:[new Paragraph({children:[new TextRun({text:'BOYUT '+(i+1)+'  ',font:'Arial',size:20,bold:true,color:LBL}),new TextRun({text:d.label,font:'Arial',size:20,bold:true,color:WH}),new TextRun({text:'     '+s+'/10',font:'Arial',size:24,bold:true,color:'FCD34D'})]})]})]  }),
+        new TableRow({children:[new TableCell({columnSpan:2,shading:{fill:LT,type:ShadingType.CLEAR},margins:{top:60,bottom:60,left:160,right:160},borders:{top:Nb(),bottom:Bn('E2E8F0'),left:Nb(),right:Nb()},children:[p(String(dim.status||'—'),{size:15,bold:true,before:0,after:0})]})]}),
+        new TableRow({children:[
+          new TableCell({width:{size:4940,type:WidthType.DXA},shading:{fill:GNBG,type:ShadingType.CLEAR},margins:{top:80,bottom:80,left:140,right:140},borders:{top:Nb(),bottom:Nb(),left:Nb(),right:Bn('E2E8F0',6)},verticalAlign:VerticalAlign.TOP,children:[p([new TextRun({text:'✓  GÜÇLÜ YÖNLER',font:'Arial',size:16,bold:true,color:GN})],{after:50,before:0}),...(good.length?good.map(g=>bl(g)):[bl('—')])]}),
+          new TableCell({width:{size:4940,type:WidthType.DXA},shading:{fill:AMBG,type:ShadingType.CLEAR},margins:{top:80,bottom:80,left:140,right:140},borders:{top:Nb(),bottom:Nb(),left:Nb(),right:Nb()},verticalAlign:VerticalAlign.TOP,children:[p([new TextRun({text:'▲  GELİŞİM ALANLARI',font:'Arial',size:16,bold:true,color:AM})],{after:50,before:0}),...(weak.length?weak.map(w=>bl(w)):[bl('—')])]})
+        ]}),
+        new TableRow({children:[new TableCell({columnSpan:2,shading:{fill:LBL,type:ShadingType.CLEAR},margins:{top:70,bottom:70,left:160,right:160},borders:{top:Bn('93C5FD',4),bottom:Nb(),left:Bn(BL,12),right:Nb()},children:[new Paragraph({children:[new TextRun({text:'➜  ÖNERİ:  ',font:'Arial',size:16,bold:true,color:BL}),new TextRun({text:String(dim.rec||'—'),font:'Arial',size:16,color:N,italics:true})]})]})]}),
+      ]
     });
-    pnl.appendChild(dg);
-    app.appendChild(pnl);
-    return;
   }
 
-  var m=MODES[S.mode];
-  // MODE HEADER
-  var mh=d({cls:'panel',style:{display:'flex',alignItems:'center',justifyContent:'space-between',borderColor:color+'35'}},[
-    d({style:{display:'flex',alignItems:'center',gap:'9px'}},[
-      d({style:{fontSize:'20px'}},m.icon),
-      d({},[
-        d({style:{fontSize:'13px',fontWeight:'bold',color:'#dde9ff'}},m.label),
-        d({style:{fontSize:'11px',color:'#7a94a8',fontFamily:'sans-serif'}},m.desc)
-      ])
-    ]),
-    h('button',{cls:'btng',$click:function(){set({mode:null,step:'mode',file:null,fc:null,report:null,err:null});}},'\u2190 Değiştir')
-  ]);
-  app.appendChild(mh);
+  const STC=[{c:RD,bg:RDBG},{c:AM,bg:AMBG},{c:BL,bg:LBL}];
+  function sRow(n){const i=n-1;const s=Array.isArray(r.steps)&&r.steps[i]||{};return new TableRow({children:[new TableCell({shading:{fill:STC[i].bg,type:ShadingType.CLEAR},margins:{top:90,bottom:90,left:180,right:180},borders:{top:Bn('E2E8F0',2),bottom:Bn('E2E8F0',2),left:Bn(STC[i].c,20),right:Nb()},children:[p([new TextRun({text:'0'+n+'  ',font:'Arial',size:26,bold:true,color:STC[i].c}),new TextRun({text:String(s.title||'—'),font:'Arial',size:19,bold:true,color:N})],{after:50,before:0}),p(String(s.desc||'—'),{size:17,align:AlignmentType.JUSTIFIED,before:0,after:0})]})]});}
 
-  // UPLOAD / READY
-  if(S.step==='upload'||S.step==='ready'){
-    var fi=document.getElementById('fi');
-    var dz=d({cls:'dropzone'+(S.file?' hf':'')});
-    if(S.file){
-      dz.appendChild(d({style:{fontSize:'36px',marginBottom:'7px'}},S.file.name.endsWith('.pdf')?'📄':'📊'));
-      dz.appendChild(d({style:{fontSize:'14px',color:'#86efac',fontWeight:'bold',marginBottom:'3px'}},S.file.name));
-      dz.appendChild(d({style:{fontSize:'11px',color:'#4ade80',fontFamily:'sans-serif'}},'✓ Yüklendi — '+(S.file.size/1024).toFixed(1)+' KB'));
-      var cb=h('button',{cls:'btng',style:{marginTop:'9px',fontSize:'11px'},$click:function(e){e.stopPropagation();set({file:null,fc:null,report:null,err:null,step:'upload'});}},'\u2190 Farklı dosya');
-      dz.appendChild(cb);
-    } else {
-      var hlp={weekly:'Tek haftanın Yansıtma Formu + Ölçek verileri',individual:'10 haftalık Yansıtma Formu + Ölçek verileri',klass:'Tüm öğrencilerin 10 haftalık verileri'};
-      dz.appendChild(d({style:{fontSize:'42px',marginBottom:'9px'}},'📂'));
-      dz.appendChild(d({style:{fontSize:'15px',color:'#cbd5e1',marginBottom:'4px'}},'Dosyayı sürükleyin veya seçin'));
-      dz.appendChild(d({style:{fontSize:'11px',color:'#4d6070',fontFamily:'sans-serif',marginBottom:'12px'}},hlp[S.mode]));
-      var ch=d({style:{display:'flex',gap:'5px',justifyContent:'center',flexWrap:'wrap'}});
-      ['PDF','Excel (.xlsx)','CSV','Metin (.txt)'].forEach(function(f){ch.appendChild(h('span',{cls:'chip'},f));});
-      dz.appendChild(ch);
-      dz.addEventListener('click',function(){fi.click();});
-    }
-    dz.addEventListener('dragover',function(e){e.preventDefault();dz.classList.add('dg');});
-    dz.addEventListener('dragleave',function(){dz.classList.remove('dg');});
-    dz.addEventListener('drop',function(e){e.preventDefault();dz.classList.remove('dg');var f=e.dataTransfer.files[0];if(f)pickFile(f);});
-    fi.onchange=function(e){if(e.target.files[0])pickFile(e.target.files[0]);fi.value='';};
-    app.appendChild(dz);
+  const GFC=['475569','334155','1D4ED8','166534','14532D'];
+  const gradeCells=GRADES.map((g,i)=>{const act=g.label===gr.label;return new TableCell({width:{size:1976,type:WidthType.DXA},shading:{fill:act?BL:GFC[i],type:ShadingType.CLEAR},margins:{top:80,bottom:80,left:50,right:50},borders:{top:Nb(),bottom:Nb(),left:Bn(N,4),right:Bn(N,4)},children:[new Paragraph({alignment:AlignmentType.CENTER,spacing:{before:0,after:18},children:[new TextRun({text:g.label,font:'Arial',size:15,bold:act,color:WH})]}),new Paragraph({alignment:AlignmentType.CENTER,spacing:{before:0,after:18},children:[new TextRun({text:g.min+'-'+g.max,font:'Arial',size:13,color:act?'DBEAFE':'93C5FD'})]}),new Paragraph({alignment:AlignmentType.CENTER,spacing:{before:0,after:0},children:[new TextRun({text:act?'▲ '+tot+'/50':'',font:'Arial',size:13,bold:true,color:'FCD34D'})]})  ]});});
 
-    if(S.step==='ready'){
-      var dp=d({cls:'panel panel-hi'});
-      dp.appendChild(d({cls:'lbl',style:{marginBottom:'9px'}},'Bu raporda değerlendirilecek 7 boyut'));
-      var dg2=d({cls:'dgrid'});
-      DIMS.forEach(function(di){
-        dg2.appendChild(d({cls:'ditem'},[
-          d({style:{fontSize:'16px',flexShrink:'0'}},di.icon),
-          d({style:{flex:'1'}},d({style:{fontSize:'11.5px',color:'#cbd5e1',fontFamily:'sans-serif',fontWeight:'600'}},di.label)),
-          d({style:{fontSize:'10px',color:di.c,fontWeight:'700',fontFamily:'sans-serif',marginLeft:'auto',flexShrink:'0'}},di.pts?di.pts+'p':'Nitel')
-        ]));
-      });
-      dp.appendChild(dg2);
-      app.appendChild(dp);
-      var ab=h('button',{cls:'btnp',style:{background:'linear-gradient(135deg,'+color+','+color+'cc)',boxShadow:'0 5px 24px '+color+'40'},
-        $mouseover:function(e){e.currentTarget.style.transform='translateY(-2px)';e.currentTarget.style.boxShadow='0 9px 32px '+color+'60';},
-        $mouseout:function(e){e.currentTarget.style.transform='';e.currentTarget.style.boxShadow='0 5px 24px '+color+'40';},
-        $click:runAnalysis
-      },m.icon+' 7 Boyutlu Analiz Başlat — PDF Rapor Oluştur');
-      app.appendChild(ab);
-    }
-  }
+  // Önceki hafta karşılaştırma tablosu
+  const prevBlock=prevWeeks.length>0?[
+    p([new TextRun({text:'GELİŞİM KARŞILAŞTIRMASI — Önceki Haftalar',font:'Arial',size:17,bold:true,color:TEAL})],{before:80,after:50}),
+    new Table({width:{size:9880,type:WidthType.DXA},columnWidths:[2800,1300,1300,1300,1300,1300,880],
+      rows:[
+        new TableRow({children:['Boyut','B1','B2','B3','B4','B5','Toplam'].map((h,i)=>new TableCell({shading:{fill:i===0?N:'1E293B',type:ShadingType.CLEAR},margins:{top:55,bottom:55,left:90,right:90},borders:{top:Nb(),bottom:Nb(),left:Nb(),right:Bn(WH,2)},children:[p(h,{size:14,bold:true,color:i===0?WH:MBL,before:0,after:0})]}))}),
+        ...prevWeeks.slice(-4).map(pw=>{const ptot=total(pw.scores||{});return new TableRow({children:[
+          new TableCell({shading:{fill:LT,type:ShadingType.CLEAR},margins:{top:50,bottom:50,left:90,right:90},borders:{top:Nb(),bottom:Bn('E2E8F0'),left:Nb(),right:Nb()},children:[p('Hafta '+pw.week+(pw.tema?' ('+pw.tema+')':''),{size:14,before:0,after:0})]}),
+          ...[1,2,3,4,5].map(b=>new TableCell({shading:{fill:'F8FAFC',type:ShadingType.CLEAR},margins:{top:50,bottom:50,left:90,right:90},borders:{top:Nb(),bottom:Bn('E2E8F0'),left:Nb(),right:Nb()},children:[p(String(pw.scores?.['b'+b]||0),{size:16,bold:true,color:DHC[b-1],before:0,after:0,align:AlignmentType.CENTER})]})),
+          new TableCell({shading:{fill:'F8FAFC',type:ShadingType.CLEAR},margins:{top:50,bottom:50,left:90,right:90},borders:{top:Nb(),bottom:Bn('E2E8F0'),left:Nb(),right:Nb()},children:[p(String(ptot),{size:16,bold:true,color:BL,before:0,after:0,align:AlignmentType.CENTER})]}),
+        ]});}),
+        new TableRow({children:[
+          new TableCell({shading:{fill:N,type:ShadingType.CLEAR},margins:{top:60,bottom:60,left:90,right:90},borders:{top:Bn(BL,4),bottom:Nb(),left:Nb(),right:Nb()},children:[p('Bu Hafta ('+r.hafta+')',{size:14,bold:true,color:WH,before:0,after:0})]}),
+          ...[1,2,3,4,5].map(b=>new TableCell({shading:{fill:BL,type:ShadingType.CLEAR},margins:{top:60,bottom:60,left:90,right:90},borders:{top:Bn(BL,4),bottom:Nb(),left:Nb(),right:Nb()},children:[p(String(sc['b'+b]||0),{size:16,bold:true,color:'FCD34D',before:0,after:0,align:AlignmentType.CENTER})]})),
+          new TableCell({shading:{fill:BL,type:ShadingType.CLEAR},margins:{top:60,bottom:60,left:90,right:90},borders:{top:Bn(BL,4),bottom:Nb(),left:Nb(),right:Nb()},children:[p(String(tot),{size:16,bold:true,color:'FCD34D',before:0,after:0,align:AlignmentType.CENTER})]}),
+        ]}),
+      ]
+    }),
+    gap(0.3),
+  ]:[];
 
-  // ANALYZING
-  if(S.step==='analyzing'){
-    var lb=d({cls:'lbox'});
-    lb.appendChild(d({cls:'spin',style:{borderTopColor:color}}));
-    lb.appendChild(d({style:{fontSize:'17px',color:'#93c5fd',marginBottom:'5px',fontWeight:'bold'}},'7 Boyutlu Analiz Yapılıyor…'));
-    lb.appendChild(d({style:{fontSize:'12px',color:'#4d6070',fontFamily:'sans-serif',marginBottom:'3px'}},m.label));
-    lb.appendChild(d({style:{fontSize:'11px',color:'#4d6070',fontFamily:'sans-serif'},id:'lmsg'},S.msg));
-    var dots=d({style:{marginTop:'14px',display:'flex',gap:'5px',justifyContent:'center'}});
-    [0,1,2].forEach(function(i){dots.appendChild(d({style:{width:'7px',height:'7px',borderRadius:'50%',background:color,animation:'dp '+(1+i*.25)+'s ease-in-out infinite'}}));});
-    lb.appendChild(dots);
-    app.appendChild(lb);
-  }
+  const katki=String(r.yzKatki||'—');
+  const katkiBg=(katki==='%26-50'||katki==='%1-25')?GNBG:(katki==='%76-100'?AMBG:LT);
 
-  // ERROR
-  if(S.err)app.appendChild(d({cls:'err'},'⚠️ '+S.err));
+  const scoreRows=[
+    new TableRow({children:[new TableCell({width:{size:5200,type:WidthType.DXA},shading:{fill:N,type:ShadingType.CLEAR},margins:{top:70,bottom:70,left:120,right:120},borders:{top:Nb(),bottom:Nb(),left:Nb(),right:Bn(WH,2)},children:[p('BOYUT',{size:16,bold:true,color:WH,before:0,after:0})]}),new TableCell({width:{size:2800,type:WidthType.DXA},shading:{fill:N,type:ShadingType.CLEAR},margins:{top:70,bottom:70,left:120,right:120},borders:{top:Nb(),bottom:Nb(),left:Nb(),right:Bn(WH,2)},children:[p('PUAN',{size:16,bold:true,color:WH,before:0,after:0})]}),new TableCell({width:{size:1880,type:WidthType.DXA},shading:{fill:N,type:ShadingType.CLEAR},margins:{top:70,bottom:70,left:120,right:120},borders:{top:Nb(),bottom:Nb(),left:Nb(),right:Nb()},children:[p('%',{size:16,bold:true,color:WH,before:0,after:0})]})]  }),
+    ...[['B1 · YZ Aracının Etkin Kullanımı',sc.b1,AM,AMBG],['B2 · Materyal Geliştirme ve Doğrulama',sc.b2,BL,LBL],['B3 · Pedagojik Tasarım Kalitesi',sc.b3,AM,AMBG],['B4 · SB Kazanım & İçerik Uyumu',sc.b4,GN,GNBG],['B5 · Prompt Mühendisliği Kalitesi',sc.b5,PU,PUBG]].map(([lbl,s,tc,bg])=>{const pct=Math.round(s/10*100);return new TableRow({children:[new TableCell({width:{size:5200,type:WidthType.DXA},margins:{top:55,bottom:55,left:120,right:120},borders:{top:Nb(),bottom:Bn('E2E8F0'),left:Nb(),right:Nb()},children:[p(lbl,{size:16,bold:true,before:0,after:0})]}),new TableCell({width:{size:2800,type:WidthType.DXA},margins:{top:55,bottom:55,left:120,right:120},borders:{top:Nb(),bottom:Bn('E2E8F0'),left:Nb(),right:Nb()},children:[new Paragraph({children:[new TextRun({text:s+'/10',font:'Arial',size:20,bold:true,color:tc}),new TextRun({text:'  ('+pct+'%)',font:'Arial',size:17,color:GR})]})]}),new TableCell({width:{size:1880,type:WidthType.DXA},shading:{fill:bg,type:ShadingType.CLEAR},margins:{top:55,bottom:55,left:120,right:120},borders:{top:Nb(),bottom:Bn('E2E8F0'),left:Nb(),right:Nb()},children:[p(pct+'%',{size:16,bold:true,color:tc,before:0,after:0})]})  ]});}),
+    new TableRow({children:[new TableCell({columnSpan:2,shading:{fill:N,type:ShadingType.CLEAR},margins:{top:70,bottom:70,left:120,right:120},borders:{top:Bn(BL,6),bottom:Nb(),left:Nb(),right:Bn(WH,2)},children:[new Paragraph({children:[new TextRun({text:'TOPLAM PUAN',font:'Arial',size:17,bold:true,color:WH}),new TextRun({text:'  |  Derece:  ',font:'Arial',size:15,color:MBL}),new TextRun({text:gr.label,font:'Arial',size:15,bold:true,color:'FCD34D'})]})]},),new TableCell({shading:{fill:BL,type:ShadingType.CLEAR},margins:{top:70,bottom:70,left:120,right:120},borders:{top:Bn(BL,6),bottom:Nb(),left:Nb(),right:Nb()},children:[new Paragraph({children:[new TextRun({text:tot+' / 50',font:'Arial',size:20,bold:true,color:WH})]})]})]  }),
+    new TableRow({children:[new TableCell({columnSpan:3,shading:{fill:'1E293B',type:ShadingType.CLEAR},margins:{top:55,bottom:55,left:120,right:120},borders:{top:Bn(WH,4),bottom:Nb(),left:Nb(),right:Nb()},children:[new Paragraph({children:[new TextRun({text:'▼  GENEL PERFORMANS DERECESİ',font:'Arial',size:15,bold:true,color:MBL}),new TextRun({text:'   —   aktif derece sarıyla işaretlidir',font:'Arial',size:13,color:GR,italics:true})]})]})]  })
+  ];
 
-  // DONE
-  if(S.step==='done'&&S.report){
-    var rbar=d({cls:'rbar',style:{borderColor:color+'30'}});
-    var rl=d({style:{display:'flex',alignItems:'center',gap:'9px'}});
-    rl.appendChild(d({style:{width:'28px',height:'28px',borderRadius:'7px',background:'linear-gradient(135deg,'+color+','+color+'bb)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'14px'}},m.icon));
-    rl.appendChild(d({},[d({style:{fontSize:'12px',fontWeight:'bold',color:'#7dd3fc'}},m.label),d({style:{fontSize:'9.5px',color:'#4d6070',fontFamily:'sans-serif'}},S.file?S.file.name:'')]));
-    rbar.appendChild(rl);
-    var rb2=d({style:{display:'flex',gap:'7px',flexWrap:'wrap'}});
-    var pdfbtn=h('button',{cls:'btnd',disabled:S.pdfBusy,$click:function(){
-      set({pdfBusy:true});
-      var dt=new Date().toLocaleDateString('tr-TR',{day:'2-digit',month:'long',year:'numeric'});
-      makePDF(S.report,S.file?S.file.name:'form',dt);
-      setTimeout(function(){set({pdfBusy:false});},2000);
-    }},S.pdfBusy?'⏳ Hazırlanıyor…':'⬇️ PDF İndir');
-    rb2.appendChild(pdfbtn);
-    rb2.appendChild(h('button',{cls:'btng',$click:function(){set({file:null,fc:null,report:null,err:null,step:'upload'});}},'🔄 Yeni Dosya'));
-    rb2.appendChild(h('button',{cls:'btng',$click:function(){set({mode:null,step:'mode',file:null,fc:null,report:null,err:null});}},'⬅️ Mod Seç'));
-    rbar.appendChild(rb2);
-    app.appendChild(rbar);
-    var tip=d({cls:'tip'});
-    tip.innerHTML='💡 <strong>"PDF olarak kaydet"</strong> seçeneğiyle kapak dahil tüm raporu indirebilirsiniz.';
-    app.appendChild(tip);
-    var rb=d({cls:'rbody'});
-    rb.innerHTML=mdHtml(S.report);
-    app.appendChild(rb);
-  }
-}
-
-function pickFile(file){
-  set({file:file,err:null,report:null,step:'upload'});
-  readFile(file,function(err,content){
-    if(err)set({err:'Dosya okunamadı: '+err});
-    else set({fc:content,step:'ready'});
+  const d=new Document({
+    numbering:{config:[{reference:'b',levels:[{level:0,format:LevelFormat.BULLET,text:'\u2022',alignment:AlignmentType.LEFT,style:{paragraph:{indent:{left:540,hanging:360}}}}]}]},
+    styles:{default:{document:{run:{font:'Arial',size:20,color:SL}}}},
+    sections:[{
+      properties:{page:{size:{width:11906,height:16838},margin:{top:576,right:1008,bottom:720,left:1008}}},
+      headers:{default:new Header({children:[new Table({width:{size:9880,type:WidthType.DXA},columnWidths:[7200,2680],rows:[new TableRow({children:[new TableCell({width:{size:7200,type:WidthType.DXA},shading:{fill:N,type:ShadingType.CLEAR},margins:{top:70,bottom:70,left:200,right:200},borders:{top:Nb(),bottom:Nb(),left:Nb(),right:Nb()},children:[p([new TextRun({text:'GERİ DÖNÜT RAPORU  ',font:'Arial',size:15,bold:true,color:MBL}),new TextRun({text:'Hafta '+r.hafta+' · '+r.tema+' · Bireysel Değerlendirme',font:'Arial',size:15,color:LT})],{before:0,after:0})]}),new TableCell({width:{size:2680,type:WidthType.DXA},shading:{fill:BL,type:ShadingType.CLEAR},margins:{top:70,bottom:70,left:200,right:200},borders:{top:Nb(),bottom:Nb(),left:Nb(),right:Nb()},verticalAlign:VerticalAlign.CENTER,children:[p([new TextRun({text:'Doç. Dr. Erhan Yaylak',font:'Arial',size:14,color:WH,bold:true,italics:true})],{align:AlignmentType.RIGHT,before:0,after:0})])})  ]})  ]})  ]})},
+      footers:{default:new Footer({children:[new Paragraph({alignment:AlignmentType.CENTER,border:{top:{style:BorderStyle.SINGLE,size:4,color:MBL}},spacing:{before:80},children:[new TextRun({text:'Form Analiz Aracı · SB Öğretmen Adayı · Hafta '+r.hafta+' Dönüt Raporu  |  Sayfa ',font:'Arial',size:15,color:GR}),new PageNumberElement()]})]})},
+      children:[
+        new Table({width:{size:9880,type:WidthType.DXA},columnWidths:[9880],rows:[
+          new TableRow({children:[new TableCell({shading:{fill:N,type:ShadingType.CLEAR},margins:{top:220,bottom:100,left:260,right:260},borders:{top:Nb(),bottom:Nb(),left:Bn(BL,20),right:Nb()},children:[p([new TextRun({text:'HAFTALIK GERİ DÖNÜT RAPORU',font:'Arial',size:40,bold:true,color:WH})],{after:30,before:0}),p([new TextRun({text:'Hafta '+r.hafta+' · '+String(r.tema||'')+'  |  Bireysel Değerlendirme',font:'Arial',size:18,color:MBL})],{after:16,before:0}),p([new TextRun({text:'Sosyal Bilgiler Öğretiminde Bilişim Teknolojileri Dersi',font:'Arial',size:15,color:'6B8FC4'})],{after:60,before:0})]})]}),
+          new TableRow({children:[new TableCell({shading:{fill:BL,type:ShadingType.CLEAR},margins:{top:100,bottom:100,left:260,right:260},borders:{top:Nb(),bottom:Nb(),left:Nb(),right:Nb()},children:[new Paragraph({children:[new TextRun({text:String(r.studentName||'—'),font:'Arial',size:24,bold:true,color:WH}),new TextRun({text:'  ·  '+String(r.sinif||'')+'  ·  '+String(r.tarih||''),font:'Arial',size:17,color:LBL})]})]})]  }),
+          new TableRow({children:[new TableCell({shading:{fill:'0F2744',type:ShadingType.CLEAR},margins:{top:70,bottom:70,left:260,right:260},borders:{top:Bn(BL,2),bottom:Nb(),left:Nb(),right:Nb()},children:[new Paragraph({children:[new TextRun({text:'Ders Öğretim Üyesi:  ',font:'Arial',size:16,color:MBL,bold:true}),new TextRun({text:'Doç. Dr. Erhan Yaylak',font:'Arial',size:16,color:WH,bold:true}),new TextRun({text:'     |     ',font:'Arial',size:16,color:'1E4270'}),new TextRun({text:'Bilişim Teknolojileri Dersi · Sosyal Bilgiler Öğretmenliği',font:'Arial',size:15,color:'6B8FC4'})]})]})]  }),
+        ]}),gap(0.4),
+        new Table({width:{size:9880,type:WidthType.DXA},columnWidths:[2600,7280],rows:[mRow('Öğretmen Adayı',r.studentName),mRow('Ders',r.ders||'Sosyal Bilgiler'),mRow('Sınıf',r.sinif),mRow('Hafta / Tema','Hafta '+r.hafta+' — '+String(r.tema||'')),mRow('Ünite',r.unite),mRow('Konu',r.konu),mRow('Kazanım',r.kazanim,GNBG),mRow('Dijital Araç',r.dijitalArac),mRow('YZ Aracı',r.yzArac),mRow('İçerik Türü',r.icerikTuru),mRow('YZ Katkı Oranı',katki,katkiBg),...(r.urunLink?[mRow('Ürün Linki',r.urunLink,GNBG)]:[])]}),
+        gap(0.4),
+        new Table({width:{size:9880,type:WidthType.DXA},columnWidths:[9880],rows:[new TableRow({children:[new TableCell({shading:{fill:LT,type:ShadingType.CLEAR},margins:{top:100,bottom:100,left:180,right:180},borders:{top:Bn(BL,8),bottom:Bn(BL,4),left:Bn(BL,20),right:Bn('E2E8F0',2)},children:[p([new TextRun({text:'HAFTALIK DEĞERLENDİRME ÖZETİ',font:'Arial',size:18,bold:true,color:N})],{after:80,before:0}),p(String(r.genelOzet||'—'),{size:17,align:AlignmentType.JUSTIFIED,after:0,before:0})]})]})]  }),
+        gap(0.4),
+        ...prevBlock,
+        p([new TextRun({text:'PUAN ÖZETİ  &  DERECE',font:'Arial',size:18,bold:true,color:N})],{before:60,after:50}),
+        new Table({width:{size:9880,type:WidthType.DXA},columnWidths:[5200,2800,1880],borders:{top:Bn(BL,8),bottom:Nb(),left:Bn(BL,8),right:Bn(BL,8),insideH:Bn('E2E8F0',2),insideV:Nb()},rows:scoreRows}),
+        new Table({width:{size:9880,type:WidthType.DXA},columnWidths:[1976,1976,1976,1976,1976],rows:[new TableRow({children:gradeCells})]}),
+        gap(0.3),new Paragraph({children:[new PageBreak()]}),
+        ...DIMS.flatMap((_,i)=>[dimCard(i),gap(0.3)]),
+        new Table({width:{size:9880,type:WidthType.DXA},columnWidths:[9880],rows:[new TableRow({children:[new TableCell({shading:{fill:N,type:ShadingType.CLEAR},margins:{top:90,bottom:90,left:180,right:180},borders:{top:Nb(),bottom:Nb(),left:Nb(),right:Nb()},children:[p([new TextRun({text:'ÖNCELİKLİ 3 GELİŞİM ADIMI',font:'Arial',size:22,bold:true,color:WH})],{before:0,after:0})]})]}),sRow(1),sRow(2),sRow(3)]}),
+        gap(0.3),
+        new Paragraph({alignment:AlignmentType.CENTER,border:{top:{style:BorderStyle.SINGLE,size:4,color:MBL}},spacing:{before:140},children:[new TextRun({text:'Hazırlayan:  ',font:'Arial',size:15,color:GR,italics:true}),new TextRun({text:'Doç. Dr. Erhan Yaylak',font:'Arial',size:15,bold:true,color:N}),new TextRun({text:'  |  Form Analiz Aracı (Claude AI)  |  Hafta '+r.hafta+'  |  Bilişim Teknolojileri Dersi · SB Öğretmenliği · 2025-2026',font:'Arial',size:15,color:GR,italics:true})]}),
+      ]
+    }]
   });
+  const blob=await Packer.toBlob(d);
+  dl(blob,'rapor_'+String(r.studentName||'ogrenci').replace(/\s+/g,'_').toLowerCase()+'_hafta'+r.hafta+'.docx');
 }
 
-// ── API KEY BAR ──
-function renderApiBar(){
-  var bar=document.getElementById('apibar');
-  if(!bar)return;
-  var key=localStorage.getItem('ak')||'';
-  bar.innerHTML='';
-  if(key){
-    bar.appendChild(h('span',{style:{fontSize:'11px',color:'#4ade80',fontFamily:'sans-serif'}},'🔑 API Anahtarı kayıtlı  '));
-    var clr=h('button',{style:{padding:'3px 10px',background:'transparent',border:'1px solid #dc2626',borderRadius:'5px',color:'#fca5a5',fontSize:'11px',cursor:'pointer',fontFamily:'sans-serif'},$click:function(){localStorage.removeItem('ak');renderApiBar();}},'Sil');
-    bar.appendChild(clr);
-  } else {
-    bar.appendChild(h('span',{style:{fontSize:'11px',color:'#f59e0b',fontFamily:'sans-serif'}},'🔑 Anthropic API Anahtarı  '));
-    var inp=h('input',{type:'password',id:'aki',placeholder:'sk-ant-...',style:{padding:'4px 10px',background:'#050c18',border:'1px solid #234d7a',borderRadius:'5px',color:'#dde9ff',fontSize:'11px',fontFamily:'sans-serif',width:'280px'}});
-    bar.appendChild(inp);
-    inp.addEventListener('keydown',function(e){if(e.key==='Enter')saveKey();});
-    var sv=h('button',{style:{marginLeft:'6px',padding:'4px 12px',background:'linear-gradient(135deg,#2563eb,#1d4ed8)',border:'none',borderRadius:'5px',color:'#fff',fontSize:'11px',cursor:'pointer',fontFamily:'sans-serif'},$click:saveKey},'Kaydet');
-    bar.appendChild(sv);
-  }
-}
-function saveKey(){
-  var v=(document.getElementById('aki')||{}).value;
-  if(v&&v.trim()){localStorage.setItem('ak',v.trim());renderApiBar();}
+// ══════════════════════════════════════════════════════════════════════
+// WORD: HAFTALIK SINIF (simplified but complete)
+// ══════════════════════════════════════════════════════════════════════
+async function buildWordClass(cr,type){
+  const{Document,Packer,Paragraph,TextRun,Table,TableRow,TableCell,Header,Footer,
+    AlignmentType,BorderStyle,WidthType,ShadingType,VerticalAlign,PageNumberElement,PageBreak,LevelFormat}=docx;
+  const N='0A1E44',BL='1D4ED8',LBL='DBEAFE',MBL='93C5FD',SL='334155',LT='F1F5F9',WH='FFFFFF',
+        GN='166534',GNBG='DCFCE7',AM='92400E',AMBG='FEF3C7',RD='991B1B',RDBG='FEE2E2',GR='64748B',TEAL='0F766E',TEALBG='CCFBF1';
+  const Bn=(c,s=4)=>({style:BorderStyle.SINGLE,size:s,color:c});
+  const Nb=()=>({style:BorderStyle.NONE,size:0,color:WH});
+  function p(runs,o={}){const ch=Array.isArray(runs)?runs:[new TextRun({text:String(runs||''),font:'Arial',size:o.size||20,color:o.color||SL,bold:!!o.bold,italics:!!o.italic})];return new Paragraph({children:ch,spacing:{before:o.before!==undefined?o.before:24,after:o.after!==undefined?o.after:24},alignment:o.align||AlignmentType.LEFT});}
+  function bl(t){return new Paragraph({numbering:{reference:'b',level:0},children:[new TextRun({text:String(t||''),font:'Arial',size:18,color:SL})],spacing:{before:18,after:18}});}
+  function gap(n=1){return new Paragraph({children:[new TextRun('')],spacing:{before:0,after:n*60}});}
+
+  const students=cr.students||[];
+  const tots=students.map(s=>total(s.scores||{}));
+  const avg=tots.length?Math.round(tots.reduce((a,b)=>a+b,0)/tots.length):0;
+  const grAvg=getGrade(avg);
+
+  const GFC=['475569','334155','1D4ED8','166534','14532D'];
+
+  const d=new Document({
+    numbering:{config:[{reference:'b',levels:[{level:0,format:LevelFormat.BULLET,text:'\u2022',alignment:AlignmentType.LEFT,style:{paragraph:{indent:{left:540,hanging:360}}}}]}]},
+    styles:{default:{document:{run:{font:'Arial',size:20,color:SL}}}},
+    sections:[{
+      properties:{page:{size:{width:11906,height:16838},margin:{top:576,right:1008,bottom:720,left:1008}}},
+      headers:{default:new Header({children:[new Table({width:{size:9880,type:WidthType.DXA},columnWidths:[7200,2680],rows:[new TableRow({children:[new TableCell({width:{size:7200,type:WidthType.DXA},shading:{fill:N,type:ShadingType.CLEAR},margins:{top:70,bottom:70,left:200,right:200},borders:{top:Nb(),bottom:Nb(),left:Nb(),right:Nb()},children:[p([new TextRun({text:'SINIF GERİ DÖNÜT RAPORU  ',font:'Arial',size:15,bold:true,color:MBL}),new TextRun({text:'Hafta '+cr.hafta+' · '+cr.tema+' · Sınıf Değerlendirmesi',font:'Arial',size:15,color:LT})],{before:0,after:0})]}),new TableCell({width:{size:2680,type:WidthType.DXA},shading:{fill:BL,type:ShadingType.CLEAR},margins:{top:70,bottom:70,left:200,right:200},borders:{top:Nb(),bottom:Nb(),left:Nb(),right:Nb()},verticalAlign:VerticalAlign.CENTER,children:[p([new TextRun({text:'Doç. Dr. Erhan Yaylak',font:'Arial',size:14,color:WH,bold:true,italics:true})],{align:AlignmentType.RIGHT,before:0,after:0})])})]})]})]}  ])},
+      footers:{default:new Footer({children:[new Paragraph({alignment:AlignmentType.CENTER,border:{top:{style:BorderStyle.SINGLE,size:4,color:MBL}},spacing:{before:80},children:[new TextRun({text:'Sınıf Dönüt Raporu · Hafta '+cr.hafta+'  |  Sayfa ',font:'Arial',size:15,color:GR}),new PageNumberElement()]})]})},
+      children:[
+        // Kapak
+        new Table({width:{size:9880,type:WidthType.DXA},columnWidths:[9880],rows:[
+          new TableRow({children:[new TableCell({shading:{fill:TEAL,type:ShadingType.CLEAR},margins:{top:220,bottom:100,left:260,right:260},borders:{top:Nb(),bottom:Nb(),left:Bn('0D9488',20),right:Nb()},children:[p([new TextRun({text:'HAFTALIK SINIF DÖNÜT RAPORU',font:'Arial',size:40,bold:true,color:WH})],{after:30,before:0}),p([new TextRun({text:'Hafta '+cr.hafta+' · '+String(cr.tema||'')+'  |  Sınıf Geneli Değerlendirme',font:'Arial',size:18,color:'CCFBF1'})],{after:14,before:0}),p([new TextRun({text:'Sosyal Bilgiler Öğretiminde Bilişim Teknolojileri Dersi',font:'Arial',size:15,color:'5EEAD4'})],{after:50,before:0})]})]}),
+          new TableRow({children:[new TableCell({shading:{fill:'0F766E',type:ShadingType.CLEAR},margins:{top:100,bottom:100,left:260,right:260},borders:{top:Nb(),bottom:Nb(),left:Nb(),right:Nb()},children:[new Paragraph({children:[new TextRun({text:students.length+' Öğrenci  ·  Sınıf Ortalaması: '+avg+'/50 ('+grAvg.label+')',font:'Arial',size:22,bold:true,color:WH})]})]})]  }),
+          new TableRow({children:[new TableCell({shading:{fill:'0B4F4A',type:ShadingType.CLEAR},margins:{top:70,bottom:70,left:260,right:260},borders:{top:Bn('0D9488',2),bottom:Nb(),left:Nb(),right:Nb()},children:[new Paragraph({children:[new TextRun({text:'Ders Öğretim Üyesi:  ',font:'Arial',size:16,color:'5EEAD4',bold:true}),new TextRun({text:'Doç. Dr. Erhan Yaylak',font:'Arial',size:16,color:WH,bold:true})]})]})]}),
+        ]}),
+        gap(0.4),
+        // Özet
+        new Table({width:{size:9880,type:WidthType.DXA},columnWidths:[9880],rows:[new TableRow({children:[new TableCell({shading:{fill:TEALBG,type:ShadingType.CLEAR},margins:{top:100,bottom:100,left:180,right:180},borders:{top:Bn(TEAL,8),bottom:Bn(TEAL,4),left:Bn(TEAL,20),right:Bn('E2E8F0',2)},children:[p([new TextRun({text:'SINIF GENEL DEĞERLENDİRME ÖZETİ',font:'Arial',size:18,bold:true,color:TEAL})],{after:80,before:0}),p(String(cr.genelOzet||'—'),{size:17,align:AlignmentType.JUSTIFIED,after:0,before:0})]})]})]  }),
+        gap(0.4),
+        // Öğrenci puan tablosu
+        p([new TextRun({text:'ÖĞRENCİ PUAN TABLOSU — Hafta '+cr.hafta,font:'Arial',size:18,bold:true,color:N})],{before:60,after:50}),
+        new Table({width:{size:9880,type:WidthType.DXA},columnWidths:[3200,1200,1200,1200,1200,1200,880],
+          rows:[
+            new TableRow({children:['Öğrenci Adı','B1','B2','B3','B4','B5','Toplam'].map(h=>new TableCell({shading:{fill:N,type:ShadingType.CLEAR},margins:{top:60,bottom:60,left:100,right:100},borders:{top:Nb(),bottom:Nb(),left:Nb(),right:Nb()},children:[p(h,{size:15,bold:true,color:WH,before:0,after:0})]}))}),
+            ...students.sort((a,b)=>total(b.scores||{})-total(a.scores||{})).map(s=>{
+              const t=total(s.scores||{});const g=getGrade(t);
+              return new TableRow({children:[
+                new TableCell({shading:{fill:LT,type:ShadingType.CLEAR},margins:{top:55,bottom:55,left:100,right:100},borders:{top:Nb(),bottom:Bn('E2E8F0'),left:Nb(),right:Nb()},children:[p(String(s.studentName||'—'),{size:15,bold:true,before:0,after:0})]}),
+                ...[1,2,3,4,5].map(b=>new TableCell({shading:{fill:'F8FAFC',type:ShadingType.CLEAR},margins:{top:55,bottom:55,left:100,right:100},borders:{top:Nb(),bottom:Bn('E2E8F0'),left:Nb(),right:Nb()},children:[p(String(s.scores?.['b'+b]||0),{size:16,bold:true,color:'#'+['92400E','1D4ED8','92400E','166534','5B21B6'][b-1].replace('#',''),before:0,after:0,align:AlignmentType.CENTER})]})),
+                new TableCell({shading:{fill:'#'+g.fill,type:ShadingType.CLEAR},margins:{top:55,bottom:55,left:100,right:100},borders:{top:Nb(),bottom:Bn('E2E8F0'),left:Nb(),right:Nb()},children:[p(String(t),{size:16,bold:true,color:WH,before:0,after:0,align:AlignmentType.CENTER})]}),
+              ]});
+            }),
+            new TableRow({children:[
+              new TableCell({shading:{fill:TEAL,type:ShadingType.CLEAR},margins:{top:65,bottom:65,left:100,right:100},borders:{top:Bn('0D9488',4),bottom:Nb(),left:Nb(),right:Nb()},children:[p('SINIF ORTALAMASI',{size:15,bold:true,color:WH,before:0,after:0})]}),
+              ...[1,2,3,4,5].map(b=>{const ba=Math.round(students.reduce((s,r)=>s+(r.scores?.['b'+b]||0),0)/Math.max(students.length,1));return new TableCell({shading:{fill:TEAL,type:ShadingType.CLEAR},margins:{top:65,bottom:65,left:100,right:100},borders:{top:Bn('0D9488',4),bottom:Nb(),left:Nb(),right:Nb()},children:[p(String(ba),{size:16,bold:true,color:'CCFBF1',before:0,after:0,align:AlignmentType.CENTER})]});}),
+              new TableCell({shading:{fill:TEAL,type:ShadingType.CLEAR},margins:{top:65,bottom:65,left:100,right:100},borders:{top:Bn('0D9488',4),bottom:Nb(),left:Nb(),right:Nb()},children:[p(String(avg),{size:16,bold:true,color:'CCFBF1',before:0,after:0,align:AlignmentType.CENTER})]}),
+            ]}),
+          ]
+        }),
+        gap(0.4),new Paragraph({children:[new PageBreak()]}),
+        // Sınıf analizi
+        p([new TextRun({text:'SINIF GENELİ BOYUT ANALİZİ',font:'Arial',size:18,bold:true,color:N})],{before:0,after:50}),
+        ...DIMS.map(d=>{
+          const ba=cr.boyutAnaliz?.[d.id]||'—';
+          return new Table({width:{size:9880,type:WidthType.DXA},columnWidths:[9880],rows:[new TableRow({children:[new TableCell({shading:{fill:d.bg,type:ShadingType.CLEAR},margins:{top:80,bottom:80,left:180,right:180},borders:{top:Bn(d.color.replace('#',''),6),bottom:Bn(d.color.replace('#',''),2),left:Bn(d.color.replace('#',''),16),right:Bn('E2E8F0',2)},children:[p([new TextRun({text:d.label+':  ',font:'Arial',size:16,bold:true,color:d.tc.replace('#','')})],{after:40,before:0}),p(String(ba),{size:16,align:AlignmentType.JUSTIFIED,after:0,before:0})]})]})]  });
+        }).flatMap(t=>[t,gap(0.2)]),
+        gap(0.3),
+        // Dikkat gereken & Öneriler
+        ...(cr.dikkatGereken?.length?[p([new TextRun({text:'ÖZEL DİKKAT GEREKTİREN ÖĞRENCİLER',font:'Arial',size:17,bold:true,color:RD})],{before:60,after:40}),...cr.dikkatGereken.map(s=>bl('⚠ '+s)),gap(0.2)]:[]),
+        ...(cr.sinifOnerileri?.length?[p([new TextRun({text:'SINIF GENELİ ÖĞRETIM ÖNERİLERİ',font:'Arial',size:17,bold:true,color:TEAL})],{before:60,after:40}),...cr.sinifOnerileri.map(o=>bl(o)),gap(0.2)]:[]),
+        new Paragraph({alignment:AlignmentType.CENTER,border:{top:{style:BorderStyle.SINGLE,size:4,color:MBL}},spacing:{before:140},children:[new TextRun({text:'Hazırlayan: Doç. Dr. Erhan Yaylak  |  Sınıf Dönüt Raporu — Hafta '+cr.hafta+'  |  Form Analiz Aracı (Claude AI)',font:'Arial',size:15,color:GR,italics:true})]}),
+      ]
+    }]
+  });
+  const blob=await Packer.toBlob(d);
+  dl(blob,'sinif_rapor_hafta'+cr.hafta+'.docx');
 }
 
-// ── INIT ──
-document.addEventListener('DOMContentLoaded',function(){
-  // Load XLSX dynamically so it doesn't block page render
-  var s=document.createElement('script');
-  s.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
-  s.onerror=function(){console.warn('XLSX CDN failed to load. Excel/CSV files will not work.');};
-  document.head.appendChild(s);
-  renderApiBar();
-  render();
-});
+// ══════════════════════════════════════════════════════════════════════
+// WORD: 10 HAFTALIK BİREYSEL
+// ══════════════════════════════════════════════════════════════════════
+async function buildWordIndividual10(rep,weeksData){
+  const{Document,Packer,Paragraph,TextRun,Table,TableRow,TableCell,Header,Footer,
+    AlignmentType,BorderStyle,WidthType,ShadingType,VerticalAlign,PageNumberElement,PageBreak,LevelFormat}=docx;
+  const N='0A1E44',BL='1D4ED8',LBL='DBEAFE',MBL='93C5FD',SL='334155',LT='F1F5F9',WH='FFFFFF',
+        GN='166534',GNBG='DCFCE7',AM='92400E',AMBG='FEF3C7',RD='991B1B',RDBG='FEE2E2',GR='64748B',PU='5B21B6';
+  const Bn=(c,s=4)=>({style:BorderStyle.SINGLE,size:s,color:c});
+  const Nb=()=>({style:BorderStyle.NONE,size:0,color:WH});
+  function p(runs,o={}){const ch=Array.isArray(runs)?runs:[new TextRun({text:String(runs||''),font:'Arial',size:o.size||20,color:o.color||SL,bold:!!o.bold,italics:!!o.italic})];return new Paragraph({children:ch,spacing:{before:o.before!==undefined?o.before:24,after:o.after!==undefined?o.after:24},alignment:o.align||AlignmentType.LEFT});}
+  function bl(t){return new Paragraph({numbering:{reference:'b',level:0},children:[new TextRun({text:String(t||''),font:'Arial',size:18,color:SL})],spacing:{before:18,after:18}});}
+  function gap(n=1){return new Paragraph({children:[new TextRun('')],spacing:{before:0,after:n*60}});}
+
+  const sorted=Object.entries(weeksData).sort((a,b)=>+a[0]-+b[0]);
+  const tots=sorted.map(([,d])=>total(d.scores||{}));
+  const first=tots[0]||0,last=tots[tots.length-1]||0;
+  const delta=last-first;
+  const gr=getGrade(last);
+  const DHC=['92400E','1D4ED8','92400E','166534','5B21B6'];
+  const trendColor=(t)=>t==='yükseliş'?GN:t==='düşüş'?RD:GR;
+
+  const d=new Document({
+    numbering:{config:[{reference:'b',levels:[{level:0,format:LevelFormat.BULLET,text:'\u2022',alignment:AlignmentType.LEFT,style:{paragraph:{indent:{left:540,hanging:360}}}}]}]},
+    styles:{default:{document:{run:{font:'Arial',size:20,color:SL}}}},
+    sections:[{
+      properties:{page:{size:{width:11906,height:16838},margin:{top:576,right:1008,bottom:720,left:1008}}},
+      headers:{default:new Header({children:[new Table({width:{size:9880,type:WidthType.DXA},columnWidths:[7200,2680],rows:[new TableRow({children:[new TableCell({width:{size:7200,type:WidthType.DXA},shading:{fill:N,type:ShadingType.CLEAR},margins:{top:70,bottom:70,left:200,right:200},borders:{top:Nb(),bottom:Nb(),left:Nb(),right:Nb()},children:[p([new TextRun({text:'10 HAFTALIK GELİŞİM RAPORU  ',font:'Arial',size:15,bold:true,color:MBL}),new TextRun({text:'Bireysel Longitudinal Analiz',font:'Arial',size:15,color:LT})],{before:0,after:0})]}),new TableCell({width:{size:2680,type:WidthType.DXA},shading:{fill:BL,type:ShadingType.CLEAR},margins:{top:70,bottom:70,left:200,right:200},borders:{top:Nb(),bottom:Nb(),left:Nb(),right:Nb()},verticalAlign:VerticalAlign.CENTER,children:[p([new TextRun({text:'Doç. Dr. Erhan Yaylak',font:'Arial',size:14,color:WH,bold:true,italics:true})],{align:AlignmentType.RIGHT,before:0,after:0})])})]})]})]}  ])},
+      footers:{default:new Footer({children:[new Paragraph({alignment:AlignmentType.CENTER,border:{top:{style:BorderStyle.SINGLE,size:4,color:MBL}},spacing:{before:80},children:[new TextRun({text:'10 Haftalık Bireysel Gelişim Raporu  |  Sayfa ',font:'Arial',size:15,color:GR}),new PageNumberElement()]})]})},
+      children:[
+        // Kapak
+        new Table({width:{size:9880,type:WidthType.DXA},columnWidths:[9880],rows:[
+          new TableRow({children:[new TableCell({shading:{fill:N,type:ShadingType.CLEAR},margins:{top:220,bottom:100,left:260,right:260},borders:{top:Nb(),bottom:Nb(),left:Bn(PU,20),right:Nb()},children:[p([new TextRun({text:'10 HAFTALIK GELİŞİM RAPORU',font:'Arial',size:40,bold:true,color:WH})],{after:30,before:0}),p([new TextRun({text:'Longitudinal Bireysel Değerlendirme  |  Sosyal Bilgiler Öğretiminde Bilişim Teknolojileri',font:'Arial',size:17,color:MBL})],{after:60,before:0})]})]}),
+          new TableRow({children:[new TableCell({shading:{fill:PU,type:ShadingType.CLEAR},margins:{top:100,bottom:100,left:260,right:260},borders:{top:Nb(),bottom:Nb(),left:Nb(),right:Nb()},children:[new Paragraph({children:[new TextRun({text:String(rep.studentName||'—'),font:'Arial',size:24,bold:true,color:WH}),new TextRun({text:'  ·  '+sorted.length+' hafta  ·  '+first+' → '+last+' puan ('+( delta>=0?'+'+delta:delta)+')',font:'Arial',size:17,color:LBL})]})]})]  }),
+          new TableRow({children:[new TableCell({shading:{fill:'3B0D8C',type:ShadingType.CLEAR},margins:{top:70,bottom:70,left:260,right:260},borders:{top:Bn(PU,2),bottom:Nb(),left:Nb(),right:Nb()},children:[new Paragraph({children:[new TextRun({text:'Genel Trend: ',font:'Arial',size:16,color:'DDD6FE',bold:true}),new TextRun({text:String(rep.genelTrend||'STABIL'),font:'Arial',size:16,color:WH,bold:true}),new TextRun({text:'     |     Ders Öğretim Üyesi: Doç. Dr. Erhan Yaylak',font:'Arial',size:15,color:'A78BFA'})]})]})]  }),
+        ]}),
+        gap(0.4),
+        // Özet
+        new Table({width:{size:9880,type:WidthType.DXA},columnWidths:[9880],rows:[new TableRow({children:[new TableCell({shading:{fill:LT,type:ShadingType.CLEAR},margins:{top:100,bottom:100,left:180,right:180},borders:{top:Bn(PU,8),bottom:Bn(PU,4),left:Bn(PU,20),right:Bn('E2E8F0',2)},children:[p([new TextRun({text:'KAPSAMLİ DEĞERLENDİRME ÖZETİ',font:'Arial',size:18,bold:true,color:PU})],{after:80,before:0}),p(String(rep.kapsamliOzet||'—'),{size:17,align:AlignmentType.JUSTIFIED,after:0,before:0})]})]})]  }),
+        gap(0.4),
+        // 10 Hafta trend tablosu
+        p([new TextRun({text:'HAFTALIK PUAN GELİŞİMİ',font:'Arial',size:18,bold:true,color:N})],{before:60,after:50}),
+        new Table({width:{size:9880,type:WidthType.DXA},columnWidths:[2200,...Array(sorted.length).fill(Math.floor(7680/Math.max(sorted.length,1)))],
+          rows:[
+            new TableRow({children:[
+              new TableCell({shading:{fill:N,type:ShadingType.CLEAR},margins:{top:55,bottom:55,left:100,right:100},borders:{top:Nb(),bottom:Nb(),left:Nb(),right:Nb()},children:[p('BOYUT',{size:14,bold:true,color:WH,before:0,after:0})]}),
+              ...sorted.map(([w,d])=>new TableCell({shading:{fill:'1E293B',type:ShadingType.CLEAR},margins:{top:55,bottom:55,left:70,right:70},borders:{top:Nb(),bottom:Nb(),left:Nb(),right:Nb()},children:[p('H'+w,{size:14,bold:true,color:MBL,before:0,after:0,align:AlignmentType.CENTER})]}))
+            ]}),
+            ...[...DIMS.map((d,i)=>[d,i]),['TOPLAM',-1]].map(([d,i])=>{
+              if(d==='TOPLAM')return new TableRow({children:[
+                new TableCell({shading:{fill:N,type:ShadingType.CLEAR},margins:{top:55,bottom:55,left:100,right:100},borders:{top:Bn(BL,4),bottom:Nb(),left:Nb(),right:Nb()},children:[p('TOPLAM',{size:15,bold:true,color:WH,before:0,after:0})]}),
+                ...sorted.map(([,wd])=>{const t=total(wd.scores||{});return new TableCell({shading:{fill:BL,type:ShadingType.CLEAR},margins:{top:55,bottom:55,left:70,right:70},borders:{top:Bn(BL,4),bottom:Nb(),left:Nb(),right:Nb()},children:[p(String(t),{size:16,bold:true,color:'FCD34D',before:0,after:0,align:AlignmentType.CENTER})  ]});})
+              ]});
+              return new TableRow({children:[
+                new TableCell({shading:{fill:LT,type:ShadingType.CLEAR},margins:{top:50,bottom:50,left:100,right:100},borders:{top:Nb(),bottom:Bn('E2E8F0'),left:Nb(),right:Nb()},children:[p(d.short,{size:13,bold:true,color:DHC[i],before:0,after:0})]}),
+                ...sorted.map(([,wd])=>{const s=wd.scores?.['b'+(i+1)]||0;return new TableCell({shading:{fill:'F8FAFC',type:ShadingType.CLEAR},margins:{top:50,bottom:50,left:70,right:70},borders:{top:Nb(),bottom:Bn('E2E8F0'),left:Nb(),right:Nb()},children:[p(String(s),{size:15,bold:true,color:DHC[i],before:0,after:0,align:AlignmentType.CENTER})  ]});})
+              ]});
+            }),
+          ]
+        }),
+        gap(0.4),new Paragraph({children:[new PageBreak()]}),
+        // Boyut trend analizi
+        p([new TextRun({text:'BOYUT TREND ANALİZİ',font:'Arial',size:18,bold:true,color:N})],{before:0,after:50}),
+        ...DIMS.map(d=>{
+          const bt=rep.boyutTrendleri?.[d.id]||{};
+          const tc=trendColor(bt.trend||'');
+          return new Table({width:{size:9880,type:WidthType.DXA},columnWidths:[9880],rows:[new TableRow({children:[new TableCell({shading:{fill:d.bg,type:ShadingType.CLEAR},margins:{top:80,bottom:80,left:180,right:180},borders:{top:Bn(d.color.replace('#',''),6),bottom:Bn(d.color.replace('#',''),2),left:Bn(d.color.replace('#',''),16),right:Bn('E2E8F0',2)},children:[new Paragraph({children:[new TextRun({text:d.label+'  ',font:'Arial',size:16,bold:true,color:d.tc.replace('#','')}),new TextRun({text:String(bt.trend||'—').toUpperCase(),font:'Arial',size:15,bold:true,color:tc}),new TextRun({text:bt.kritikHafta?'  (Kritik dönüm: Hafta '+bt.kritikHafta+')':'',font:'Arial',size:13,color:GR,italics:true})],spacing:{before:0,after:40}}),p(String(bt.aciklama||'—'),{size:15,align:AlignmentType.JUSTIFIED,before:0,after:0})]})]})]  });
+        }).flatMap(t=>[t,gap(0.2)]),
+        gap(0.3),
+        // Kalıcı sorunlar & Kırılan kalıplar
+        ...(rep.kaliciZayifliklar?.length?[p([new TextRun({text:'AŞILAMAYAN KALICI SORUNLAR',font:'Arial',size:17,bold:true,color:RD})],{before:60,after:40}),...rep.kaliciZayifliklar.map(s=>bl(s)),gap(0.2)]:[]),
+        ...(rep.kirılanKaliplar?.length?[p([new TextRun({text:'KIRİLAN OLUMSUZ KALIPLAR',font:'Arial',size:17,bold:true,color:GN})],{before:60,after:40}),...rep.kirılanKaliplar.map(s=>bl(s)),gap(0.2)]:[]),
+        // Gelecek dönem önerileri
+        ...(rep.gelecekOnerileri?.length?[p([new TextRun({text:'SONRAKI DÖNEM STRATEJİK ÖNERİLER',font:'Arial',size:17,bold:true,color:PU})],{before:60,after:40}),...rep.gelecekOnerileri.map((o,i)=>{const STC=[{c:RD,bg:RDBG},{c:AM,bg:AMBG},{c:PU,bg:'EDE9FE'}];const i2=Math.min(i,2);return new Table({width:{size:9880,type:WidthType.DXA},columnWidths:[9880],rows:[new TableRow({children:[new TableCell({shading:{fill:STC[i2].bg,type:ShadingType.CLEAR},margins:{top:70,bottom:70,left:180,right:180},borders:{top:Bn('E2E8F0',2),bottom:Bn('E2E8F0',2),left:Bn(STC[i2].c,20),right:Nb()},children:[p([new TextRun({text:'0'+(i+1)+'  ',font:'Arial',size:22,bold:true,color:STC[i2].c}),new TextRun({text:String(o),font:'Arial',size:17,color:N})],{before:0,after:0})]})]})  ]});}).flatMap(t=>[t,gap(0.15)]),gap(0.2)]:[]),
+        new Paragraph({alignment:AlignmentType.CENTER,border:{top:{style:BorderStyle.SINGLE,size:4,color:MBL}},spacing:{before:140},children:[new TextRun({text:'Hazırlayan: Doç. Dr. Erhan Yaylak  |  10 Haftalık Bireysel Gelişim Raporu  |  Form Analiz Aracı (Claude AI)',font:'Arial',size:15,color:GR,italics:true})]}),
+      ]
+    }]
+  });
+  const blob=await Packer.toBlob(d);
+  dl(blob,'10hafta_bireysel_'+String(rep.studentName||'ogrenci').replace(/\s+/g,'_').toLowerCase()+'.docx');
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// WORD: 10 HAFTALIK SINIF
+// ══════════════════════════════════════════════════════════════════════
+async function buildWordClass10(rep,allData){
+  const{Document,Packer,Paragraph,TextRun,Table,TableRow,TableCell,Header,Footer,
+    AlignmentType,BorderStyle,WidthType,ShadingType,VerticalAlign,PageNumberElement,PageBreak,LevelFormat}=docx;
+  const N='0A1E44',BL='1D4ED8',LBL='DBEAFE',MBL='93C5FD',SL='334155',LT='F1F5F9',WH='FFFFFF',
+        GN='166534',GNBG='DCFCE7',AM='92400E',AMBG='FEF3C7',RD='991B1B',RDBG='FEE2E2',GR='64748B',TEAL='0F766E',TEALBG='CCFBF1';
+  const Bn=(c,s=4)=>({style:BorderStyle.SINGLE,size:s,color:c});
+  const Nb=()=>({style:BorderStyle.NONE,size:0,color:WH});
+  function p(runs,o={}){const ch=Array.isArray(runs)?runs:[new TextRun({text:String(runs||''),font:'Arial',size:o.size||20,color:o.color||SL,bold:!!o.bold,italics:!!o.italic})];return new Paragraph({children:ch,spacing:{before:o.before!==undefined?o.before:24,after:o.after!==undefined?o.after:24},alignment:o.align||AlignmentType.LEFT});}
+  function bl(t){return new Paragraph({numbering:{reference:'b',level:0},children:[new TextRun({text:String(t||''),font:'Arial',size:18,color:SL})],spacing:{before:18,after:18}});}
+  function gap(n=1){return new Paragraph({children:[new TextRun('')],spacing:{before:0,after:n*60}});}
+
+  const students=Object.entries(allData);
+  const allWeeks=[...new Set(students.flatMap(([,w])=>Object.keys(w)).map(Number))].sort((a,b)=>a-b);
+
+  const d=new Document({
+    numbering:{config:[{reference:'b',levels:[{level:0,format:LevelFormat.BULLET,text:'\u2022',alignment:AlignmentType.LEFT,style:{paragraph:{indent:{left:540,hanging:360}}}}]}]},
+    styles:{default:{document:{run:{font:'Arial',size:20,color:SL}}}},
+    sections:[{
+      properties:{page:{size:{width:11906,height:16838},margin:{top:576,right:1008,bottom:720,left:1008}}},
+      headers:{default:new Header({children:[new Table({width:{size:9880,type:WidthType.DXA},columnWidths:[7200,2680],rows:[new TableRow({children:[new TableCell({width:{size:7200,type:WidthType.DXA},shading:{fill:TEAL,type:ShadingType.CLEAR},margins:{top:70,bottom:70,left:200,right:200},borders:{top:Nb(),bottom:Nb(),left:Nb(),right:Nb()},children:[p([new TextRun({text:'10 HAFTALIK SINIF GELİŞİM RAPORU  ',font:'Arial',size:15,bold:true,color:'CCFBF1'})],{before:0,after:0})]}),new TableCell({width:{size:2680,type:WidthType.DXA},shading:{fill:'0D9488',type:ShadingType.CLEAR},margins:{top:70,bottom:70,left:200,right:200},borders:{top:Nb(),bottom:Nb(),left:Nb(),right:Nb()},verticalAlign:VerticalAlign.CENTER,children:[p([new TextRun({text:'Doç. Dr. Erhan Yaylak',font:'Arial',size:14,color:WH,bold:true,italics:true})],{align:AlignmentType.RIGHT,before:0,after:0})])})]})]})]}  ])},
+      footers:{default:new Footer({children:[new Paragraph({alignment:AlignmentType.CENTER,border:{top:{style:BorderStyle.SINGLE,size:4,color:'5EEAD4'}},spacing:{before:80},children:[new TextRun({text:'10 Haftalık Sınıf Gelişim Raporu  |  Sayfa ',font:'Arial',size:15,color:GR}),new PageNumberElement()]})]})},
+      children:[
+        // Kapak
+        new Table({width:{size:9880,type:WidthType.DXA},columnWidths:[9880],rows:[
+          new TableRow({children:[new TableCell({shading:{fill:TEAL,type:ShadingType.CLEAR},margins:{top:220,bottom:100,left:260,right:260},borders:{top:Nb(),bottom:Nb(),left:Bn('0D9488',20),right:Nb()},children:[p([new TextRun({text:'10 HAFTALIK SINIF GELİŞİM RAPORU',font:'Arial',size:40,bold:true,color:WH})],{after:30,before:0}),p([new TextRun({text:'Longitudinal Sınıf Analizi  |  Sosyal Bilgiler Öğretiminde Bilişim Teknolojileri Dersi',font:'Arial',size:17,color:'CCFBF1'})],{after:60,before:0})]})]}),
+          new TableRow({children:[new TableCell({shading:{fill:'0D9488',type:ShadingType.CLEAR},margins:{top:100,bottom:100,left:260,right:260},borders:{top:Nb(),bottom:Nb(),left:Nb(),right:Nb()},children:[new Paragraph({children:[new TextRun({text:students.length+' Öğrenci  ·  '+allWeeks.length+' Hafta  ·  Genel Trend: '+String(rep.sinifGenelTrend||'STABIL'),font:'Arial',size:22,bold:true,color:WH})]})]})]  }),
+          new TableRow({children:[new TableCell({shading:{fill:'0B4F4A',type:ShadingType.CLEAR},margins:{top:70,bottom:70,left:260,right:260},borders:{top:Bn('0D9488',2),bottom:Nb(),left:Nb(),right:Nb()},children:[new Paragraph({children:[new TextRun({text:'Ders Öğretim Üyesi:  ',font:'Arial',size:16,color:'5EEAD4',bold:true}),new TextRun({text:'Doç. Dr. Erhan Yaylak',font:'Arial',size:16,color:WH,bold:true})]})]})]  }),
+        ]}),
+        gap(0.4),
+        new Table({width:{size:9880,type:WidthType.DXA},columnWidths:[9880],rows:[new TableRow({children:[new TableCell({shading:{fill:TEALBG,type:ShadingType.CLEAR},margins:{top:100,bottom:100,left:180,right:180},borders:{top:Bn(TEAL,8),bottom:Bn(TEAL,4),left:Bn(TEAL,20),right:Bn('E2E8F0',2)},children:[p([new TextRun({text:'SINIF 10 HAFTALIK GELİŞİM ÖZETİ',font:'Arial',size:18,bold:true,color:TEAL})],{after:80,before:0}),p(String(rep.kapsamliOzet||'—'),{size:17,align:AlignmentType.JUSTIFIED,after:0,before:0})]})]})]  }),
+        gap(0.4),
+        // Sınıf haftalık ortalama tablosu
+        p([new TextRun({text:'SINIF HAFTALIK ORTALAMA TABLOSU',font:'Arial',size:17,bold:true,color:N})],{before:60,after:50}),
+        new Table({width:{size:9880,type:WidthType.DXA},columnWidths:[2800,...allWeeks.map(()=>Math.floor(7080/Math.max(allWeeks.length,1)))],
+          rows:[
+            new TableRow({children:[new TableCell({shading:{fill:N,type:ShadingType.CLEAR},margins:{top:55,bottom:55,left:100,right:100},borders:{top:Nb(),bottom:Nb(),left:Nb(),right:Nb()},children:[p('Öğrenci',{size:14,bold:true,color:WH,before:0,after:0})]}),
+              ...allWeeks.map(w=>new TableCell({shading:{fill:'1E293B',type:ShadingType.CLEAR},margins:{top:55,bottom:55,left:60,right:60},borders:{top:Nb(),bottom:Nb(),left:Nb(),right:Nb()},children:[p('H'+w,{size:14,bold:true,color:MBL,before:0,after:0,align:AlignmentType.CENTER})]}))]
+            }),
+            ...students.map(([name,weeks])=>new TableRow({children:[
+              new TableCell({shading:{fill:LT,type:ShadingType.CLEAR},margins:{top:50,bottom:50,left:100,right:100},borders:{top:Nb(),bottom:Bn('E2E8F0'),left:Nb(),right:Nb()},children:[p(name,{size:13,bold:true,before:0,after:0})]}),
+              ...allWeeks.map(w=>{const wd=weeks[String(w)];const t=wd?total(wd.scores||{}):'—';const gr=wd?getGrade(total(wd.scores||{})):null;return new TableCell({shading:{fill:wd?'#'+gr.fill:'F8FAFC',type:ShadingType.CLEAR},margins:{top:50,bottom:50,left:60,right:60},borders:{top:Nb(),bottom:Bn('E2E8F0'),left:Nb(),right:Nb()},children:[p(String(t),{size:14,bold:!!wd,color:wd?WH:GR,before:0,after:0,align:AlignmentType.CENTER})]});})
+            ]})),
+            new TableRow({children:[
+              new TableCell({shading:{fill:TEAL,type:ShadingType.CLEAR},margins:{top:60,bottom:60,left:100,right:100},borders:{top:Bn('0D9488',4),bottom:Nb(),left:Nb(),right:Nb()},children:[p('Hafta Ort.',{size:14,bold:true,color:WH,before:0,after:0})]}),
+              ...allWeeks.map(w=>{const ws=students.filter(([,wk])=>wk[String(w)]).map(([,wk])=>total(wk[String(w)].scores||{}));const avg=ws.length?Math.round(ws.reduce((a,b)=>a+b,0)/ws.length):0;return new TableCell({shading:{fill:TEAL,type:ShadingType.CLEAR},margins:{top:60,bottom:60,left:60,right:60},borders:{top:Bn('0D9488',4),bottom:Nb(),left:Nb(),right:Nb()},children:[p(avg?String(avg):'—',{size:15,bold:true,color:'CCFBF1',before:0,after:0,align:AlignmentType.CENTER})]});})
+            ]}),
+          ]
+        }),
+        gap(0.4),new Paragraph({children:[new PageBreak()]}),
+        // Kategoriler
+        ...(rep.enCokGelisen?.length?[p([new TextRun({text:'EN ÇOK GELİŞEN ÖĞRENCİLER ▲',font:'Arial',size:17,bold:true,color:GN})],{before:0,after:40}),...rep.enCokGelisen.map(s=>bl(s)),gap(0.2)]:[]),
+        ...(rep.enCokGerileyen?.length?[p([new TextRun({text:'GERİLEYEN / MÜDAHALE GEREKEN ÖĞRENCİLER ▼',font:'Arial',size:17,bold:true,color:RD})],{before:40,after:40}),...rep.enCokGerileyen.map(s=>bl(s)),gap(0.2)]:[]),
+        // Boyut analizi
+        p([new TextRun({text:'SINIF BOYUT TREND ANALİZİ',font:'Arial',size:17,bold:true,color:N})],{before:40,after:40}),
+        ...DIMS.map(d=>{
+          const ba=rep.boyutSinifAnaliz?.[d.id]||'—';
+          return new Table({width:{size:9880,type:WidthType.DXA},columnWidths:[9880],rows:[new TableRow({children:[new TableCell({shading:{fill:d.bg,type:ShadingType.CLEAR},margins:{top:70,bottom:70,left:180,right:180},borders:{top:Bn(d.color.replace('#',''),6),bottom:Bn(d.color.replace('#',''),2),left:Bn(d.color.replace('#',''),16),right:Bn('E2E8F0',2)},children:[p([new TextRun({text:d.label+':  ',font:'Arial',size:15,bold:true,color:d.tc.replace('#','')})],{after:35,before:0}),p(String(ba),{size:15,align:AlignmentType.JUSTIFIED,before:0,after:0})]})]})]  });
+        }).flatMap(t=>[t,gap(0.18)]),
+        gap(0.3),
+        // Müdahale önerileri
+        ...(rep.mudahaleOnerileri?.length?[p([new TextRun({text:'SONRAKI DÖNEM MÜDAHALE VE STRATEJİ ÖNERİLERİ',font:'Arial',size:17,bold:true,color:TEAL})],{before:40,after:40}),...rep.mudahaleOnerileri.map(o=>bl(o)),gap(0.2)]:[]),
+        ...(rep.bireyselMudahale?.length?[p([new TextRun({text:'BİREYSEL MÜDAHALESİ GEREKEN ÖĞRENCİLER',font:'Arial',size:17,bold:true,color:RD})],{before:40,after:40}),...rep.bireyselMudahale.map(m=>new Table({width:{size:9880,type:WidthType.DXA},columnWidths:[9880],rows:[new TableRow({children:[new TableCell({shading:{fill:RDBG,type:ShadingType.CLEAR},margins:{top:65,bottom:65,left:180,right:180},borders:{top:Bn('E2E8F0',2),bottom:Bn('E2E8F0',2),left:Bn(RD,16),right:Nb()},children:[p([new TextRun({text:String(m.ad||'—')+'  ',font:'Arial',size:15,bold:true,color:RD})],{after:35,before:0}),p([new TextRun({text:'Neden: ',font:'Arial',size:14,bold:true,color:N}),new TextRun({text:String(m.neden||'—'),font:'Arial',size:14,color:SL})],{after:20,before:0}),p([new TextRun({text:'Öneri: ',font:'Arial',size:14,bold:true,color:GN}),new TextRun({text:String(m.oneri||'—'),font:'Arial',size:14,color:SL,italics:true})],{before:0,after:0})]})]})]  })).flatMap(t=>[t,gap(0.15)]),gap(0.2)]:[]),
+        new Paragraph({alignment:AlignmentType.CENTER,border:{top:{style:BorderStyle.SINGLE,size:4,color:'5EEAD4'}},spacing:{before:140},children:[new TextRun({text:'Hazırlayan: Doç. Dr. Erhan Yaylak  |  10 Haftalık Sınıf Gelişim Raporu  |  Form Analiz Aracı (Claude AI)',font:'Arial',size:15,color:GR,italics:true})]}),
+      ]
+    }]
+  });
+  const blob=await Packer.toBlob(d);
+  dl(blob,'10hafta_sinif_raporu.docx');
+}
+
+// ── DOWNLOAD ──────────────────────────────────────────────────────────
+function dl(blob,filename){
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=filename;
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(a.href),15000);
+}
+
+// INIT
+showScreen('w1');
 </script>
 </body>
 </html>
