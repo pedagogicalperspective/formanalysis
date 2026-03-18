@@ -106,6 +106,7 @@
   </div>
   <div class="header-badge" id="headerBadge">10 Haftalık Program</div>
 </div>
+<div id="apiKeyBar" style="background:#070e1c;border-bottom:1px solid #192f4a;padding:8px 26px;display:flex;align-items:center;gap:8px;min-height:36px;"></div>
 <div class="container"><div id="app"></div></div>
 <input type="file" id="fileInput" accept=".pdf,.xlsx,.xls,.csv,.txt" />
 <script>
@@ -450,8 +451,16 @@ async function analyzeForm(){
     }else{
       messages=[{role:"user",content:prompt+"\n\n---\n"+state.fileContent+"\n---"}];
     }
+    const apiKey=localStorage.getItem("anthropic_api_key")||"";
+    if(!apiKey){setState({error:"Lütfen önce API anahtarınızı girin.",step:"ready"});clearInterval(iv);return;}
     const res=await fetch("https://api.anthropic.com/v1/messages",{
-      method:"POST",headers:{"Content-Type":"application/json"},
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json",
+        "x-api-key":apiKey,
+        "anthropic-version":"2023-06-01",
+        "anthropic-dangerous-direct-browser-access":"true"
+      },
       body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,system:PROMPTS[state.mode],messages})
     });
     const data=await res.json();
@@ -637,6 +646,26 @@ async function handleFileSelect(file){
 }
 
 render();
+
+// API Key management
+function renderApiKeyBar(){
+  const bar=document.getElementById("apiKeyBar");
+  if(!bar)return;
+  const key=localStorage.getItem("anthropic_api_key")||"";
+  if(key){
+    bar.innerHTML='<span style="font-size:11px;color:#4ade80;font-family:'Source Sans 3',sans-serif;">🔑 API Anahtarı kayıtlı &nbsp;</span><button onclick="clearApiKey()" style="padding:3px 10px;background:transparent;border:1px solid #dc2626;border-radius:5px;color:#fca5a5;font-size:11px;cursor:pointer;font-family:'Source Sans 3',sans-serif;">Sil</button>';
+  }else{
+    bar.innerHTML='<span style="font-size:11px;color:#f59e0b;font-family:'Source Sans 3',sans-serif;">🔑 Anthropic API Anahtarı &nbsp;</span><input id="apiKeyInput" type="password" placeholder="sk-ant-..." style="padding:4px 10px;background:#050c18;border:1px solid #234d7a;border-radius:5px;color:#dde9ff;font-size:11px;font-family:'Source Sans 3',sans-serif;width:280px;" /><button onclick="saveApiKey()" style="margin-left:6px;padding:4px 12px;background:linear-gradient(135deg,#2563eb,#1d4ed8);border:none;border-radius:5px;color:#fff;font-size:11px;cursor:pointer;font-family:'Source Sans 3',sans-serif;">Kaydet</button>';
+  }
+}
+function saveApiKey(){
+  const v=document.getElementById("apiKeyInput").value.trim();
+  if(v){localStorage.setItem("anthropic_api_key",v);renderApiKeyBar();}
+}
+function clearApiKey(){
+  localStorage.removeItem("anthropic_api_key");renderApiKeyBar();
+}
+renderApiKeyBar();
 </script>
 </body>
 </html>
