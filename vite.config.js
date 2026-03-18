@@ -6,5 +6,5 @@ import react from '@vitejs/plugin-react'
 // Repo adını değiştirdiyseniz burayı da güncelleyin.
 export default defineConfig({
   plugins: [react()],
-  base: '/form-analiz-araci/',
+  base: '/formanalysis/',
 })
