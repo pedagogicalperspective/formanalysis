@@ -145,10 +145,8 @@ function makePDF(text,fname,dt){
   var m=MODES[S.mode],ac=mc();
   var body=mdHtml(text);
   var dr=DIMS.map(function(di){return'<div style="display:flex;align-items:center;gap:8px;font-size:9.5pt;margin-bottom:6px"><div style="width:7px;height:7px;border-radius:50%;background:'+di.c+';flex-shrink:0"></div><span>'+di.icon+' '+di.full+'</span><span style="margin-left:auto;font-size:8.5pt;font-weight:700;color:'+ac+'">'+( di.pts?di.pts+' puan':'Nitel')+'</span></div>';}).join('');
-  var w=window.open('','_blank');
-  if(!w){alert('Lütfen açılır pencere engelleyicisini kapatın.');return;}
   var ps='<scr'+'ipt>window.onload=function(){setTimeout(window.print,900);}<'+'/scr'+'ipt>';
-  w.document.write('<!DOCTYPE html><html lang="tr"><head><meta charset="UTF-8"/><title>'+m.label+'</title>'
+  var htmlStr=('<!DOCTYPE html><html lang="tr"><head><meta charset="UTF-8"/><title>'+m.label+'</title>'
   +'<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:Arial,sans-serif;font-size:10.5pt;color:#1a1a2e;background:#fff;line-height:1.75}'
   +'.cv{page-break-after:always;min-height:100vh;display:flex;flex-direction:column}'
   +'.hero{background:linear-gradient(135deg,#0a1e3d,'+ac+');padding:48px 56px 40px;color:#fff;flex:1}'
@@ -183,7 +181,13 @@ function makePDF(text,fname,dt){
   +'<div class="ct2">'+body+'</div>'
   +'<div class="pf"><span>SB Öğretmen Adayı Değerlendirme Projesi - '+m.label+'</span><span>Claude AI · Form Analiz Aracı</span></div>'
   +'</div>'+ps+'</body></html>');
-  w.document.close();
+  var blob=new Blob([htmlStr],{type:'text/html;charset=utf-8'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url;
+  a.target='_blank';
+  a.click();
+  setTimeout(function(){URL.revokeObjectURL(url);},10000);
 }
 
 // ── MARKDOWN ──
